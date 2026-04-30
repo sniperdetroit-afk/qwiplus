@@ -2,7 +2,7 @@
 
 import { supabase } from "../services/supabase.js";
 import { navigate } from "../core/router.js";
-import { getState } from "../core/state.js";
+import { getState, setState } from "../core/state.js";
 
 let box;
 let offset = 0;
@@ -25,12 +25,43 @@ async function renderHome(){
 }
 
 /* =========================
+   AUTH GUARD PRO
+========================= */
+
+async function checkAuth(){
+
+  const { data } = await supabase.auth.getSession();
+  const user = data.session?.user;
+
+  const state = getState();
+  const isGuest = state.guest === true;
+
+  if(!user && !isGuest){
+    navigate("login");
+    return null;
+  }
+
+  // 🔥 sincronizar usuario
+  if(user){
+    setState({
+      session: { user }
+    });
+  }
+
+  return user;
+}
+
+/* =========================
    MOUNT
 ========================= */
 
 async function mountHome(){
 
   alive = true;
+
+  // 🔥 PROTECCIÓN REAL
+  const user = await checkAuth();
+  if(!user && !getState().guest) return;
 
   const state = getState();
   const params = state.app?.params || {};
@@ -47,7 +78,6 @@ async function mountHome(){
 
   let usedCache = false;
 
-  /* 🔥 KEY DINÁMICA */
   const cacheKey = `ads_cache_${params.category || "all"}_${params.subcategory || "all"}_${params.subsub || "all"}`;
 
   /* ================= CACHE ================= */
@@ -74,7 +104,7 @@ async function mountHome(){
   }
 
   if(!usedCache){
-    box.innerHTML = "Cargando...";
+    box.innerHTML = `<p style="text-align:center">Cargando anuncios...</p>`;
   }
 
   window.removeEventListener("scroll", onScroll);
@@ -125,7 +155,6 @@ async function loadMore(){
 
   try {
 
-    /* 🔥 QUERY DINÁMICA */
     let query = supabase
       .from("ads")
       .select("*")
@@ -144,8 +173,6 @@ async function loadMore(){
     }
 
     const { data, error } = await query.range(offset, offset + 19);
-
-    console.log("ADS DATA:", data, error);
 
     if(error){
       console.error("SUPABASE ERROR:", error);
@@ -181,7 +208,7 @@ async function loadMore(){
 
       try {
         localStorage.setItem(cacheKey, JSON.stringify(data));
-        console.log("💾 Cache filtrado actualizado");
+        console.log("💾 Cache actualizado");
       } catch(e){
         console.warn("Cache save error", e);
       }

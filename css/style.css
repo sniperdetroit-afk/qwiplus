@@ -834,3 +834,189 @@ body{
   min-height:100vh;
   padding-bottom:80px;
 }
+
+/* ================= LOGIN PRO ================= */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 30px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  animation: fadeIn 0.4s ease;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.login-header h1 {
+  color: #fff;
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.login-header p {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* ================= INPUT FLOAT ================= */
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #1e293b;
+  color: white;
+  font-size: 14px;
+}
+
+.input-group label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  color: #94a3b8;
+  font-size: 13px;
+  pointer-events: none;
+  transition: 0.2s;
+}
+
+.input-group input:focus + label,
+.input-group input:valid + label {
+  top: -8px;
+  left: 10px;
+  font-size: 11px;
+  color: #6DA8FF;
+  background: #020617;
+  padding: 0 5px;
+}
+
+/* ================= BUTTON ================= */
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #6DA8FF, #4CAF50);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  transform: scale(1.02);
+}
+
+/* ================= DIVIDER ================= */
+
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* ================= OAUTH ================= */
+
+.btn-oauth {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.btn-oauth.google {
+  background: white;
+  color: black;
+}
+
+.btn-oauth.facebook {
+  background: #1877f2;
+  color: white;
+}
+
+.btn-oauth:hover {
+  transform: scale(1.02);
+}
+
+/* ================= SECONDARY ================= */
+
+.btn-secondary {
+  margin-top: 10px;
+  width: 100%;
+  background: transparent;
+  color: #6DA8FF;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-ghost {
+  margin-top: 10px;
+  width: 100%;
+  background: transparent;
+  color: #94a3b8;
+  border: none;
+  cursor: pointer;
+}
+
+/* ================= ERROR ================= */
+
+.login-error {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,0,0,0.1);
+  color: #ff4d4f;
+  font-size: 13px;
+  text-align: center;
+  display: none;
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Base app */
+html, body {
+  background: #020617; /* mismo tono que el login */
+  color: #e5e7eb;
+  min-height: 100%;
+}
+
+/* El contenedor principal ocupa pantalla completa */
+.page {
+  min-height: 100vh;
+}

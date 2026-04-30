@@ -1,3 +1,5 @@
+// js/views/login.js
+
 import { supabase } from "../services/supabase.js";
 import { navigate } from "../core/router.js";
 import { setState } from "../core/state.js";
@@ -27,14 +29,13 @@ async function renderLogin(){
         Crear cuenta
       </button>
 
-      <!-- 🔥 OAUTH -->
       <div class="oauth-section">
 
-        <button id="googleBtn" class="btn-oauth">
+        <button id="googleBtn" class="btn-oauth google">
           Continuar con Google
         </button>
 
-        <button id="facebookBtn" class="btn-oauth">
+        <button id="facebookBtn" class="btn-oauth facebook">
           Continuar con Facebook
         </button>
 
@@ -52,21 +53,59 @@ async function renderLogin(){
   `;
 }
 
+/* ================= HELPERS ================= */
+
+const setLoading = (loading) => {
+  const btn = form?.querySelector("button[type='submit']");
+  if (!btn) return;
+
+  if (loading) {
+    btn.disabled = true;
+    btn.innerText = "Entrando...";
+  } else {
+    btn.disabled = false;
+    btn.innerText = "Entrar";
+  }
+};
+
+const showError = (msg) => {
+  const errorBox = document.getElementById("loginError");
+  if (!errorBox) return;
+
+  errorBox.innerText = msg;
+  errorBox.style.display = "block";
+};
+
+const clearError = () => {
+  const errorBox = document.getElementById("loginError");
+  if (!errorBox) return;
+
+  errorBox.innerText = "";
+  errorBox.style.display = "none";
+};
+
 /* ================= MOUNT ================= */
 
 async function mountLogin(){
 
   form = document.getElementById("loginForm");
-  const errorBox = document.getElementById("loginError");
   const registerBtn = document.getElementById("registerBtn");
   const guestBtn = document.getElementById("guestBtn");
-
   const googleBtn = document.getElementById("googleBtn");
   const facebookBtn = document.getElementById("facebookBtn");
 
   if(!form) return;
 
-  /* ================= REDIRECT PRO (FIX) ================= */
+  /* ================= AUTO LOGIN ================= */
+
+  const { data } = await supabase.auth.getSession();
+
+  if (data.session) {
+    navigate("home");
+    return;
+  }
+
+  /* ================= REDIRECT ================= */
 
   const redirectTo = window.location.origin;
 
@@ -75,7 +114,8 @@ async function mountLogin(){
   form.onsubmit = async (e) => {
 
     e.preventDefault();
-    errorBox.innerText = "";
+    clearError();
+    setLoading(true);
 
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
@@ -96,7 +136,9 @@ async function mountLogin(){
       navigate("home");
 
     }catch(err){
-      errorBox.innerText = err.message || "Error login";
+      showError(err.message || "Error login");
+    }finally{
+      setLoading(false);
     }
 
   };
@@ -107,13 +149,13 @@ async function mountLogin(){
 
     registerBtn.onclick = async () => {
 
-      errorBox.innerText = "";
+      clearError();
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
 
       if(!email || !password){
-        errorBox.innerText = "Introduce email y contraseña";
+        showError("Introduce email y contraseña");
         return;
       }
 
@@ -126,10 +168,10 @@ async function mountLogin(){
 
         if(error) throw error;
 
-        errorBox.innerText = "Cuenta creada. Revisa tu email 📩";
+        showError("Cuenta creada. Revisa tu email 📩");
 
       }catch(err){
-        errorBox.innerText = err.message || "Error registro";
+        showError(err.message || "Error registro");
       }
 
     };
@@ -149,7 +191,8 @@ async function mountLogin(){
       });
 
       if(error){
-        console.error("Google error:", error);
+        showError("Error con Google");
+        console.error(error);
       }
     };
   }
@@ -167,7 +210,8 @@ async function mountLogin(){
       });
 
       if(error){
-        console.error("Facebook error:", error);
+        showError("Error con Facebook");
+        console.error(error);
       }
     };
   }

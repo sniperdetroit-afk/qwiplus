@@ -10,11 +10,11 @@
   <!-- SEO -->
   <meta name="description" content="Compra, vende y conecta en Qwiplus" />
 
-  <!-- 🔥 PWA -->
+  <!-- PWA BASE (sin SW activo) -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#6DA8FF">
 
-  <!-- 🔥 MOBILE APP MODE -->
+  <!-- MOBILE APP MODE -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -28,6 +28,20 @@
   <link rel="stylesheet" href="css/pages.css" />
   <link rel="stylesheet" href="css/style.css" />
 
+  <!-- BASE DARK (evita flash blanco) -->
+  <style>
+    html, body {
+      background: #020617;
+      color: #e5e7eb;
+      min-height: 100%;
+      margin: 0;
+    }
+
+    .page {
+      min-height: 100vh;
+    }
+  </style>
+
   <!-- ICONOS -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -35,15 +49,39 @@
 
 <body>
 
-  <!-- 🔥 ARRANQUE INTELIGENTE (NO ROMPE RUTAS) -->
+  <!-- ================= ROUTE INIT ================= -->
   <script>
-    const path = window.location.pathname;
-    const hash = window.location.hash;
+    (function(){
+      const path = window.location.pathname;
+      const hash = window.location.hash;
 
-    // Solo redirige si estás en home limpio
-    if (!hash && path === "/") {
-      window.location.replace("#login");
+      if (!hash && path === "/") {
+        window.location.replace("#login");
+      }
+    })();
+  </script>
+
+  <!-- ================= LAYOUT CONTROL ================= -->
+  <script>
+    function updateLayout(view){
+      const header = document.getElementById("appHeader");
+      const nav = document.getElementById("bottomNav");
+
+      const isAuth = view === "login";
+
+      if(header) header.style.display = isAuth ? "none" : "flex";
+      if(nav) nav.style.display = isAuth ? "none" : "flex";
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const currentView = window.location.hash.replace("#", "") || "login";
+      updateLayout(currentView);
+    });
+
+    window.addEventListener("hashchange", () => {
+      const view = window.location.hash.replace("#", "");
+      updateLayout(view);
+    });
   </script>
 
   <!-- ================= HEADER ================= -->
@@ -123,11 +161,11 @@
 
     document.addEventListener("DOMContentLoaded", loadIcons);
 
-    const observer = new MutationObserver(loadIcons);
-
     const main = document.getElementById("main");
 
     if(main){
+      const observer = new MutationObserver(loadIcons);
+
       observer.observe(main, {
         childList: true,
         subtree: true
@@ -135,7 +173,36 @@
     }
   </script>
 
-  <!-- 🔥 SERVICE WORKER (PWA REAL) -->
+  <!-- ================= TRANSICIONES ================= -->
+  <script>
+    function animateViewChange() {
+      const mainView = document.getElementById("main");
+      if (!mainView) return;
+
+      mainView.style.opacity = "0";
+      mainView.style.transform = "translateY(10px)";
+
+      setTimeout(() => {
+        mainView.style.transition = "all 0.25s ease";
+        mainView.style.opacity = "1";
+        mainView.style.transform = "translateY(0)";
+      }, 50);
+    }
+
+    const mainView = document.getElementById("main");
+
+    if (mainView) {
+      const observerView = new MutationObserver(animateViewChange);
+
+      observerView.observe(mainView, {
+        childList: true,
+        subtree: true
+      });
+    }
+  </script>
+
+  <!-- ================= SERVICE WORKER (OFF EN DEV) ================= -->
+  <!--
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
@@ -145,6 +212,7 @@
       });
     }
   </script>
+  -->
 
 </body>
 </html>
