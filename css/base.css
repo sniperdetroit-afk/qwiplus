@@ -1,0 +1,14 @@
+body{
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.hidden{
+  display:none !important;
+}
+
+.logo{
+  width:80px;
+}

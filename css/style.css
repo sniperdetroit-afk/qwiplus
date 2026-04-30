@@ -1,0 +1,836 @@
+/* =========================
+   APP LAYOUT SYSTEM
+========================= */
+
+/* contenedor app tipo android */
+
+#app{
+  width:100%;
+  min-height:100vh;
+  background:white;
+  position:relative;
+}
+/* =========================
+   ALADIN CORE SYSTEM
+========================= */
+
+:root{
+  --bg-main: #0f1115;
+  --bg-soft: #151821;
+  --card-bg: #1c1f27;
+
+  --text-main: #ffffff;
+  --text-soft: #9aa3b2;
+
+  --accent1: #6c8cff;
+  --accent2: #58d6a3;
+
+  --radius-main: 18px;
+
+  --shadow-soft: 0 10px 30px rgba(0,0,0,0.4);
+  --shadow-card: 0 4px 14px rgba(0,0,0,0.5);
+}
+
+/* GLOBAL RESET */
+
+
+/* =========================
+   ALADIN MASTER BASE
+========================= */
+.hidden{
+  display:none !important;
+}
+:root{
+
+  /* BRAND */
+  --accent: #6DA8FF;
+  --accent2: #6EE7B7;
+
+  /* UI */
+  --bg: #F4F7FD;
+  --card: #ffffff;
+
+  --text: #1f2937;
+  --muted: #6b7280;
+
+  /* DESIGN */
+  --radius: 18px;
+
+  --shadow-soft: 0 6px 18px rgba(0,0,0,0.06);
+  --shadow-card: 0 4px 14px rgba(0,0,0,0.08);
+
+}
+
+/* RESET */
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+  padding:10px 18px;
+  background:var(--bg);
+}
+
+.search-input{
+  width:100%;
+  padding:14px 20px;
+  border-radius:999px;
+  border:none;
+  background:white;
+  font-size:15px;
+  box-shadow:var(--shadow-soft);
+}
+
+.header-actions{
+  display:flex;
+  gap:12px;
+  margin-top:10px;
+}
+
+.btn{
+  flex:1;
+  border:none;
+  padding:12px;
+  border-radius:999px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.btn-primary{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:white;
+}
+
+
+/* =========================
+   GRID ADS
+========================= */
+
+.ads-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+  padding:18px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-card);
+  transition:.25s;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+}
+
+.card-image{
+  width:100%;
+  aspect-ratio:1/1;
+  overflow:hidden;
+}
+
+.card-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.card-info{
+  padding:12px;
+}
+
+.card-title{
+  font-size:14px;
+  font-weight:500;
+  margin-bottom:4px;
+}
+
+.price{
+  font-size:18px;
+  font-weight:700;
+}
+/* =========================
+   PROFILE AVATAR FINAL STABLE
+========================= */
+
+.profile-page{
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
+
+.profile-header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+
+.profile-avatar{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  overflow:hidden;
+  margin-bottom:12px;
+  background:#eee;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.profile-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.avatar-placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:40px;
+  color:#888;
+}
+
+.profile-email{
+  font-size:20px;
+  font-weight:600;
+  margin-top:8px;
+}
+
+.profile-actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+  justify-content:center;
+}
+
+.profile-btn{
+  padding:10px 16px;
+  border-radius:20px;
+  border:none;
+  background:linear-gradient(135deg,#7da6ff,#6fe3c1);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(0,0,0,0.1);
+  transition:.2s;
+}
+
+.profile-btn:hover{
+  transform:translateY(-2px);
+}
+/* =========================
+   PROFILE MENU FINAL FIX
+========================= */
+
+.profile-menu-page{
+  max-width:100px;
+  margin:auto;
+  padding:20px;
+}
+
+.profile-menu-header{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.profile-menu-avatar{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#eee;
+  flex-shrink:0;
+}
+
+.profile-menu-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.profile-menu-email{
+  font-weight:600;
+  font-size:16px;
+}
+
+.profile-menu-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:20px;
+}
+
+.profile-menu-btn{
+  background:linear-gradient(135deg,#7da6ff,#6fe3c1);
+  border:none;
+  padding:14px;
+  border-radius:16px;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  transition:.2s;
+}
+
+.profile-menu-btn:hover{
+  transform:translateY(-2px);
+}
+.profile-menu-avatar{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  overflow:hidden;
+}
+/* =========================
+   CHAT SYSTEM FINAL STABLE
+========================= */
+
+.messages-page{
+  padding:10px;
+}
+
+.conversation{
+  display:flex;
+  gap:12px;
+  padding:12px;
+  border-bottom:1px solid #eee;
+  align-items:center;
+}
+
+.conv-img{
+  width:80px;
+  height:80px;
+  min-width:80px;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.conv-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.conv-info{
+  flex:1;
+}
+
+.conv-name{
+  font-weight:600;
+}
+
+.conv-title{
+  font-size:13px;
+  color:#777;
+}
+
+.conv-last{
+  font-size:14px;
+}
+
+.conv-time{
+  font-size:12px;
+  color:#999;
+}
+
+/* ===== CHAT PAGE ===== */
+
+
+.chat-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  background:white;
+  border-bottom:1px solid #eee;
+}
+
+.chat-ad-mini{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.chat-ad-mini img{
+  width:40px;
+  height:40px;
+  border-radius:8px;
+  object-fit:cover;
+}
+
+.chat-buy-bar{
+  padding:10px;
+  background:white;
+  border-bottom:1px solid #eee;
+}
+
+.chat-buy-actions{
+  display:flex;
+  gap:10px;
+}
+
+.chat-offer-btn{
+  flex:1;
+  border:2px solid var(--accent);
+  background:white;
+  color:var(--accent);
+  padding:12px;
+  border-radius:20px;
+  font-weight:600;
+}
+
+.chat-buy-btn{
+  flex:1;
+  background:linear-gradient(90deg,#6c8cff,#58d6a3);
+  color:white;
+  border:none;
+  padding:12px;
+  border-radius:20px;
+  font-weight:600;
+}
+
+.chat-messages{
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.bubble{
+  max-width:70%;
+  padding:10px 14px;
+  border-radius:18px;
+  font-size:14px;
+}
+
+.bubble-me{
+  align-self:flex-end;
+  background:linear-gradient(90deg,#6c8cff,#58d6a3);
+  color:white;
+}
+
+.bubble-other{
+  align-self:flex-start;
+  background:#f1f1f1;
+}
+
+.chat-input{
+  position:sticky;
+  bottom:0;
+  background:white;
+  padding:12px;
+  display:flex;
+  gap:10px;
+  border-top:1px solid #eee;
+}
+
+.chat-input input{
+  flex:1;
+  padding:12px;
+  border-radius:20px;
+  border:1px solid #ddd;
+}
+
+.chat-input button{
+  background:linear-gradient(90deg,#6c8cff,#58d6a3);
+  border:none;
+  color:white;
+  padding:10px 18px;
+  border-radius:20px;
+  font-weight:600;
+}
+
+/* =========================
+   NAVBAR ALADIN
+========================= */
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:100;
+  right:0;
+  height:64px;
+  background:linear-gradient(90deg,#6DA8FF,#5aa0ff);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  backdrop-filter:blur(10px);
+  box-shadow:0 -4px 20px rgba(0,0,0,0.15);
+}
+
+.nav-item{
+  background:none;
+  border:none;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+
+.nav-item small{
+  font-size:11px;
+}
+/* =========================
+   FAVORITES
+========================= */
+
+.fav-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:36px;
+  height:36px;
+
+  margin-top:8px;
+
+  background:white;
+  border:none;
+  border-radius:50%;
+
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+
+  cursor:pointer;
+  transition:.2s;
+}
+
+.fav-btn:hover{
+  transform:scale(1.08);
+}
+
+.fav-btn.active{
+  background:linear-gradient(90deg,#ff6b6b,#ff3b3b);
+  color:white;
+}
+.fav-btn:hover{
+  transform:scale(1.08);
+}
+
+.fav-btn.active{
+  background:linear-gradient(90deg,#ff6b6b,#ff3b3b);
+  color:white;
+}
+
+.card-image{
+  position:relative;
+}
+/* =========================
+   CATEGORY CARDS MODERN
+========================= */
+
+.categories-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:18px;
+  padding:20px;
+}
+
+.category-card{
+  background:white;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+  cursor:pointer;
+  transition:.25s;
+}
+
+.category-card:hover{
+  transform:translateY(-4px);
+}
+
+.category-img{
+  width:100%;
+  aspect-ratio:1/1;
+  overflow:hidden;
+}
+
+.category-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.category-info{
+  padding:14px;
+}
+
+.category-title{
+  font-size:16px;
+  font-weight:600;
+  color:#2E3A55;
+}
+
+.category-sub{
+  font-size:13px;
+  color:#777;
+  margin-top:4px;
+}
+/* =========================
+   CATEGORIES GRID PREMIUM
+========================= */
+
+.category-card{
+  background:white;
+  border:none;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 6px 20px rgba(0,0,0,0.06);
+  cursor:pointer;
+  transition:.25s;
+  text-align:left;
+}
+
+.category-card:active{
+  transform:scale(.97);
+}
+
+.category-image{
+  width:100%;
+  aspect-ratio:1/1;
+  overflow:hidden;
+}
+
+.category-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.category-info{
+  padding:12px 14px 14px;
+}
+
+.category-info h3{
+  font-size:15px;
+  font-weight:600;
+  color:#2E3A55;
+}
+
+/* sensación app moderna */
+
+.category-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 28px rgba(0,0,0,0.10);
+}
+/* =========================
+   SUBCATEGORIES GRID PREMIUM
+========================= */
+
+.subcategories {
+  padding: 25px 20px 120px;
+}
+
+.subcategories h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: var(--text);
+}
+
+.subcategory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.subcategory-item {
+  background: white;
+  border-radius: 16px;
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+  border: none;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.subcategory-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+}
+/* =========================
+   HEADER VISIBILITY CONTROL
+========================= */
+
+
+
+
+
+.chat-seller-header{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex:1;
+}
+
+.chat-seller-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#eee;
+}
+
+.chat-seller-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.chat-seller-info{
+  display:flex;
+  flex-direction:column;
+}
+
+.chat-seller-name{
+  font-weight:600;
+  font-size:14px;
+}
+
+.chat-seller-ad{
+  font-size:12px;
+  color:#777;
+}
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  padding: 16px;
+}
+
+.category-card {
+  position: relative;
+  height: 120px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: none;
+  padding: 0;
+}
+
+.category-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.category-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.38),
+    rgba(0,0,0,0.05)
+  );
+}
+
+.category-card span {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  right: 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: left;
+}
+.category-card {
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.category-card:active {
+  transform: scale(.97);
+}
+
+/* ===== AD DETAIL IMAGE CONTROL ===== */
+
+.ad-image{
+  width:100%;
+  height:320px;        /* altura tipo app real */
+  overflow:hidden;
+  background:#f2f4f8;
+  position:relative;
+}
+
+.ad-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+/* FULLSCREEN VIEWS */
+
+
+.ad-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #f5f5f5;
+  overflow: hidden;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.ad-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ad-body {
+  padding: 16px;
+}
+
+.ad-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ad-price {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.ad-desc {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.chat-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+#main{
+  min-height:100vh;
+  padding-bottom:80px;
+}

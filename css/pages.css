@@ -1,0 +1,73 @@
+.home-section{
+  padding:30px 22px 40px;
+}
+
+.publish-page{
+  padding:28px 22px 40px;
+}
+
+/* ================= LOGIN PAGE ================= */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-soft);
+}
+ 
+
+.login-box {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card-bg);
+  padding: 24px;
+  border-radius: var(--radius-main);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+.login-title {
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+
+.login-sub {
+  color: var(--text-soft);
+  margin-bottom: 20px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--accent1);
+  color: white;
+  border: none;
+  margin-bottom: 10px;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid var(--accent1);
+  background: transparent;
+  color: var(--accent1);
+}
+
+.back-btn {
+  margin-top: 15px;
+  background: none;
+  border: none;
+  color: var(--text-soft);
+}
+

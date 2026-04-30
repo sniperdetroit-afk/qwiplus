@@ -1,0 +1,33 @@
+
+
+.fab{
+  position:fixed;
+  bottom:80px;
+  right:30px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#4c6ef5;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+/* FULLSCREEN ROUTES (chat, login, boot) */
+
+body.fullscreen header {
+  display: none !important;
+}
+
+body.fullscreen .bottom-nav {
+  display: none !important;
+}
+
+body.fullscreen .fab {
+  display: none !important;
+}
+body.fullscreen .top-bar,
+body.fullscreen .bottom-nav {
+  display: none !important;
+}
+

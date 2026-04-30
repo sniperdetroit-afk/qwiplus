@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+  <!-- ================= META ================= -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Qwiplus</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Compra, vende y conecta en Qwiplus" />
+
+  <!-- 🔥 PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#6DA8FF">
+
+  <!-- 🔥 MOBILE APP MODE -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="/img/logo-qwiplus.png">
+
+  <!-- ================= CSS ================= -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/system.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages.css" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- ICONOS -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+</head>
+
+<body>
+
+  <!-- 🔥 ARRANQUE INTELIGENTE (NO ROMPE RUTAS) -->
+  <script>
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+
+    // Solo redirige si estás en home limpio
+    if (!hash && path === "/") {
+      window.location.replace("#login");
+    }
+  </script>
+
+  <!-- ================= HEADER ================= -->
+  <header id="appHeader" class="header">
+    <div class="header-inner">
+
+      <div class="search-wrapper">
+        <input
+          type="search"
+          id="globalSearch"
+          class="search-input"
+          placeholder="Buscar en Qwiplus"
+          autocomplete="off"
+        />
+        <div id="searchSuggestions" class="search-suggestions hidden"></div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-primary" data-view="categories">
+          Categorías
+        </button>
+
+        <button class="btn btn-primary" data-view="publish">
+          Publicar
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= APP ROOT ================= -->
+  <div id="app">
+    <main id="main" class="page"></main>
+  </div>
+
+  <!-- ================= NAV ================= -->
+  <nav id="bottomNav" class="bottom-nav">
+
+    <button class="nav-item" data-view="home">
+      <i data-lucide="house"></i>
+      <small>Inicio</small>
+    </button>
+
+    <button class="nav-item" data-view="favorites">
+      <i data-lucide="heart"></i>
+      <small>Favoritos</small>
+    </button>
+
+    <button class="nav-item" data-view="search">
+      <i data-lucide="search"></i>
+      <small>Buscar</small>
+    </button>
+
+    <button class="nav-item" data-view="messages">
+      <i data-lucide="mail"></i>
+      <span id="msgBadge" class="msg-badge hidden">0</span>
+      <small>Mensajes</small>
+    </button>
+
+    <button class="nav-item" data-view="profileMenu">
+      <i data-lucide="user"></i>
+      <small>Perfil</small>
+    </button>
+
+  </nav>
+
+  <!-- ================= APP ================= -->
+  <script type="module" src="js/app.js"></script>
+
+  <!-- ================= ICONOS ================= -->
+  <script>
+    function loadIcons(){
+      if(window.lucide){
+        lucide.createIcons();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadIcons);
+
+    const observer = new MutationObserver(loadIcons);
+
+    const main = document.getElementById("main");
+
+    if(main){
+      observer.observe(main, {
+        childList: true,
+        subtree: true
+      });
+    }
+  </script>
+
+  <!-- 🔥 SERVICE WORKER (PWA REAL) -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js")
+          .then(() => console.log("✅ PWA activa"))
+          .catch(err => console.error("❌ SW error:", err));
+      });
+    }
+  </script>
+
+</body>
+</html>
