@@ -1,266 +1,310 @@
-// js/app.js
+// js/views/login.js
 
-console.log("APP VERSION 154 FIX RENDER");
+import { supabase } from "../services/supabase.js";
+import { navigate } from "../core/router.js";
+import { setState } from "../core/state.js";
 
-/* ================= IMPORTS ================= */
-
-import { loadView } from "./core/viewEngine.js";
-import { subscribe } from "./core/store.js";
-import { getState, setState } from "./core/state.js";
-import { navigate, resolveRoute } from "./core/router.js";
-import { supabase } from "./services/supabase.js";
-
-/* ================= ANTI DOBLE INIT ================= */
-
-if (window.__APP_INIT__) {
-  console.warn("App ya inicializada");
-} else {
-  window.__APP_INIT__ = true;
-}
-
-/* ================= CONTROL RENDER ================= */
-
-let isRendering = false;
-let currentViewName = null;
-
-/* ================= VIEWS ================= */
-
-import { BootView } from "./views/boot.js";
-import { HomeView } from "./views/home.js";
-import { PublishView } from "./views/publish.js";
-import { ProfileView } from "./views/profile.js";
-import { ProfileMenuView } from "./views/profileMenu.js";
-import { EditProfileView } from "./views/editProfile.js";
-import { SettingsView } from "./views/settings.js";
-import { LoginView } from "./views/login.js";
-
-import {
-  CategoriesView,
-  SubcategoriesView,
-  SubSubcategoriesView
-} from "./views/categories.js";
-
-import { FavoritesView } from "./views/favorites.js";
-import { AdDetailView } from "./views/adDetail.js";
-import { SearchView } from "./views/search.js";
-import { SearchResultsView } from "./views/searchResults.js";
-import { EditAdView } from "./views/editAd.js";
-import { InboxView } from "./views/inbox.js";
-import { ChatView } from "./views/chat.js";
-
-/* ================= ROUTES ================= */
-
-const routes = {
-  boot: BootView,
-  home: HomeView,
-  publish: PublishView,
-  profile: ProfileView,
-  profileMenu: ProfileMenuView,
-  settings: SettingsView,
-  login: LoginView,
-  categories: CategoriesView,
-  subcategories: SubcategoriesView,
-  subsubcategories: SubSubcategoriesView,
-  favorites: FavoritesView,
-  adDetail: AdDetailView,
-  search: SearchView,
-  searchResults: SearchResultsView,
-  editAd: EditAdView,
-  editProfile: EditProfileView,
-  messages: InboxView,
-  chat: ChatView
-};
+let form;
 
 /* ================= RENDER ================= */
 
-async function renderApp(){
+async function renderLogin(){
 
-  if (isRendering) return;
+  return `
+  <section class="login-page" style="
+    min-height:100vh;
+    width:100%;
+    background:#020617;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    box-sizing:border-box;
+  ">
 
-  const state = getState();
-  let viewName = state.app?.view;
+    <div class="login-card" style="
+      width:100%;
+      max-width:420px;
+      background:rgba(15,23,42,.92);
+      border-radius:28px;
+      padding:30px;
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
+      color:white;
+      box-sizing:border-box;
+    ">
 
-  // fallback seguro
-  if (!routes[viewName]) {
-    viewName = "login";
-  }
+      <h1 style="margin:0 0 6px;font-size:34px;font-weight:800;">Bienvenido</h1>
+      <p style="margin:0 0 22px;color:#cbd5e1;">Accede o crea tu cuenta</p>
 
-  const main = document.getElementById("main");
+      <form id="loginForm" style="display:flex;flex-direction:column;gap:12px;">
+        <input id="email" type="email" placeholder="Email" required style="
+          height:48px;
+          border-radius:14px;
+          border:0;
+          padding:0 16px;
+          font-size:16px;
+        ">
 
-  // 🔥 FIX CRÍTICO: evita bloqueo pero permite recuperación
-  if (
-    viewName === currentViewName &&
-    main &&
-    main.innerHTML.trim() !== ""
-  ){
+        <input id="password" type="password" placeholder="Password" required style="
+          height:48px;
+          border-radius:14px;
+          border:0;
+          padding:0 16px;
+          font-size:16px;
+        ">
+
+        <button type="submit" style="
+          height:50px;
+          border:0;
+          border-radius:16px;
+          font-weight:800;
+          color:white;
+          background:linear-gradient(90deg,#60a5fa,#22c55e);
+          font-size:16px;
+        ">Entrar</button>
+      </form>
+
+      <button id="registerBtn" style="
+        margin-top:18px;
+        width:100%;
+        background:transparent;
+        border:0;
+        color:#e5e7eb;
+        font-weight:700;
+        height:42px;
+      ">Crear cuenta</button>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+
+        <button id="googleBtn" style="
+          height:46px;
+          border-radius:14px;
+          border:0;
+          background:white;
+          color:#111827;
+          font-weight:800;
+        ">Continuar con Google</button>
+
+        <button id="facebookBtn" style="
+          height:46px;
+          border-radius:14px;
+          border:0;
+          background:#1877f2;
+          color:white;
+          font-weight:800;
+        ">Continuar con Facebook</button>
+
+      </div>
+
+      <button id="guestBtn" style="
+        margin-top:16px;
+        width:100%;
+        height:44px;
+        border:0;
+        background:transparent;
+        color:white;
+        font-weight:800;
+      ">Continuar sin registrarse</button>
+
+      <div id="loginError" style="
+        display:none;
+        margin-top:14px;
+        color:#fecaca;
+        background:rgba(239,68,68,.16);
+        padding:12px;
+        border-radius:12px;
+        font-weight:700;
+      "></div>
+
+    </div>
+
+  </section>
+  `;
+}
+
+/* ================= HELPERS ================= */
+
+const getRedirectTo = () => {
+  return `${window.location.origin}/#home`;
+};
+
+const forceAuthLayout = () => {
+  const header = document.getElementById("appHeader");
+  const nav = document.getElementById("bottomNav");
+
+  if(header) header.style.display = "none";
+  if(nav) nav.style.display = "none";
+
+  document.body.style.background = "#020617";
+};
+
+const setLoading = (loading) => {
+  const btn = form?.querySelector("button[type='submit']");
+  if (!btn) return;
+
+  btn.disabled = loading;
+  btn.innerText = loading ? "Entrando..." : "Entrar";
+};
+
+const showError = (msg) => {
+  const errorBox = document.getElementById("loginError");
+  if (!errorBox) return;
+
+  errorBox.innerText = msg;
+  errorBox.style.display = "block";
+};
+
+const clearError = () => {
+  const errorBox = document.getElementById("loginError");
+  if (!errorBox) return;
+
+  errorBox.innerText = "";
+  errorBox.style.display = "none";
+};
+
+/* ================= MOUNT ================= */
+
+async function mountLogin(){
+
+  forceAuthLayout();
+
+  form = document.getElementById("loginForm");
+  const registerBtn = document.getElementById("registerBtn");
+  const guestBtn = document.getElementById("guestBtn");
+  const googleBtn = document.getElementById("googleBtn");
+  const facebookBtn = document.getElementById("facebookBtn");
+
+  if(!form) return;
+
+  const { data } = await supabase.auth.getSession();
+
+  if (data.session) {
+    navigate("home");
     return;
   }
 
-  isRendering = true;
+  const redirectTo = getRedirectTo();
 
-  try {
+  form.onsubmit = async (e) => {
+    e.preventDefault();
 
-    currentViewName = viewName;
+    clearError();
+    setLoading(true);
 
-    const View = routes[viewName];
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
-    const header = document.getElementById("appHeader");
-    const nav = document.getElementById("bottomNav");
+    try{
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    const layoutConfig = {
-      boot: { header: false, nav: false },
-      login: { header: false, nav: false },
+      if(error) throw error;
 
-      home: { header: true, nav: true },
-      search: { header: false, nav: true },
-      favorites: { header: false, nav: true },
-      chat: { header: false, nav: false },
-      profileMenu: { header: false, nav: true },
-      profile: { header: false, nav: true },
+      setState({
+        session:{ user:data.user },
+        guest:false
+      });
 
-      settings: { header: false, nav: false },
-      editProfile: { header: false, nav: false },
-      editAd: { header: false, nav: false }
-    };
+      navigate("home");
 
-    const layout = layoutConfig[viewName] || { header: false, nav: true };
-
-    if (header) header.style.display = layout.header ? "" : "none";
-    if (nav) nav.style.display = layout.nav ? "" : "none";
-
-    // 🔥 limpiar antes de render para evitar estados corruptos
-    if (main) {
-      main.innerHTML = "";
+    }catch(err){
+      showError(err.message || "Error login");
+    }finally{
+      setLoading(false);
     }
-
-    await loadView(View, state);
-
-    if (layout.nav) updateActiveNav(viewName);
-
-    console.log("VIEW OK:", viewName);
-
-  } catch (err) {
-    console.error("Render error:", err);
-
-    // 🔥 fallback visual si algo falla
-    const main = document.getElementById("main");
-    if (main) {
-      main.innerHTML = `
-        <div style="padding:20px;color:white">
-          ⚠️ Error cargando vista
-        </div>
-      `;
-    }
-
-  } finally {
-    isRendering = false;
-  }
-}
-
-/* ================= NAV ================= */
-
-function updateActiveNav(view) {
-  document.querySelectorAll(".nav-item")
-    .forEach(btn => {
-      btn.classList.toggle("active", btn.dataset.view === view);
-    });
-}
-
-/* ================= CLICK ================= */
-
-document.addEventListener("click", async (e) => {
-
-  const el = e.target.closest("[data-view]");
-  if (!el) return;
-
-  e.preventDefault();
-
-  const view = el.dataset.view;
-
-  const params = {
-    id: el.dataset.id,
-    category: el.dataset.category,
-    subcategory: el.dataset.subcategory
   };
 
-  Object.keys(params).forEach(k => {
-    if (!params[k]) delete params[k];
-  });
+  if(registerBtn){
+    registerBtn.onclick = async () => {
+      clearError();
 
-  const state = getState();
-  const user = state.session?.user;
-  const current = state.app?.view;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
 
-  if (current === view) return;
+      if(!email || !password){
+        showError("Introduce email y contraseña");
+        return;
+      }
 
-  if (
-    ["publish","favorites","messages","chat","profile","profileMenu"].includes(view)
-    && !user
-  ){
-    navigate("login");
-    return;
+      try{
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: redirectTo
+          }
+        });
+
+        if(error) throw error;
+
+        showError("Cuenta creada. Revisa tu email 📩");
+
+      }catch(err){
+        showError(err.message || "Error registro");
+      }
+    };
   }
 
-  navigate(view, params);
-});
+  if(googleBtn){
+    googleBtn.onclick = async () => {
+      clearError();
 
-/* ================= STORE ================= */
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo }
+      });
 
-subscribe(renderApp);
-
-/* ================= INIT ================= */
-
-async function initApp() {
-
-  try {
-
-    const route = resolveRoute();
-    console.log("ROUTE:", route);
-
-    setState({
-      app: {
-        view: "boot",
-        params: {}
+      if(error){
+        console.error(error);
+        showError("Error con Google");
       }
-    });
+    };
+  }
 
-    const { data: { session } } = await supabase.auth.getSession();
-    const user = session?.user || null;
+  if(facebookBtn){
+    facebookBtn.onclick = async () => {
+      clearError();
 
-    setState({
-      session: { user },
-      app: {
-        view: user ? route.view : "login",
-        params: route.params || {}
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "facebook",
+        options: { redirectTo }
+      });
+
+      if(error){
+        console.error(error);
+        showError("Error con Facebook");
       }
-    });
+    };
+  }
 
-  } catch (err){
-    console.error("Init error:", err);
+  if(guestBtn){
+    guestBtn.onclick = () => {
+      setState({
+        session:{ user:null },
+        guest:true
+      });
+
+      navigate("home");
+    };
   }
 }
 
-initApp();
+/* ================= UNMOUNT ================= */
 
-/* ================= AUTH ================= */
+async function unmountLogin(){
+  form = null;
+}
 
-supabase.auth.onAuthStateChange((event, session) => {
+/* ================= EXPORT ================= */
 
-  const prev = getState();
+export const LoginView = async () => {
+  const html = await renderLogin();
 
-  setState({
-    ...prev,
-    session: {
-      user: session?.user || null
-    }
-  });
-
-  if (session?.user && getState().app?.view === "login") {
-    navigate("home");
-  }
-
-});
-
-/* ================= SW ================= */
-
-// desactivado por ahora
+  return {
+    html,
+    mount: mountLogin,
+    unmount: unmountLogin
+  };
+};
