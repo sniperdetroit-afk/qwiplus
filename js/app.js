@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 153 INIT FIX");
+console.log("APP VERSION 154 FIX RENDER");
 
 /* ================= IMPORTS ================= */
 
@@ -71,30 +71,30 @@ const routes = {
   chat: ChatView
 };
 
-/* ================= SAFE VIEW ================= */
-
-function getViewName() {
-  const state = getState();
-  const view = state.app?.view;
-  return routes[view] ? view : "login";
-}
-
 /* ================= RENDER ================= */
 
 async function renderApp(){
 
-  if(isRendering) return;
+  if (isRendering) return;
 
   const state = getState();
   let viewName = state.app?.view;
 
   // fallback seguro
-  if(!routes[viewName]){
+  if (!routes[viewName]) {
     viewName = "login";
   }
 
-  // 🔥 evita renders duplicados
-  if(viewName === currentViewName) return;
+  const main = document.getElementById("main");
+
+  // 🔥 FIX CRÍTICO: evita bloqueo pero permite recuperación
+  if (
+    viewName === currentViewName &&
+    main &&
+    main.innerHTML.trim() !== ""
+  ){
+    return;
+  }
 
   isRendering = true;
 
@@ -128,6 +128,11 @@ async function renderApp(){
     if (header) header.style.display = layout.header ? "" : "none";
     if (nav) nav.style.display = layout.nav ? "" : "none";
 
+    // 🔥 limpiar antes de render para evitar estados corruptos
+    if (main) {
+      main.innerHTML = "";
+    }
+
     await loadView(View, state);
 
     if (layout.nav) updateActiveNav(viewName);
@@ -136,6 +141,17 @@ async function renderApp(){
 
   } catch (err) {
     console.error("Render error:", err);
+
+    // 🔥 fallback visual si algo falla
+    const main = document.getElementById("main");
+    if (main) {
+      main.innerHTML = `
+        <div style="padding:20px;color:white">
+          ⚠️ Error cargando vista
+        </div>
+      `;
+    }
+
   } finally {
     isRendering = false;
   }
@@ -168,7 +184,7 @@ document.addEventListener("click", async (e) => {
   };
 
   Object.keys(params).forEach(k => {
-    if(!params[k]) delete params[k];
+    if (!params[k]) delete params[k];
   });
 
   const state = getState();
@@ -199,6 +215,7 @@ async function initApp() {
   try {
 
     const route = resolveRoute();
+    console.log("ROUTE:", route);
 
     setState({
       app: {

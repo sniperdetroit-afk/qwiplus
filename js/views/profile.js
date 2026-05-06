@@ -6,6 +6,21 @@ import { getState, setState } from "../core/state.js";
 
 let user = null;
 
+/* ================= HELPERS ================= */
+
+function getUserName(email = "") {
+  return email.split("@")[0] || "Usuario";
+}
+
+function getFallbackAvatar(email = "") {
+  const seed = encodeURIComponent(getUserName(email));
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=60a5fa,34d399&fontWeight=700`;
+}
+
+function getAvatarUrl(user) {
+  return user?.user_metadata?.avatar_url || getFallbackAvatar(user?.email || "");
+}
+
 /* ================= RENDER ================= */
 
 async function renderProfile(){
@@ -21,9 +36,8 @@ async function renderProfile(){
           <button id="backProfileBtn">← Volver</button>
         </div>
 
-        <h1>Perfil</h1>
-
         <div class="profile-empty">
+          <h1>Perfil</h1>
           <p>No estás logueado</p>
           <button id="goLogin" class="btn-primary">Iniciar sesión</button>
         </div>
@@ -32,40 +46,149 @@ async function renderProfile(){
     `;
   }
 
+  const name = getUserName(user.email);
+  const avatarUrl = getAvatarUrl(user);
+
   return `
-  <section class="profile-page">
+    <section class="profile-page">
 
-    <div class="profile-top">
-      <button id="backProfileBtn">← Volver</button>
-    </div>
-
-    <div class="profile-header">
-      <div class="avatar avatar-lg">
-        <div class="avatar-placeholder">👤</div>
+      <div class="profile-top">
+        <button id="backProfileBtn" class="profile-back">← Volver</button>
       </div>
-      <h2>${user.email}</h2>
-    </div>
 
-    <div class="profile-card">
-      <span>Email</span>
-      <strong>${user.email}</strong>
-    </div>
+      <div class="profile-pro-header">
 
-    <div class="profile-actions">
-      <button id="editProfile" class="btn-primary">Editar perfil</button>
-      <button id="logoutBtn" class="btn-danger">Cerrar sesión</button>
-    </div>
+        <button id="avatarUploadBtn" class="profile-avatar avatar-upload-btn" type="button">
+          <img id="profileAvatarImg" src="${avatarUrl}" alt="Avatar de ${name}">
+          <span class="avatar-edit-badge">📷</span>
+        </button>
 
-    <!-- 🔥 MIS ANUNCIOS -->
-    <div class="my-ads-section">
-      <h3>Mis anuncios</h3>
+        <input id="avatarInput" type="file" accept="image/*" hidden>
 
-      <div id="myAdsContainer" class="ads-grid"></div>
+        <div class="profile-user-info">
+          <h1>${name}</h1>
+          <p>${user.email}</p>
 
-    </div>
+          <div class="profile-badge">
+            <span>Verificado por Qwiplus</span>
+          </div>
+        </div>
 
-  </section>
+      </div>
+
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <strong id="adsCount">0</strong>
+          <span>Anuncios</span>
+        </div>
+
+        <div class="profile-stat">
+          <strong id="likesCount">0</strong>
+          <span>Favoritos recibidos</span>
+        </div>
+
+        <div class="profile-stat">
+          <strong>Activo</strong>
+          <span>Estado</span>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button id="editProfile" class="btn-primary">Editar perfil</button>
+        <button id="logoutBtn" class="btn-danger">Cerrar sesión</button>
+      </div>
+
+      <div class="my-ads-section">
+        <div class="section-title-row">
+          <h2>Mis anuncios</h2>
+          <button id="publishFromProfile" class="btn-primary small">Publicar</button>
+        </div>
+
+        <div id="myAdsContainer" class="ads-grid"></div>
+      </div>
+
+    </section>
   `;
+}
+
+/* ================= AVATAR UPLOAD ================= */
+
+async function uploadAvatar(file){
+
+  if(!user || !file) return;
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if(!allowedTypes.includes(file.type)){
+    alert("Solo puedes subir imágenes JPG, PNG o WEBP");
+    return;
+  }
+
+  const maxSize = 3 * 1024 * 1024;
+  if(file.size > maxSize){
+    alert("La imagen es demasiado grande. Máximo 3MB");
+    return;
+  }
+
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${user.id}/avatar.${ext}`;
+
+  const avatarImg = document.getElementById("profileAvatarImg");
+  const oldSrc = avatarImg?.src;
+
+  if(avatarImg){
+    avatarImg.src = URL.createObjectURL(file);
+  }
+
+  const { error: uploadError } = await supabase.storage
+    .from("avatars")
+    .upload(path, file, {
+      cacheControl: "3600",
+      upsert: true
+    });
+
+  if(uploadError){
+    console.error("AVATAR UPLOAD ERROR:", uploadError);
+    alert(uploadError.message);
+
+    if(avatarImg && oldSrc){
+      avatarImg.src = oldSrc;
+    }
+
+    return;
+  }
+
+  const { data: publicData } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(path);
+
+  const publicUrl = `${publicData.publicUrl}?v=${Date.now()}`;
+
+  const { data, error: updateError } = await supabase.auth.updateUser({
+    data: {
+      avatar_url: publicUrl
+    }
+  });
+
+  if(updateError){
+    console.error("AVATAR UPDATE ERROR:", updateError);
+    alert(updateError.message);
+    return;
+  }
+
+  user = data.user;
+
+  const currentState = getState();
+
+  setState({
+    ...currentState,
+    session: {
+      user
+    }
+  });
+
+  if(avatarImg){
+    avatarImg.src = publicUrl;
+  }
 }
 
 /* ================= MOUNT ================= */
@@ -84,6 +207,24 @@ async function mountProfile(){
   const editBtn = document.getElementById("editProfile");
   if(editBtn) editBtn.onclick = () => navigate("editProfile");
 
+  const publishBtn = document.getElementById("publishFromProfile");
+  if(publishBtn) publishBtn.onclick = () => navigate("publish");
+
+  const avatarBtn = document.getElementById("avatarUploadBtn");
+  const avatarInput = document.getElementById("avatarInput");
+
+  if(avatarBtn && avatarInput){
+    avatarBtn.onclick = () => avatarInput.click();
+
+    avatarInput.onchange = async () => {
+      const file = avatarInput.files?.[0];
+      if(!file) return;
+
+      await uploadAvatar(file);
+      avatarInput.value = "";
+    };
+  }
+
   const logoutBtn = document.getElementById("logoutBtn");
   if(logoutBtn){
     logoutBtn.onclick = async () => {
@@ -91,74 +232,94 @@ async function mountProfile(){
       await supabase.auth.signOut();
 
       setState({
-        session:{ user:null }
+        session:{ user:null },
+        guest:false
       });
 
-      navigate("home");
+      navigate("login");
     };
   }
 
-  /* ================= MIS ANUNCIOS ================= */
-
   const container = document.getElementById("myAdsContainer");
+  if(!container || !user) return;
 
-  // ⏳ esperar a que el user esté listo
-  let attempts = 0;
-  let userReady = null;
+  container.innerHTML = `<p style="text-align:center">Cargando tus anuncios...</p>`;
 
-  while(attempts < 10){
-    const state = getState();
-    userReady = state.session?.user;
-
-    if(userReady) break;
-
-    await new Promise(r => setTimeout(r, 100));
-    attempts++;
-  }
-
-  if(!userReady){
-    console.log("❌ user no disponible");
-    return;
-  }
-
-  if(!container) return;
-
-  // ✅ query segura
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("ads")
     .select("*")
-    .eq("user_id", userReady.id)
+    .eq("user_id", user.id)
     .order("created_at", { ascending:false });
 
-  // 🔍 DEBUG
-  console.log("USER ID:", userReady.id);
-  console.log("ADS:", data);
-
-  if(!data || data.length === 0){
-    container.innerHTML = "<p>No tienes anuncios</p>";
+  if(error){
+    console.error("PROFILE ADS ERROR:", error);
+    container.innerHTML = "<p>Error cargando tus anuncios</p>";
     return;
   }
 
-  container.innerHTML = data.map(ad => `
-    <div class="card" data-id="${ad.id}">
+  const ads = data || [];
+
+  const adsCount = document.getElementById("adsCount");
+  const likesCount = document.getElementById("likesCount");
+
+  if(adsCount) adsCount.textContent = ads.length;
+
+  const totalLikes = ads.reduce((sum, ad) => {
+    return sum + Number(ad.favorites_count || 0);
+  }, 0);
+
+  if(likesCount) likesCount.textContent = totalLikes;
+
+  if(ads.length === 0){
+    container.innerHTML = `
+      <div class="profile-no-ads">
+        <p>No tienes anuncios todavía</p>
+        <button class="btn-primary" data-view="publish">Publicar mi primer anuncio</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = ads.map(ad => `
+    <div class="card profile-ad-card" data-id="${ad.id}">
 
       <div class="card-image">
-        <img src="${ad.image_url || ""}">
+        <img src="${ad.image_url || "/img/placeholder.png"}" alt="${ad.title || "Anuncio"}">
       </div>
 
       <div class="card-info">
         <div class="card-title">${ad.title || ""}</div>
-        <div class="price">${ad.price || ""}€</div>
+
+        <div class="card-bottom">
+          <div class="price">${ad.price || 0}€</div>
+
+          <div class="favorite-counter">
+            ❤️ <span>${ad.favorites_count || 0}</span>
+          </div>
+        </div>
       </div>
 
-      <button class="deleteAd" data-id="${ad.id}">
-        🗑
-      </button>
+      <div class="profile-card-actions">
+        <button class="editAdBtn" data-id="${ad.id}">Editar</button>
+        <button class="deleteAd" data-id="${ad.id}">🗑</button>
+      </div>
 
     </div>
   `).join("");
 
-  /* DELETE */
+  document.querySelectorAll(".profile-ad-card").forEach(card => {
+    card.onclick = (e) => {
+      if(e.target.closest("button")) return;
+      navigate("adDetail", { id: card.dataset.id });
+    };
+  });
+
+  document.querySelectorAll(".editAdBtn").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      navigate("editAd", { id: btn.dataset.id });
+    };
+  });
 
   document.querySelectorAll(".deleteAd").forEach(btn => {
     btn.onclick = async (e) => {
@@ -166,16 +327,27 @@ async function mountProfile(){
       e.stopPropagation();
 
       const id = btn.dataset.id;
+      const ok = confirm("¿Eliminar este anuncio?");
+      if(!ok) return;
 
-      await supabase
+      const { error } = await supabase
         .from("ads")
         .delete()
-        .eq("id", id);
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if(error){
+        console.error("DELETE AD ERROR:", error);
+        alert(error.message);
+        return;
+      }
 
       btn.closest(".card").remove();
+
+      const currentAds = Number(adsCount?.textContent || 1);
+      if(adsCount) adsCount.textContent = Math.max(currentAds - 1, 0);
     };
   });
-
 }
 
 /* ================= UNMOUNT ================= */
@@ -186,9 +358,9 @@ async function unmountProfile(){
 
 /* ================= EXPORT ================= */
 
-export const ProfileView = async (state) => {
+export const ProfileView = async () => {
 
-  const html = await renderProfile(state);
+  const html = await renderProfile();
 
   return {
     html,

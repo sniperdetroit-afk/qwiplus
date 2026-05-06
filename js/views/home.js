@@ -8,6 +8,7 @@ let box;
 let offset = 0;
 let loading = false;
 let alive = false;
+let adsChannel = null;
 
 let renderedIds = new Set();
 let requestId = 0;
@@ -25,7 +26,7 @@ async function renderHome(){
 }
 
 /* =========================
-   AUTH GUARD PRO
+   AUTH GUARD
 ========================= */
 
 async function checkAuth(){
@@ -41,7 +42,6 @@ async function checkAuth(){
     return null;
   }
 
-  // 🔥 sincronizar usuario
   if(user){
     setState({
       session: { user }
@@ -59,56 +59,21 @@ async function mountHome(){
 
   alive = true;
 
-  // 🔥 PROTECCIÓN REAL
   const user = await checkAuth();
   if(!user && !getState().guest) return;
 
-  const state = getState();
-  const params = state.app?.params || {};
-
   box = document.getElementById("adsList");
-  if(!box){
-    console.error("adsList not found");
-    return;
-  }
 
   offset = 0;
   loading = false;
   renderedIds.clear();
 
-  let usedCache = false;
-
-  const cacheKey = `ads_cache_${params.category || "all"}_${params.subcategory || "all"}_${params.subsub || "all"}`;
-
-  /* ================= CACHE ================= */
-
-  try {
-    const cache = localStorage.getItem(cacheKey);
-
-    if(cache){
-      const ads = JSON.parse(cache);
-
-      if(ads.length > 0){
-        box.innerHTML = "";
-        ads.forEach(renderAd);
-
-        offset = ads.length;
-        usedCache = true;
-
-        console.log("⚡ Ads desde cache filtrado");
-      }
-    }
-
-  } catch(e){
-    console.warn("Cache read error", e);
-  }
-
-  if(!usedCache){
-    box.innerHTML = `<p style="text-align:center">Cargando anuncios...</p>`;
-  }
+  box.innerHTML = `<p style="text-align:center">Cargando anuncios...</p>`;
 
   window.removeEventListener("scroll", onScroll);
   window.addEventListener("scroll", onScroll);
+
+  startRealtime();
 
   await loadMore();
 }
@@ -120,7 +85,44 @@ async function mountHome(){
 async function unmountHome(){
   alive = false;
   loading = false;
+
   window.removeEventListener("scroll", onScroll);
+
+  if(adsChannel){
+    supabase.removeChannel(adsChannel);
+    adsChannel = null;
+  }
+}
+
+/* =========================
+   REALTIME
+========================= */
+
+function startRealtime(){
+
+  adsChannel = supabase
+    .channel("ads-realtime")
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "ads"
+      },
+      (payload) => {
+
+        const ad = payload.new;
+        const card = document.querySelector(`[data-id="${ad.id}"]`);
+
+        if(!card) return;
+
+        const count = card.querySelector(".fav-count");
+        if(count){
+          count.textContent = ad.favorites_count || 0;
+        }
+      }
+    )
+    .subscribe();
 }
 
 /* =========================
@@ -147,52 +149,24 @@ async function loadMore(){
 
   if(loading || !alive) return;
 
-  const state = getState();
-  const params = state.app?.params || {};
-
   loading = true;
   const myRequest = ++requestId;
 
   try {
 
-    let query = supabase
+    const { data, error } = await supabase
       .from("ads")
       .select("*")
-      .order("created_at",{ ascending:false });
-
-    if (params.category) {
-      query = query.eq("category", params.category);
-    }
-
-    if (params.subcategory) {
-      query = query.eq("subcategory", params.subcategory);
-    }
-
-    if (params.subsub) {
-      query = query.eq("subsub", params.subsub);
-    }
-
-    const { data, error } = await query.range(offset, offset + 19);
+      .order("favorites_count", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(offset, offset + 19);
 
     if(error){
-      console.error("SUPABASE ERROR:", error);
-      if(offset === 0){
-        box.innerHTML = "Error cargando anuncios";
-      }
+      console.error(error);
       return;
     }
 
     if(myRequest !== requestId) return;
-    if(!alive) return;
-
-    if(!data || data.length === 0){
-
-      if(offset === 0){
-        box.innerHTML = "<p style='text-align:center'>No hay anuncios</p>";
-      }
-
-      return;
-    }
 
     if(offset === 0){
       box.innerHTML = "";
@@ -200,27 +174,10 @@ async function loadMore(){
 
     data.forEach(renderAd);
 
-    /* ================= CACHE ================= */
-
-    if(offset === 0){
-
-      const cacheKey = `ads_cache_${params.category || "all"}_${params.subcategory || "all"}_${params.subsub || "all"}`;
-
-      try {
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-        console.log("💾 Cache actualizado");
-      } catch(e){
-        console.warn("Cache save error", e);
-      }
-    }
-
     offset += data.length;
 
-  } catch (err){
-    console.error("Error loading ads:", err);
-    if(offset === 0){
-      box.innerHTML = "Error cargando anuncios";
-    }
+  } catch(err){
+    console.error(err);
   } finally {
     loading = false;
   }
@@ -249,32 +206,80 @@ function renderAd(ad){
 
       ${
         !isMine ? `
-        <button class="fav-btn" data-id="${ad.id}">
-          ❤️
-        </button>
+        <button class="fav-btn">❤️</button>
         ` : ""
       }
     </div>
 
     <div class="card-info">
-      <div class="card-title">${ad.title || ""}</div>
-      <div class="price">${ad.price || 0}€</div>
+      <div class="card-title">${ad.title}</div>
+
+      <div class="card-bottom">
+        <div class="price">${ad.price}€</div>
+
+        <div class="favorite-counter">
+          ❤️ <span class="fav-count">${ad.favorites_count || 0}</span>
+        </div>
+      </div>
     </div>
   `;
 
+  const favBtn = div.querySelector(".fav-btn");
+
+  if(favBtn){
+
+    favBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+
+      const userId = getState().session?.user?.id;
+
+      if(!userId){
+        navigate("login");
+        return;
+      }
+
+      const countEl = div.querySelector(".fav-count");
+      let current = Number(countEl.textContent);
+
+      const { data: existing } = await supabase
+        .from("favorites")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("ad_id", ad.id)
+        .maybeSingle();
+
+      if(existing){
+
+        await supabase
+          .from("favorites")
+          .delete()
+          .eq("id", existing.id);
+
+        favBtn.textContent = "❤️";
+        countEl.textContent = Math.max(current - 1, 0);
+
+      } else {
+
+        await supabase
+          .from("favorites")
+          .insert([{ user_id: userId, ad_id: ad.id }]);
+
+        favBtn.textContent = "💖";
+        countEl.textContent = current + 1;
+      }
+    });
+  }
+
   div.addEventListener("click", (e) => {
-
     if(e.target.closest(".fav-btn")) return;
-
     navigate("adDetail", { id: ad.id });
-
   });
 
   box.appendChild(div);
 }
 
 /* =========================
-   VIEW EXPORT
+   EXPORT
 ========================= */
 
 export const HomeView = async () => {
@@ -286,5 +291,4 @@ export const HomeView = async () => {
     mount: mountHome,
     unmount: unmountHome
   };
-
 };

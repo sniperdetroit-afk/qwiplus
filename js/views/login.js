@@ -55,6 +55,10 @@ async function renderLogin(){
 
 /* ================= HELPERS ================= */
 
+const getRedirectTo = () => {
+  return `${window.location.origin}/#login`;
+};
+
 const setLoading = (loading) => {
   const btn = form?.querySelector("button[type='submit']");
   if (!btn) return;
@@ -96,8 +100,6 @@ async function mountLogin(){
 
   if(!form) return;
 
-  /* ================= AUTO LOGIN ================= */
-
   const { data } = await supabase.auth.getSession();
 
   if (data.session) {
@@ -105,11 +107,7 @@ async function mountLogin(){
     return;
   }
 
-  /* ================= REDIRECT ================= */
-
-  const redirectTo = window.location.origin;
-
-  /* ================= LOGIN ================= */
+  const redirectTo = getRedirectTo();
 
   form.onsubmit = async (e) => {
 
@@ -130,7 +128,8 @@ async function mountLogin(){
       if(error) throw error;
 
       setState({
-        session:{ user:data.user }
+        session:{ user:data.user },
+        guest:false
       });
 
       navigate("home");
@@ -142,8 +141,6 @@ async function mountLogin(){
     }
 
   };
-
-  /* ================= REGISTER ================= */
 
   if(registerBtn){
 
@@ -163,7 +160,10 @@ async function mountLogin(){
 
         const { error } = await supabase.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            emailRedirectTo: redirectTo
+          }
         });
 
         if(error) throw error;
@@ -178,10 +178,10 @@ async function mountLogin(){
 
   }
 
-  /* ================= GOOGLE ================= */
-
   if(googleBtn){
     googleBtn.onclick = async () => {
+
+      clearError();
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -197,10 +197,10 @@ async function mountLogin(){
     };
   }
 
-  /* ================= FACEBOOK ================= */
-
   if(facebookBtn){
     facebookBtn.onclick = async () => {
+
+      clearError();
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "facebook",
@@ -215,8 +215,6 @@ async function mountLogin(){
       }
     };
   }
-
-  /* ================= GUEST ================= */
 
   if(guestBtn){
     guestBtn.onclick = () => {

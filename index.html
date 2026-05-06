@@ -10,15 +10,15 @@
   <!-- SEO -->
   <meta name="description" content="Compra, vende y conecta en Qwiplus" />
 
-  <!-- PWA BASE (sin SW activo) -->
-  <link rel="manifest" href="/manifest.json">
+  <!-- PWA BASE -->
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#6DA8FF">
 
   <!-- MOBILE APP MODE -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="apple-touch-icon" href="/img/logo-qwiplus.png">
+  <link rel="apple-touch-icon" href="img/logo-qwiplus.png">
 
   <!-- ================= CSS ================= -->
   <link rel="stylesheet" href="css/base.css" />
@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="css/pages.css" />
   <link rel="stylesheet" href="css/style.css" />
 
-  <!-- BASE DARK (evita flash blanco) -->
+  <!-- BASE DARK -->
   <style>
     html, body {
       background: #020617;
@@ -48,41 +48,6 @@
 </head>
 
 <body>
-
-  <!-- ================= ROUTE INIT ================= -->
-  <script>
-    (function(){
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-
-      if (!hash && path === "/") {
-        window.location.replace("#login");
-      }
-    })();
-  </script>
-
-  <!-- ================= LAYOUT CONTROL ================= -->
-  <script>
-    function updateLayout(view){
-      const header = document.getElementById("appHeader");
-      const nav = document.getElementById("bottomNav");
-
-      const isAuth = view === "login";
-
-      if(header) header.style.display = isAuth ? "none" : "flex";
-      if(nav) nav.style.display = isAuth ? "none" : "flex";
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const currentView = window.location.hash.replace("#", "") || "login";
-      updateLayout(currentView);
-    });
-
-    window.addEventListener("hashchange", () => {
-      const view = window.location.hash.replace("#", "");
-      updateLayout(view);
-    });
-  </script>
 
   <!-- ================= HEADER ================= -->
   <header id="appHeader" class="header">
@@ -200,19 +165,6 @@
       });
     }
   </script>
-
-  <!-- ================= SERVICE WORKER (OFF EN DEV) ================= -->
-  <!--
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js")
-          .then(() => console.log("✅ PWA activa"))
-          .catch(err => console.error("❌ SW error:", err));
-      });
-    }
-  </script>
-  -->
 
 </body>
 </html>

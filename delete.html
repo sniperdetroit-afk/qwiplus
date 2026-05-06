@@ -1,17 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Eliminación de Datos - Qwiplus</title>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Eliminación de Cuenta - Qwiplus</title>
+
+  <meta name="description" content="Solicita la eliminación de tu cuenta en Qwiplus y todos tus datos personales.">
+
+  <style>
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container{
+      max-width: 500px;
+      width: 100%;
+      background: #0f172a;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h1{
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    p{
+      line-height: 1.6;
+      margin: 15px 0;
+    }
+
+    .email{
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #2563eb;
+      border-radius: 8px;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+    }
+
+    .note{
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 20px;
+    }
+  </style>
+
 </head>
+
 <body>
-  <h1>Eliminación de Cuenta</h1>
-  <p>
-    Para eliminar tu cuenta y todos los datos asociados,
-    envía un correo a sniperdetroit@gmail.com
-    con el asunto: "Eliminar cuenta".
-  </p>
-  <p>
-    La solicitud se procesará en un plazo máximo de 7 días.
-  </p>
+
+  <div class="container">
+
+    <h1>Eliminar tu cuenta</h1>
+
+    <p>
+      Si deseas eliminar tu cuenta de <strong>Qwiplus</strong> y todos los datos asociados,
+      puedes solicitarlo enviando un correo electrónico.
+    </p>
+
+    <p>
+      📩 Email:
+    </p>
+
+    <!-- 🔥 AQUÍ ESTABA EL ERROR -->
+    <a 
+      class="email" 
+      href="mailto:sniperdetroit@gmail.com?subject=Eliminar cuenta Qwiplus"
+    >
+      sniperdetroit@gmail.com
+    </a>
+
+    <p>
+      Indica en el mensaje el correo con el que te registraste.
+    </p>
+
+    <p>
+      Tu solicitud será procesada en un plazo máximo de <strong>7 días</strong>.
+    </p>
+
+    <p class="note">
+      Todos los datos personales serán eliminados de forma permanente conforme a nuestra política de privacidad.
+    </p>
+
+  </div>
+
 </body>
 </html>

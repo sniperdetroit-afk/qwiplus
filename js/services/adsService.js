@@ -28,9 +28,11 @@ export async function createAd(data) {
     .single();
 
   if (error) {
-    console.error("Error creando anuncio:", error.message);
+    console.error("❌ Error creando anuncio:", error.message);
     return null;
   }
+
+  console.log("✅ Anuncio creado:", inserted);
 
   return inserted;
 }
@@ -52,11 +54,13 @@ export async function getAds(offset = 0, limit = 20) {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Error obteniendo anuncios:", error.message);
+    console.error("❌ Error obteniendo anuncios:", error.message);
     return [];
   }
 
-  return data || [];
+  console.log("📦 Ads cargados:", data);
+
+  return Array.isArray(data) ? data : [];
 }
 
 /* =========================
@@ -76,7 +80,7 @@ export async function getAdById(id) {
     .single();
 
   if (error) {
-    console.error("Error obteniendo anuncio:", error);
+    console.error("❌ Error obteniendo anuncio:", error);
     return null;
   }
 
@@ -102,10 +106,10 @@ export async function searchAds(query) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error buscando anuncios:", error.message);
+    console.error("❌ Error buscando anuncios:", error.message);
     return [];
   }
 
-  return data || [];
+  return Array.isArray(data) ? data : [];
 }
 
