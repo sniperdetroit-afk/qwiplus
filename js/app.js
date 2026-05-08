@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 155 FIX OAUTH");
+console.log("APP VERSION 156 REGISTER");
 
 /* ================= IMPORTS ================= */
 
@@ -33,6 +33,7 @@ import { ProfileMenuView } from "./views/profileMenu.js";
 import { EditProfileView } from "./views/editProfile.js";
 import { SettingsView } from "./views/settings.js";
 import { LoginView } from "./views/login.js";
+import { RegisterView } from "./views/register.js";
 
 import {
   CategoriesView,
@@ -58,6 +59,7 @@ const routes = {
   profileMenu: ProfileMenuView,
   settings: SettingsView,
   login: LoginView,
+  register: RegisterView,
   categories: CategoriesView,
   subcategories: SubcategoriesView,
   subsubcategories: SubSubcategoriesView,
@@ -108,6 +110,7 @@ async function renderApp(){
     const layoutConfig = {
       boot: { header: false, nav: false },
       login: { header: false, nav: false },
+      register: { header: false, nav: false },
       home: { header: true, nav: true },
       search: { header: false, nav: true },
       favorites: { header: false, nav: true },
@@ -208,7 +211,6 @@ async function initApp() {
 
   try {
 
-    // 🔥 FIX OAUTH: procesar token de Google/Facebook en la URL
     if (window.location.hash.includes("access_token")) {
       await supabase.auth.getSession();
       window.history.replaceState({}, "", "/");
@@ -264,3 +266,4 @@ supabase.auth.onAuthStateChange((event, session) => {
 /* ================= SW ================= */
 
 // desactivado por ahora
+

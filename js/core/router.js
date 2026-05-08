@@ -8,7 +8,7 @@ function guard(view){
   const user = state.session?.user;
   const isGuest = state.guest === true;
 
-  if(!user && !isGuest && view !== "login" && view !== "boot"){
+  if(!user && !isGuest && view !== "login" && view !== "boot" && view !== "register"){
     return "login";
   }
 
@@ -25,8 +25,7 @@ function buildUrl(view, params){
 
   if(view === "home") return "/";
   if(view === "login") return "/login";
-
-  // 🔥 URL PRO
+  if(view === "register") return "/register";
 
   if(view === "subcategories"){
     return `/${params.category}`;
@@ -80,34 +79,32 @@ export function navigate(view, params = {}){
   );
 }
 
-/* ================= RESOLVE ROUTE (PRO) ================= */
+/* ================= RESOLVE ROUTE ================= */
 
 export function resolveRoute(){
 
   const path = window.location.pathname;
   const parts = path.split("/").filter(Boolean);
 
-  // HOME
   if(parts.length === 0){
     return { view: "home", params: {} };
   }
 
-  // LOGIN
   if(parts[0] === "login"){
     return { view: "login", params: {} };
   }
 
-  // AD
+  if(parts[0] === "register"){
+    return { view: "register", params: {} };
+  }
+
   if(parts[0] === "ad"){
     return { view: "adDetail", params: { id: parts[1] } };
   }
 
-  // CHAT
   if(parts[0] === "chat"){
     return { view: "chat", params: { conversationId: parts[1] } };
   }
-
-  // 🔥 CATEGORÍAS PRO
 
   const category = parts[0];
   const subcategory = parts[1] ? decodeURIComponent(parts[1]) : null;
@@ -134,25 +131,19 @@ export function resolveRoute(){
 window.addEventListener("popstate", (e)=>{
 
   if(e.state){
-
     setState({
       app: {
         view: e.state.view,
         params: e.state.params || {}
       }
     });
-
   } else {
-
     const route = resolveRoute();
-
     setState({
       app: {
         view: route.view,
         params: route.params || {}
       }
     });
-
   }
-
 });

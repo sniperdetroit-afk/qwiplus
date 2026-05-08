@@ -45,7 +45,7 @@ async function renderLogin(){
           font-size:16px;
         ">
 
-        <input id="password" type="password" placeholder="Password" required style="
+        <input id="password" type="password" placeholder="Contraseña" required style="
           height:48px;
           border-radius:14px;
           border:0;
@@ -72,7 +72,7 @@ async function renderLogin(){
         color:#e5e7eb;
         font-weight:700;
         height:42px;
-      ">Crear cuenta</button>
+      ">¿No tienes cuenta? Crear cuenta →</button>
 
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
 
@@ -116,16 +116,6 @@ async function renderLogin(){
         font-weight:700;
       "></div>
 
-      <div id="loginSuccess" style="
-        display:none;
-        margin-top:14px;
-        color:#bbf7d0;
-        background:rgba(34,197,94,.16);
-        padding:12px;
-        border-radius:12px;
-        font-weight:700;
-      "></div>
-
     </div>
 
   </section>
@@ -141,10 +131,8 @@ const getRedirectTo = () => {
 const forceAuthLayout = () => {
   const header = document.getElementById("appHeader");
   const nav = document.getElementById("bottomNav");
-
   if(header) header.style.display = "none";
   if(nav) nav.style.display = "none";
-
   document.body.style.background = "#020617";
 };
 
@@ -160,24 +148,13 @@ const showError = (msg) => {
   if (!errorBox) return;
   errorBox.innerText = msg;
   errorBox.style.display = "block";
-  const successBox = document.getElementById("loginSuccess");
-  if (successBox) successBox.style.display = "none";
 };
 
-const showSuccess = (msg) => {
-  const successBox = document.getElementById("loginSuccess");
-  if (!successBox) return;
-  successBox.innerText = msg;
-  successBox.style.display = "block";
+const clearError = () => {
   const errorBox = document.getElementById("loginError");
-  if (errorBox) errorBox.style.display = "none";
-};
-
-const clearMessages = () => {
-  const errorBox = document.getElementById("loginError");
-  const successBox = document.getElementById("loginSuccess");
-  if (errorBox) { errorBox.innerText = ""; errorBox.style.display = "none"; }
-  if (successBox) { successBox.innerText = ""; successBox.style.display = "none"; }
+  if (!errorBox) return;
+  errorBox.innerText = "";
+  errorBox.style.display = "none";
 };
 
 /* ================= MOUNT ================= */
@@ -195,7 +172,6 @@ async function mountLogin(){
   if(!form) return;
 
   const { data } = await supabase.auth.getSession();
-
   if (data.session) {
     navigate("home");
     return;
@@ -205,8 +181,7 @@ async function mountLogin(){
 
   form.onsubmit = async (e) => {
     e.preventDefault();
-
-    clearMessages();
+    clearError();
     setLoading(true);
 
     const email = document.getElementById("email").value.trim();
@@ -234,51 +209,18 @@ async function mountLogin(){
     }
   };
 
-  if(registerBtn){
-    registerBtn.onclick = async () => {
-      clearMessages();
-
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      if(!email || !password){
-        showError("Introduce email y contraseña");
-        return;
-      }
-
-      if(password.length < 6){
-        showError("La contraseña debe tener al menos 6 caracteres");
-        return;
-      }
-
-      try{
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: redirectTo
-          }
-        });
-
-        if(error) throw error;
-
-        showSuccess("✅ Cuenta creada. Revisa tu email para confirmarla 📩");
-
-      }catch(err){
-        showError(err.message || "Error al crear cuenta");
-      }
-    };
-  }
+  // 🔥 AHORA NAVEGA A PANTALLA DE REGISTRO
+  registerBtn?.addEventListener("click", () => {
+    navigate("register");
+  });
 
   if(googleBtn){
     googleBtn.onclick = async () => {
-      clearMessages();
-
+      clearError();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo }
       });
-
       if(error){
         console.error(error);
         showError("Error con Google");
@@ -288,13 +230,11 @@ async function mountLogin(){
 
   if(facebookBtn){
     facebookBtn.onclick = async () => {
-      clearMessages();
-
+      clearError();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "facebook",
         options: { redirectTo }
       });
-
       if(error){
         console.error(error);
         showError("Error con Facebook");
@@ -308,7 +248,6 @@ async function mountLogin(){
         session:{ user:null },
         guest:true
       });
-
       navigate("home");
     };
   }
@@ -324,10 +263,10 @@ async function unmountLogin(){
 
 export const LoginView = async () => {
   const html = await renderLogin();
-
   return {
     html,
     mount: mountLogin,
     unmount: unmountLogin
   };
 };
+
