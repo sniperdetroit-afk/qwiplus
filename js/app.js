@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 154 FIX RENDER");
+console.log("APP VERSION 155 FIX OAUTH");
 
 /* ================= IMPORTS ================= */
 
@@ -80,14 +80,12 @@ async function renderApp(){
   const state = getState();
   let viewName = state.app?.view;
 
-  // fallback seguro
   if (!routes[viewName]) {
     viewName = "login";
   }
 
   const main = document.getElementById("main");
 
-  // 🔥 FIX CRÍTICO: evita bloqueo pero permite recuperación
   if (
     viewName === currentViewName &&
     main &&
@@ -110,14 +108,12 @@ async function renderApp(){
     const layoutConfig = {
       boot: { header: false, nav: false },
       login: { header: false, nav: false },
-
       home: { header: true, nav: true },
       search: { header: false, nav: true },
       favorites: { header: false, nav: true },
       chat: { header: false, nav: false },
       profileMenu: { header: false, nav: true },
       profile: { header: false, nav: true },
-
       settings: { header: false, nav: false },
       editProfile: { header: false, nav: false },
       editAd: { header: false, nav: false }
@@ -128,7 +124,6 @@ async function renderApp(){
     if (header) header.style.display = layout.header ? "" : "none";
     if (nav) nav.style.display = layout.nav ? "" : "none";
 
-    // 🔥 limpiar antes de render para evitar estados corruptos
     if (main) {
       main.innerHTML = "";
     }
@@ -142,7 +137,6 @@ async function renderApp(){
   } catch (err) {
     console.error("Render error:", err);
 
-    // 🔥 fallback visual si algo falla
     const main = document.getElementById("main");
     if (main) {
       main.innerHTML = `
@@ -214,6 +208,12 @@ async function initApp() {
 
   try {
 
+    // 🔥 FIX OAUTH: procesar token de Google/Facebook en la URL
+    if (window.location.hash.includes("access_token")) {
+      await supabase.auth.getSession();
+      window.history.replaceState({}, "", "/");
+    }
+
     const route = resolveRoute();
     console.log("ROUTE:", route);
 
@@ -230,7 +230,7 @@ async function initApp() {
     setState({
       session: { user },
       app: {
-        view: user ? route.view : "login",
+        view: user ? "home" : "login",
         params: route.params || {}
       }
     });

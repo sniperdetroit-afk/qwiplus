@@ -116,6 +116,16 @@ async function renderLogin(){
         font-weight:700;
       "></div>
 
+      <div id="loginSuccess" style="
+        display:none;
+        margin-top:14px;
+        color:#bbf7d0;
+        background:rgba(34,197,94,.16);
+        padding:12px;
+        border-radius:12px;
+        font-weight:700;
+      "></div>
+
     </div>
 
   </section>
@@ -125,7 +135,7 @@ async function renderLogin(){
 /* ================= HELPERS ================= */
 
 const getRedirectTo = () => {
-  return `${window.location.origin}/#home`;
+  return window.location.origin;
 };
 
 const forceAuthLayout = () => {
@@ -141,7 +151,6 @@ const forceAuthLayout = () => {
 const setLoading = (loading) => {
   const btn = form?.querySelector("button[type='submit']");
   if (!btn) return;
-
   btn.disabled = loading;
   btn.innerText = loading ? "Entrando..." : "Entrar";
 };
@@ -149,17 +158,26 @@ const setLoading = (loading) => {
 const showError = (msg) => {
   const errorBox = document.getElementById("loginError");
   if (!errorBox) return;
-
   errorBox.innerText = msg;
   errorBox.style.display = "block";
+  const successBox = document.getElementById("loginSuccess");
+  if (successBox) successBox.style.display = "none";
 };
 
-const clearError = () => {
+const showSuccess = (msg) => {
+  const successBox = document.getElementById("loginSuccess");
+  if (!successBox) return;
+  successBox.innerText = msg;
+  successBox.style.display = "block";
   const errorBox = document.getElementById("loginError");
-  if (!errorBox) return;
+  if (errorBox) errorBox.style.display = "none";
+};
 
-  errorBox.innerText = "";
-  errorBox.style.display = "none";
+const clearMessages = () => {
+  const errorBox = document.getElementById("loginError");
+  const successBox = document.getElementById("loginSuccess");
+  if (errorBox) { errorBox.innerText = ""; errorBox.style.display = "none"; }
+  if (successBox) { successBox.innerText = ""; successBox.style.display = "none"; }
 };
 
 /* ================= MOUNT ================= */
@@ -188,11 +206,11 @@ async function mountLogin(){
   form.onsubmit = async (e) => {
     e.preventDefault();
 
-    clearError();
+    clearMessages();
     setLoading(true);
 
     const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const password = document.getElementById("password").value;
 
     try{
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -210,7 +228,7 @@ async function mountLogin(){
       navigate("home");
 
     }catch(err){
-      showError(err.message || "Error login");
+      showError(err.message || "Email o contraseña incorrectos");
     }finally{
       setLoading(false);
     }
@@ -218,13 +236,18 @@ async function mountLogin(){
 
   if(registerBtn){
     registerBtn.onclick = async () => {
-      clearError();
+      clearMessages();
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
       if(!email || !password){
         showError("Introduce email y contraseña");
+        return;
+      }
+
+      if(password.length < 6){
+        showError("La contraseña debe tener al menos 6 caracteres");
         return;
       }
 
@@ -239,17 +262,17 @@ async function mountLogin(){
 
         if(error) throw error;
 
-        showError("Cuenta creada. Revisa tu email 📩");
+        showSuccess("✅ Cuenta creada. Revisa tu email para confirmarla 📩");
 
       }catch(err){
-        showError(err.message || "Error registro");
+        showError(err.message || "Error al crear cuenta");
       }
     };
   }
 
   if(googleBtn){
     googleBtn.onclick = async () => {
-      clearError();
+      clearMessages();
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
@@ -265,7 +288,7 @@ async function mountLogin(){
 
   if(facebookBtn){
     facebookBtn.onclick = async () => {
-      clearError();
+      clearMessages();
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "facebook",
