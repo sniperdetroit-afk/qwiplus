@@ -447,7 +447,6 @@ if (!title) return showError("El título es obligatorio");
         subcategory: subCategorySelect.value || null,
         subsub: subSubCategorySelect.value || null,
         favorites_count: 0,
-        views_count: 0
       };
 
       /* CAMPOS ESPECÍFICOS POR CATEGORÍA */
