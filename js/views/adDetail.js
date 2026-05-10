@@ -31,8 +31,6 @@ async function mountAdDetail(){
 
   const state = getState();
 
-  // ================= GET ID =================
-
   let adId = state.app?.params?.id;
 
   if(!adId){
@@ -42,9 +40,7 @@ async function mountAdDetail(){
     }
   }
 
-  if(adId){
-    adId = adId.trim();
-  }
+  if(adId) adId = adId.trim();
 
   console.log("🔎 AD ID:", adId);
 
@@ -63,13 +59,9 @@ async function mountAdDetail(){
       .eq("id", adId)
       .maybeSingle();
 
-    if(error){
-      console.error("❌ Supabase error:", error);
-    }
+    if(error) console.error("❌ Supabase error:", error);
 
     if(!alive) return;
-
-    // ================= NO EXISTE =================
 
     if(!data){
       console.warn("⚠️ Anuncio no encontrado:", adId);
@@ -79,8 +71,6 @@ async function mountAdDetail(){
 
     console.log("✅ AD LOADED:", data);
 
-    // ================= PROFILE =================
-
     let profile = null;
 
     try{
@@ -89,9 +79,7 @@ async function mountAdDetail(){
         .select("*")
         .eq("id", data.user_id)
         .maybeSingle();
-
       profile = p;
-
     }catch(e){
       console.warn("⚠️ Profile load fail", e);
     }
@@ -108,34 +96,19 @@ async function mountAdDetail(){
 /* ================= UI STATES ================= */
 
 function showNotFound(container){
-
   container.innerHTML = `
     <div style="padding:30px;text-align:center">
       <h3>Este anuncio ya no está disponible</h3>
-      <p style="color:#666;margin:10px 0;">
-        Puede haber sido eliminado o no existe.
-      </p>
-
-      <button id="goHomeBtn" class="btn-primary">
-        Volver al inicio
-      </button>
+      <p style="color:#666;margin:10px 0;">Puede haber sido eliminado o no existe.</p>
+      <button id="goHomeBtn" class="btn-primary">Volver al inicio</button>
     </div>
   `;
 
   const btn = document.getElementById("goHomeBtn");
-
-  if(btn){
-    btn.onclick = () => {
-      console.log("↩️ Redirect → home");
-      navigate("home");
-    };
-  }
+  if(btn) btn.onclick = () => navigate("home");
 
   setTimeout(() => {
-    if(alive){
-      console.log("⏱ Auto redirect → home");
-      navigate("home");
-    }
+    if(alive) navigate("home");
   }, 2500);
 }
 
@@ -159,7 +132,6 @@ function renderAd(container, ad, profile){
 
   const state = getState();
   const currentUser = state.session?.user;
-
   const isOwner = currentUser && currentUser.id === ad.user_id;
 
   const avatar = profile?.avatar_url
@@ -183,9 +155,21 @@ function renderAd(container, ad, profile){
 
         <h2 class="ad-title">${ad.title}</h2>
 
-        <div class="ad-seller" style="display:flex;align-items:center;gap:10px;margin:12px 0;">
+        <!-- VENDEDOR CLICKABLE -->
+        <div id="sellerBtn" style="
+          display:flex;align-items:center;gap:10px;
+          margin:12px 0;padding:12px;
+          background:#f8fafc;border-radius:14px;
+          cursor:pointer;transition:background 0.2s;
+        ">
           ${avatar}
-          <span>${profile?.name || "Usuario"}</span>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:15px;color:#111827;">
+              ${profile?.name || "Usuario"}
+            </div>
+            <div style="font-size:12px;color:#6b7280;">Ver perfil →</div>
+          </div>
+          <span style="color:#9ca3af;font-size:20px;">›</span>
         </div>
 
         <div class="ad-actions">
@@ -219,6 +203,11 @@ function renderAd(container, ad, profile){
 
   const backBtn = document.getElementById("backBtn");
   if(backBtn) backBtn.onclick = () => history.back();
+
+  const sellerBtn = document.getElementById("sellerBtn");
+  if(sellerBtn){
+    sellerBtn.onclick = () => navigate("publicProfile", { userId: ad.user_id });
+  }
 }
 
 /* ================= CHAT ================= */
@@ -256,7 +245,6 @@ async function initChatButton(ad){
     if(existing){
       conversationId = existing.id;
     } else {
-
       const { data: newConv, error } = await supabase
         .from("conversations")
         .insert({
@@ -278,20 +266,17 @@ async function initChatButton(ad){
     }
 
     navigate("chat", { conversationId });
-
   };
 }
 
 /* ================= EXPORT ================= */
 
 export const AdDetailView = async () => {
-
   const html = await renderAdDetail();
-
   return {
     html,
     mount: mountAdDetail,
     unmount: unmountAdDetail
   };
-
 };
+

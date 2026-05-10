@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 157 REGISTER");
+console.log("APP VERSION 158 REGISTER");
 
 /* ================= IMPORTS ================= */
 
@@ -9,7 +9,7 @@ import { subscribe } from "./core/store.js";
 import { getState, setState } from "./core/state.js";
 import { navigate, resolveRoute } from "./core/router.js";
 import { supabase } from "./services/supabase.js";
-import { initLang } from "./services/langService.js"; // ✅ NUEVO
+import { initLang } from "./services/langService.js";
 
 /* ================= ANTI DOBLE INIT ================= */
 
@@ -21,7 +21,7 @@ if (window.__APP_INIT__) {
 
 /* ================= LANG ================= */
 
-initLang(); // ✅ NUEVO
+initLang();
 
 /* ================= CONTROL RENDER ================= */
 
@@ -53,6 +53,7 @@ import { SearchResultsView } from "./views/searchResults.js";
 import { EditAdView } from "./views/editAd.js";
 import { InboxView } from "./views/inbox.js";
 import { ChatView } from "./views/chat.js";
+import { PublicProfileView } from "./views/publicProfile.js";
 
 /* ================= ROUTES ================= */
 
@@ -75,7 +76,8 @@ const routes = {
   editAd: EditAdView,
   editProfile: EditProfileView,
   messages: InboxView,
-  chat: ChatView
+  chat: ChatView,
+  publicProfile: PublicProfileView
 };
 
 /* ================= RENDER ================= */
@@ -124,7 +126,8 @@ async function renderApp(){
       profile: { header: false, nav: true },
       settings: { header: false, nav: false },
       editProfile: { header: false, nav: false },
-      editAd: { header: false, nav: false }
+      editAd: { header: false, nav: false },
+      publicProfile: { header: false, nav: false }
     };
 
     const layout = layoutConfig[viewName] || { header: false, nav: true };
@@ -181,6 +184,7 @@ document.addEventListener("click", async (e) => {
 
   const params = {
     id: el.dataset.id,
+    userId: el.dataset.userId,
     category: el.dataset.category,
     subcategory: el.dataset.subcategory
   };
@@ -271,6 +275,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 /* ================= SW ================= */
 
 // desactivado por ahora
+
 
 
 
