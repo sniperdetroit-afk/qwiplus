@@ -76,7 +76,6 @@ async function renderProfile(){
     `;
   }
 
-  // Cargar perfil de la tabla profiles para tener nombre y ubicación
   let profile = {};
   try {
     const { data } = await supabase
@@ -213,6 +212,14 @@ async function uploadAvatar(file){
   setState({ ...currentState, session: { user } });
 
   if(avatarImg) avatarImg.src = publicUrl;
+
+  // ✅ Sincronizar en tabla profiles
+  await supabase
+    .from("profiles")
+    .upsert({
+      id: user.id,
+      avatar_url: publicUrl
+    });
 }
 
 /* ================= MOUNT ================= */
@@ -340,7 +347,7 @@ async function mountProfile(){
 
       const { error } = await supabase
         .from("ads")
-        .delete()
+         .delete()
         .eq("id", id)
         .eq("user_id", user.id);
 
