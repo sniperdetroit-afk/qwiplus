@@ -137,14 +137,88 @@ export const categories = [
     id: "deporte",
     name: "Equipamiento deportivo",
     sub: [
-      "Individual",
-      "Equipo",
-      "Combate",
-      "Invierno",
-      "Urbano",
-      "Náuticos",
-      "Motor",
-      "Camping",
+      { name: "Individual", sub: [
+        "Running",
+        "Ciclismo",
+        "Fitness y gimnasio",
+        "Yoga y pilates",
+        "Atletismo",
+        "Patinaje",
+        "Skate",
+        "Golf",
+        "Tenis",
+        "Pádel",
+        "Bádminton",
+        "Tiro con arco",
+        "Otros"
+      ]},
+      { name: "Equipo", sub: [
+        "Fútbol",
+        "Baloncesto",
+        "Voleibol",
+        "Balonmano",
+        "Rugby",
+        "Béisbol",
+        "Hockey",
+        "Otros"
+      ]},
+      { name: "Combate", sub: [
+        "Boxeo",
+        "Karate",
+        "Judo",
+        "Taekwondo",
+        "Jiu-jitsu",
+        "MMA",
+        "Kickboxing",
+        "Esgrima",
+        "Otros"
+      ]},
+      { name: "Invierno", sub: [
+        "Esquí",
+        "Snowboard",
+        "Patinaje sobre hielo",
+        "Hockey sobre hielo",
+        "Ropa térmica",
+        "Otros"
+      ]},
+      { name: "Urbano", sub: [
+        "BMX",
+        "Skate",
+        "Longboard",
+        "Patines en línea",
+        "Parkour",
+        "Otros"
+      ]},
+      { name: "Náuticos", sub: [
+        "Surf",
+        "Windsurf",
+        "Kitesurf",
+        "Paddle surf",
+        "Vela",
+        "Buceo",
+        "Snorkel",
+        "Natación",
+        "Pesca",
+        "Otros"
+      ]},
+      { name: "Motor", sub: [
+        "Motocross",
+        "Quads",
+        "Karts",
+        "Trial",
+        "Enduro",
+        "Otros"
+      ]},
+      { name: "Camping", sub: [
+        "Tiendas de campaña",
+        "Sacos de dormir",
+        "Mochilas",
+        "Hornillos y cocina",
+        "Linternas",
+        "Senderismo",
+        "Escalada",
+        "Otros"
+      ]},
       "Otros"
     ]
   },
@@ -228,22 +302,22 @@ export const categories = [
 async function renderCategories(){
 
   const images = {
-  vehiculos: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200",
-  inmuebles: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=1200",
-  empleo: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1200",
-  moda: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200",
-  infantil: "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=1200",
-  belleza: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200",
-  hogar: "https://images.unsplash.com/photo-1505691723518-36a5ac3be353?q=80&w=1200",
-  electronica: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200",
-  servicios: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200",
-  herramientas: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=1200",
-  digitales: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200",
-  animales: "https://images.unsplash.com/photo-1507146426996-ef05306b995a?q=80&w=1200",
-  botanica: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=1200",
-  deporte: "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1200",
-  coleccionismo: "https://images.unsplash.com/photo-1606503153255-59d8b8b82176?q=80&w=1200"
-};
+    vehiculos: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200",
+    inmuebles: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=1200",
+    empleo: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1200",
+    moda: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200",
+    infantil: "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=1200",
+    belleza: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200",
+    hogar: "https://images.unsplash.com/photo-1505691723518-36a5ac3be353?q=80&w=1200",
+    electronica: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200",
+    servicios: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200",
+    herramientas: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=1200",
+    digitales: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200",
+    animales: "https://images.unsplash.com/photo-1507146426996-ef05306b995a?q=80&w=1200",
+    botanica: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=1200",
+    deporte: "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=1200",
+    coleccionismo: "https://images.unsplash.com/photo-1606503153255-59d8b8b82176?q=80&w=1200"
+  };
 
 
   return `
@@ -321,68 +395,4 @@ async function renderSubcategories(state){
   </section>
   `;
 }
-
-export const SubcategoriesView = createView(renderSubcategories);
-
-/* ================= SUBSUB ================= */
-
-async function renderSubSubcategories(state){
-
-  let categoryId = state.category;
-  let subcategoryName = state.subcategory;
-
-  const params = new URLSearchParams(window.location.search);
-
-  if(!categoryId){
-    categoryId = params.get("category");
-  }
-
-  if(!subcategoryName){
-    subcategoryName = params.get("subcategory");
-  }
-
-  const path = window.location.pathname.split("/").filter(Boolean);
-
-  if(!categoryId && path.length >= 1){
-    categoryId = path[0];
-  }
-
-  if(!subcategoryName && path.length >= 2){
-    subcategoryName = decodeURIComponent(path[1]);
-  }
-
-  const category = categories.find(c => c.id === categoryId);
-  if(!category) return `<p>Error categoría</p>`;
-
-  const sub = category.sub.find(
-    s => typeof s === "object" && s.name === subcategoryName
-  );
-
-  if(!sub || !sub.sub) return `<p>No hay más niveles</p>`;
-
-  return `
-  <section class="subsubcategories">
-
-    <button 
-      class="back-btn"
-      data-view="subcategories"
-      data-category="${category.id}"
-    >
-      ← Volver
-    </button>
-
-    <h3>${sub.name}</h3>
-
-    <div class="subcategory-grid">
-      ${sub.sub.map(item => `
-        <button class="subcategory-item">
-          ${item}
-        </button>
-      `).join("")}
-    </div>
-
-  </section>
-  `;
-}
-
 export const SubSubcategoriesView = createView(renderSubSubcategories);
