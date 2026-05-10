@@ -30,14 +30,13 @@ async function renderLogin(){
 
       <!-- LOGO -->
       <div style="text-align:center;margin-bottom:32px;">
-        <div style="
-          display:inline-flex;align-items:center;justify-content:center;
-          width:64px;height:64px;border-radius:20px;
-          background:linear-gradient(135deg,#6DA8FF,#6EE7B7);
-          font-size:28px;font-weight:900;color:white;
-          box-shadow:0 8px 24px rgba(109,168,255,0.4);
-          margin-bottom:14px;
-        ">Q</div>
+       <img src="/img/logo-qwiplus.png" style="
+  width:72px;height:72px;border-radius:20px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  margin-bottom:14px;
+  object-fit:cover;
+">
+ 
         <h1 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Qwiplus</h1>
         <p style="margin:6px 0 0;color:#94a3b8;font-size:14px;">Compra y vende lo que quieras</p>
       </div>
