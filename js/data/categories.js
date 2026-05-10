@@ -18,6 +18,36 @@ export const categories = [
   },
 
   {
+    id: "inmuebles",
+    name: "Inmuebles",
+    sub: [
+      "Pisos",
+      "Casas y chalets",
+      "Habitaciones",
+      "Locales comerciales",
+      "Oficinas",
+      "Garajes",
+      "Trasteros",
+      "Terrenos",
+      "Naves industriales",
+      "Otros"
+    ]
+  },
+
+  {
+    id: "empleo",
+    name: "Empleo",
+    sub: [
+      "Ofertas de trabajo",
+      "Busco trabajo",
+      "Prácticas",
+      "Freelance",
+      "Voluntariado",
+      "Otros"
+    ]
+  },
+
+  {
     id: "moda",
     name: "Moda y accesorios",
     sub: [

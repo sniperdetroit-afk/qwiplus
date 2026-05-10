@@ -1,11 +1,49 @@
 import { createView } from "../core/createView.js";
 
 /* ================= DATA ================= */
-/* =========================
-  CATEGORIES no se tocan
-========================= */
 
 export const categories = [
+  {
+    id: "vehiculos",
+    name: "Vehículos",
+    sub: [
+      "Coches",
+      "Motos",
+      "Embarcaciones",
+      "Bicicletas",
+      "Patines",
+      "Drones",
+      "Otros"
+    ]
+  },
+  {
+    id: "inmuebles",
+    name: "Inmuebles",
+    sub: [
+      "Pisos",
+      "Casas y chalets",
+      "Habitaciones",
+      "Locales comerciales",
+      "Oficinas",
+      "Garajes",
+      "Trasteros",
+      "Terrenos",
+      "Naves industriales",
+      "Otros"
+    ]
+  },
+  {
+    id: "empleo",
+    name: "Empleo",
+    sub: [
+      "Ofertas de trabajo",
+      "Busco trabajo",
+      "Prácticas",
+      "Freelance",
+      "Voluntariado",
+      "Otros"
+    ]
+  },
   {
     id: "moda",
     name: "Moda y accesorios",
@@ -190,13 +228,16 @@ export const categories = [
 async function renderCategories(){
 
   const images = {
+    vehiculos: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200",
+    inmuebles: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=1200",
+    empleo: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1200",
     moda: "https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1200",
     infantil: "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=1200",
     belleza: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200",
     hogar: "https://images.unsplash.com/photo-1505691723518-36a5ac3be353?q=80&w=1200",
     electronica: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200",
     servicios: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200",
-    herramientas: "https://images.unsplash.com/photo-1581147036324-c1c5c2c6e5a7?q=80&w=1200",
+    herramientas: "https://images.unsplash.com/photo-1530124566582-a618bc2615dc?q=80&w=1200",
     digitales: "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1200",
     animales: "https://images.unsplash.com/photo-1507146426996-ef05306b995a?q=80&w=1200",
     botanica: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1200",
@@ -343,4 +384,3 @@ async function renderSubSubcategories(state){
 }
 
 export const SubSubcategoriesView = createView(renderSubSubcategories);
-
