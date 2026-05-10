@@ -9,12 +9,11 @@ let form;
 /* ================= RENDER ================= */
 
 async function renderLogin(){
-
   return `
-  <section class="login-page" style="
+  <section style="
     min-height:100vh;
     width:100%;
-    background:#020617;
+    background:linear-gradient(160deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -22,99 +21,135 @@ async function renderLogin(){
     box-sizing:border-box;
   ">
 
-    <div class="login-card" style="
+    <div style="
       width:100%;
-      max-width:420px;
-      background:rgba(15,23,42,.92);
-      border-radius:28px;
-      padding:30px;
-      box-shadow:0 30px 80px rgba(0,0,0,.45);
+      max-width:400px;
       color:white;
       box-sizing:border-box;
     ">
 
-      <h1 style="margin:0 0 6px;font-size:34px;font-weight:800;">Bienvenido</h1>
-      <p style="margin:0 0 22px;color:#cbd5e1;">Accede o crea tu cuenta</p>
+      <!-- LOGO -->
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="
+          display:inline-flex;align-items:center;justify-content:center;
+          width:64px;height:64px;border-radius:20px;
+          background:linear-gradient(135deg,#6DA8FF,#6EE7B7);
+          font-size:28px;font-weight:900;color:white;
+          box-shadow:0 8px 24px rgba(109,168,255,0.4);
+          margin-bottom:14px;
+        ">Q</div>
+        <h1 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Qwiplus</h1>
+        <p style="margin:6px 0 0;color:#94a3b8;font-size:14px;">Compra y vende lo que quieras</p>
+      </div>
 
-      <form id="loginForm" style="display:flex;flex-direction:column;gap:12px;">
-        <input id="email" type="email" placeholder="Email" required style="
-          height:48px;
-          border-radius:14px;
-          border:0;
-          padding:0 16px;
-          font-size:16px;
-        ">
+      <!-- CARD -->
+      <div style="
+        background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.08);
+        border-radius:24px;
+        padding:28px;
+        backdrop-filter:blur(12px);
+      ">
 
-        <input id="password" type="password" placeholder="Contraseña" required style="
-          height:48px;
-          border-radius:14px;
-          border:0;
-          padding:0 16px;
-          font-size:16px;
-        ">
+        <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;">Iniciar sesión</h2>
 
-        <button type="submit" style="
-          height:50px;
-          border:0;
-          border-radius:16px;
-          font-weight:800;
-          color:white;
-          background:linear-gradient(90deg,#60a5fa,#22c55e);
-          font-size:16px;
-        ">Entrar</button>
-      </form>
+        <form id="loginForm" style="display:flex;flex-direction:column;gap:12px;">
 
-      <button id="registerBtn" style="
-        margin-top:18px;
-        width:100%;
-        background:transparent;
-        border:0;
-        color:#e5e7eb;
-        font-weight:700;
-        height:42px;
-      ">¿No tienes cuenta? Crear cuenta →</button>
+          <div style="position:relative;">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;">📧</span>
+            <input id="email" type="email" placeholder="Email" required style="
+              width:100%;height:50px;
+              border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
+              padding:0 16px 0 42px;
+              font-size:15px;
+              background:rgba(255,255,255,0.07);
+              color:white;
+              outline:none;
+              box-sizing:border-box;
+              transition:border 0.2s;
+            ">
+          </div>
 
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+          <div style="position:relative;">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;">🔒</span>
+            <input id="password" type="password" placeholder="Contraseña" required style="
+              width:100%;height:50px;
+              border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
+              padding:0 16px 0 42px;
+              font-size:15px;
+              background:rgba(255,255,255,0.07);
+              color:white;
+              outline:none;
+              box-sizing:border-box;
+              transition:border 0.2s;
+            ">
+          </div>
 
-        <button id="googleBtn" style="
-          height:46px;
-          border-radius:14px;
-          border:0;
-          background:white;
-          color:#111827;
-          font-weight:800;
-        ">Continuar con Google</button>
+          <button type="submit" style="
+            height:52px;border:0;border-radius:16px;
+            font-weight:800;color:white;font-size:16px;
+            background:linear-gradient(90deg,#6DA8FF,#6EE7B7);
+            box-shadow:0 6px 20px rgba(109,168,255,0.35);
+            cursor:pointer;margin-top:4px;
+            transition:opacity 0.2s;
+          ">Entrar</button>
 
-        <button id="facebookBtn" style="
-          height:46px;
-          border-radius:14px;
-          border:0;
-          background:#1877f2;
-          color:white;
-          font-weight:800;
-        ">Continuar con Facebook</button>
+        </form>
+
+        <!-- DIVIDER -->
+        <div style="display:flex;align-items:center;gap:10px;margin:18px 0;">
+          <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
+          <span style="color:#64748b;font-size:12px;">o continúa con</span>
+          <div style="flex:1;height:1px;background:rgba(255,255,255,0.1);"></div>
+        </div>
+
+        <!-- OAUTH -->
+        <div style="display:flex;gap:10px;">
+
+          <button id="googleBtn" style="
+            flex:1;height:46px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
+            background:rgba(255,255,255,0.07);color:white;
+            font-weight:700;font-size:14px;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+          ">
+            <span style="font-size:18px;">G</span> Google
+          </button>
+
+          <button id="facebookBtn" style="
+            flex:1;height:46px;border-radius:14px;border:0;
+            background:#1877f2;color:white;
+            font-weight:700;font-size:14px;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+          ">
+            <span style="font-size:18px;">f</span> Facebook
+          </button>
+
+        </div>
+
+        <!-- ERROR -->
+        <div id="loginError" style="
+          display:none;margin-top:14px;
+          color:#fca5a5;background:rgba(239,68,68,0.12);
+          padding:12px;border-radius:12px;font-size:14px;font-weight:600;
+          text-align:center;
+        "></div>
 
       </div>
 
-      <button id="guestBtn" style="
-        margin-top:16px;
-        width:100%;
-        height:44px;
-        border:0;
-        background:transparent;
-        color:white;
-        font-weight:800;
-      ">Continuar sin registrarse</button>
+      <!-- FOOTER LINKS -->
+      <div style="text-align:center;margin-top:20px;display:flex;flex-direction:column;gap:10px;">
 
-      <div id="loginError" style="
-        display:none;
-        margin-top:14px;
-        color:#fecaca;
-        background:rgba(239,68,68,.16);
-        padding:12px;
-        border-radius:12px;
-        font-weight:700;
-      "></div>
+        <button id="registerBtn" style="
+          background:transparent;border:0;
+          color:#6DA8FF;font-weight:700;font-size:15px;cursor:pointer;
+        ">¿No tienes cuenta? <span style="text-decoration:underline;">Crear cuenta</span></button>
+
+        <button id="guestBtn" style="
+          background:transparent;border:0;
+          color:#64748b;font-size:13px;cursor:pointer;
+        ">Continuar sin registrarse →</button>
+
+      </div>
 
     </div>
 
@@ -124,35 +159,33 @@ async function renderLogin(){
 
 /* ================= HELPERS ================= */
 
-const getRedirectTo = () => {
-  return window.location.origin;
-};
+const getRedirectTo = () => window.location.origin;
 
 const forceAuthLayout = () => {
   const header = document.getElementById("appHeader");
   const nav = document.getElementById("bottomNav");
   if(header) header.style.display = "none";
   if(nav) nav.style.display = "none";
-  document.body.style.background = "#020617";
+  document.body.style.background = "#0f172a";
 };
 
 const setLoading = (loading) => {
   const btn = form?.querySelector("button[type='submit']");
-  if (!btn) return;
+  if(!btn) return;
   btn.disabled = loading;
   btn.innerText = loading ? "Entrando..." : "Entrar";
 };
 
 const showError = (msg) => {
   const errorBox = document.getElementById("loginError");
-  if (!errorBox) return;
+  if(!errorBox) return;
   errorBox.innerText = msg;
   errorBox.style.display = "block";
 };
 
 const clearError = () => {
   const errorBox = document.getElementById("loginError");
-  if (!errorBox) return;
+  if(!errorBox) return;
   errorBox.innerText = "";
   errorBox.style.display = "none";
 };
@@ -172,7 +205,7 @@ async function mountLogin(){
   if(!form) return;
 
   const { data } = await supabase.auth.getSession();
-  if (data.session) {
+  if(data.session){
     navigate("home");
     return;
   }
@@ -188,18 +221,10 @@ async function mountLogin(){
     const password = document.getElementById("password").value;
 
     try{
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if(error) throw error;
 
-      setState({
-        session:{ user:data.user },
-        guest:false
-      });
-
+      setState({ session:{ user:data.user }, guest:false });
       navigate("home");
 
     }catch(err){
@@ -209,22 +234,16 @@ async function mountLogin(){
     }
   };
 
-  // 🔥 AHORA NAVEGA A PANTALLA DE REGISTRO
-  registerBtn?.addEventListener("click", () => {
-    navigate("register");
-  });
+  registerBtn?.addEventListener("click", () => navigate("register"));
 
   if(googleBtn){
     googleBtn.onclick = async () => {
       clearError();
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo }
+        provider:"google",
+        options:{ redirectTo }
       });
-      if(error){
-        console.error(error);
-        showError("Error con Google");
-      }
+      if(error) showError("Error con Google");
     };
   }
 
@@ -232,22 +251,16 @@ async function mountLogin(){
     facebookBtn.onclick = async () => {
       clearError();
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: "facebook",
-        options: { redirectTo }
+        provider:"facebook",
+        options:{ redirectTo }
       });
-      if(error){
-        console.error(error);
-        showError("Error con Facebook");
-      }
+      if(error) showError("Error con Facebook");
     };
   }
 
   if(guestBtn){
     guestBtn.onclick = () => {
-      setState({
-        session:{ user:null },
-        guest:true
-      });
+      setState({ session:{ user:null }, guest:true });
       navigate("home");
     };
   }
@@ -269,4 +282,5 @@ export const LoginView = async () => {
     unmount: unmountLogin
   };
 };
+
 
