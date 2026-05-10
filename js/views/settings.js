@@ -105,7 +105,7 @@ function mountSettings() {
   if (langSelect) {
     langSelect.addEventListener("change", (e) => {
       setLang(e.target.value);
-      window.location.reload();
+      window.location.href = "/"; // ✅ fix 404
     });
   }
 }
@@ -118,3 +118,4 @@ export const SettingsView = () => {
     mount: mountSettings
   };
 };
+
