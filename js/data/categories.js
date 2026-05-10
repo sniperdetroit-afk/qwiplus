@@ -4,6 +4,20 @@
 
 export const categories = [
   {
+    id: "vehiculos",
+    name: "Vehículos",
+    sub: [
+      "Coches",
+      "Motos",
+      "Embarcaciones",
+      "Bicicletas",
+      "Patines",
+      "Drones",
+      "Otros"
+    ]
+  },
+
+  {
     id: "moda",
     name: "Moda y accesorios",
     sub: [
