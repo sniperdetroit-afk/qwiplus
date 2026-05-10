@@ -395,4 +395,67 @@ async function renderSubcategories(state){
   </section>
   `;
 }
+export const SubcategoriesView = createView(renderSubcategories);
+
+/* ================= SUBSUB ================= */
+
+async function renderSubSubcategories(state){
+
+  let categoryId = state.category;
+  let subcategoryName = state.subcategory;
+
+  const params = new URLSearchParams(window.location.search);
+
+  if(!categoryId){
+    categoryId = params.get("category");
+  }
+
+  if(!subcategoryName){
+    subcategoryName = params.get("subcategory");
+  }
+
+  const path = window.location.pathname.split("/").filter(Boolean);
+
+  if(!categoryId && path.length >= 1){
+    categoryId = path[0];
+  }
+
+  if(!subcategoryName && path.length >= 2){
+    subcategoryName = decodeURIComponent(path[1]);
+  }
+
+  const category = categories.find(c => c.id === categoryId);
+  if(!category) return `<p>Error categoría</p>`;
+
+  const sub = category.sub.find(
+    s => typeof s === "object" && s.name === subcategoryName
+  );
+
+  if(!sub || !sub.sub) return `<p>No hay más niveles</p>`;
+
+  return `
+  <section class="subsubcategories">
+
+    <button 
+      class="back-btn"
+      data-view="subcategories"
+      data-category="${category.id}"
+    >
+      ← Volver
+    </button>
+
+    <h3>${sub.name}</h3>
+
+    <div class="subcategory-grid">
+      ${sub.sub.map(item => `
+        <button class="subcategory-item">
+          ${item}
+        </button>
+      `).join("")}
+    </div>
+
+  </section>
+  `;
+}
+
 export const SubSubcategoriesView = createView(renderSubSubcategories);
