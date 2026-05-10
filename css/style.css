@@ -291,7 +291,13 @@ body{
   cursor:pointer;
   box-shadow:0 6px 18px rgba(0,0,0,0.08);
   transition:.2s;
+  width:100%;
+  display:block;
+  margin-bottom:10px;
+  font-size:15px;
+  text-align:left;
 }
+
 
 .profile-menu-btn:hover{
   transform:translateY(-2px);
