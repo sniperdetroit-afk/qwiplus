@@ -152,13 +152,4 @@ function mountSettings() {
   }
 }
 
-/* ================= EXPORT ================= */
-
-export const SettingsView = () => {
-  return {
-    html: renderSettings(),
-    mount: mountSettings
-  };
-};
-
-
+/* ================= EXPORT ================= 
