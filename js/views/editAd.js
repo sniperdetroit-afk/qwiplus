@@ -10,7 +10,7 @@ let formRef = null;
 
 async function renderEditAd(state) {
 
-  const id = state?.id;
+  const id = state?.app?.params?.id || state?.id;
 
   if (!id) {
     return `
@@ -80,7 +80,7 @@ async function renderEditAd(state) {
 
 /* ================= MOUNT ================= */
 
-function mountEditAd(){
+function mountEditAd() {
 
   const backBtn = document.getElementById("backBtn");
   formRef = document.getElementById("editForm");
@@ -96,9 +96,9 @@ function mountEditAd(){
 
 /* ================= UNMOUNT ================= */
 
-function unmountEditAd(){
+function unmountEditAd() {
 
-  if(formRef){
+  if (formRef) {
     formRef.removeEventListener("submit", handleSaveAd);
   }
 
@@ -107,7 +107,7 @@ function unmountEditAd(){
 
 /* ================= SAVE ================= */
 
-async function handleSaveAd(e){
+async function handleSaveAd(e) {
 
   e.preventDefault();
 
@@ -143,8 +143,10 @@ async function handleSaveAd(e){
   navigate("profile");
 }
 
-export const EditAdView = createView(
-  renderEditAd,
-  mountEditAd,
-  unmountEditAd
-);
+/* ================= EXPORT ================= */
+
+export const EditAdView = createView({
+  render: renderEditAd,
+  mount: mountEditAd,
+  unmount: unmountEditAd
+});

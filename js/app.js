@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 156 REGISTER");
+console.log("APP VERSION 157 REGISTER");
 
 /* ================= IMPORTS ================= */
 
@@ -9,6 +9,7 @@ import { subscribe } from "./core/store.js";
 import { getState, setState } from "./core/state.js";
 import { navigate, resolveRoute } from "./core/router.js";
 import { supabase } from "./services/supabase.js";
+import { initLang } from "./services/langService.js"; // ✅ NUEVO
 
 /* ================= ANTI DOBLE INIT ================= */
 
@@ -17,6 +18,10 @@ if (window.__APP_INIT__) {
 } else {
   window.__APP_INIT__ = true;
 }
+
+/* ================= LANG ================= */
+
+initLang(); // ✅ NUEVO
 
 /* ================= CONTROL RENDER ================= */
 
@@ -266,4 +271,5 @@ supabase.auth.onAuthStateChange((event, session) => {
 /* ================= SW ================= */
 
 // desactivado por ahora
+
 

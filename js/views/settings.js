@@ -1,8 +1,23 @@
 import { navigate } from "../core/router.js";
+import { t, getLang, setLang } from "../services/langService.js";
+
+const LANGUAGES = [
+  { code: "es", label: "🇪🇸 Español" },
+  { code: "en", label: "🇬🇧 English" },
+  { code: "ar", label: "🇸🇦 العربية" },
+  { code: "fr", label: "🇫🇷 Français" },
+  { code: "de", label: "🇩🇪 Deutsch" },
+];
 
 /* ================= RENDER ================= */
 
-function renderSettings(){
+function renderSettings() {
+
+  const langOptions = LANGUAGES.map(l => `
+    <option value="${l.code}" ${getLang() === l.code ? "selected" : ""}>
+      ${l.label}
+    </option>
+  `).join("");
 
   return `
   <section class="settings-page">
@@ -53,30 +68,46 @@ function renderSettings(){
       </button>
     </div>
 
+    <div class="settings-group">
+      <h3>🌐 Idioma</h3>
+
+      <select class="input-field" id="langSelect" style="margin-top:8px;">
+        ${langOptions}
+      </select>
+    </div>
+
   </section>
   `;
 }
 
 /* ================= MOUNT ================= */
 
-function mountSettings(){
+function mountSettings() {
 
   const back = document.getElementById("backSettings");
 
-  if(back){
+  if (back) {
     back.onclick = () => navigate("profileMenu");
   }
 
-  // 🔥 CLAVE: activar todos los botones automáticamente
   const buttons = document.querySelectorAll(".settings-item[data-view]");
 
   buttons.forEach(btn => {
     btn.onclick = () => {
       const view = btn.dataset.view;
-      if(view) navigate(view);
+      if (view) navigate(view);
     };
   });
 
+  // IDIOMA
+  const langSelect = document.getElementById("langSelect");
+
+  if (langSelect) {
+    langSelect.addEventListener("change", (e) => {
+      setLang(e.target.value);
+      window.location.reload();
+    });
+  }
 }
 
 /* ================= EXPORT ================= */

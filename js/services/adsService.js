@@ -29,12 +29,12 @@ export async function createAd(data) {
 
   if (error) {
     console.error("❌ Error creando anuncio:", error.message);
-    return null;
+    return { data: null, error };
   }
 
   console.log("✅ Anuncio creado:", inserted);
 
-  return inserted;
+  return { data: inserted, error: null };
 }
 
 /* =========================
@@ -112,4 +112,5 @@ export async function searchAds(query) {
 
   return Array.isArray(data) ? data : [];
 }
+
 
