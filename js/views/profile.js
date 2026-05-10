@@ -12,9 +12,42 @@ function getUserName(email = "") {
   return email.split("@")[0] || "Usuario";
 }
 
+function getInitials(name = "") {
+  const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+}
+
+function getColorFromString(str = "") {
+  const colors = [
+    "#EF4444", "#F59E0B", "#10B981", "#3B82F6",
+    "#8B5CF6", "#EC4899", "#14B8A6", "#F97316",
+    "#6366F1", "#84CC16", "#06B6D4", "#A855F7"
+  ];
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
 function getFallbackAvatar(email = "") {
-  const seed = encodeURIComponent(getUserName(email));
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}&backgroundColor=60a5fa,34d399&fontWeight=700`;
+  const name = getUserName(email);
+  const initials = getInitials(name);
+  const color = getColorFromString(email);
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+      <rect width="200" height="200" fill="${color}"/>
+      <text x="50%" y="50%" dy=".1em"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-size="90" font-weight="600" fill="white"
+        text-anchor="middle" dominant-baseline="middle">${initials}</text>
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
 function getAvatarUrl(user) {

@@ -131,7 +131,6 @@ function showNotFound(container){
     };
   }
 
-  // 🔥 AUTO REDIRECT (nivel pro)
   setTimeout(() => {
     if(alive){
       console.log("⏱ Auto redirect → home");
@@ -164,8 +163,8 @@ function renderAd(container, ad, profile){
   const isOwner = currentUser && currentUser.id === ad.user_id;
 
   const avatar = profile?.avatar_url
-    ? `<img src="${profile.avatar_url}" class="seller-avatar">`
-    : `<div class="seller-avatar">👤</div>`;
+    ? `<img src="${profile.avatar_url}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+    : `<div style="width:42px;height:42px;border-radius:50%;background:#10B981;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0;">👤</div>`;
 
   container.innerHTML = `
     <div class="ad-detail">
@@ -184,7 +183,7 @@ function renderAd(container, ad, profile){
 
         <h2 class="ad-title">${ad.title}</h2>
 
-        <div class="ad-seller">
+        <div class="ad-seller" style="display:flex;align-items:center;gap:10px;margin:12px 0;">
           ${avatar}
           <span>${profile?.name || "Usuario"}</span>
         </div>
