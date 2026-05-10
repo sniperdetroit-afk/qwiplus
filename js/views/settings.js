@@ -7,6 +7,7 @@ const LANGUAGES = [
   { code: "ar", label: "🇸🇦 العربية" },
   { code: "fr", label: "🇫🇷 Français" },
   { code: "de", label: "🇩🇪 Deutsch" },
+  { code: "it", label: "🇮🇹 Italiano" },
 ];
 
 /* ================= RENDER ================= */
@@ -105,7 +106,7 @@ function mountSettings() {
   if (langSelect) {
     langSelect.addEventListener("change", (e) => {
       setLang(e.target.value);
-      window.location.href = "/"; // ✅ fix 404
+      window.location.href = "/";
     });
   }
 }
