@@ -10,6 +10,41 @@ const LANGUAGES = [
   { code: "it", label: "🇮🇹 Italiano" },
 ];
 
+// Vistas que SÍ existen en el router
+const EXISTING_VIEWS = ["editProfile"];
+
+// Toast "Próximamente"
+function showComingSoon(label) {
+  const existing = document.getElementById("qw-toast");
+  if (existing) existing.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "qw-toast";
+  toast.textContent = `${label} — Próximamente 🚧`;
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 9999;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: opacity 0.3s;
+  `;
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+
 /* ================= RENDER ================= */
 
 function renderSettings() {
@@ -86,7 +121,6 @@ function renderSettings() {
 function mountSettings() {
 
   const back = document.getElementById("backSettings");
-
   if (back) {
     back.onclick = () => navigate("profileMenu");
   }
@@ -94,15 +128,22 @@ function mountSettings() {
   const buttons = document.querySelectorAll(".settings-item[data-view]");
 
   buttons.forEach(btn => {
-    btn.onclick = () => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
       const view = btn.dataset.view;
-      if (view) navigate(view);
+      if (!view) return;
+
+      if (EXISTING_VIEWS.includes(view)) {
+        navigate(view);
+      } else {
+        const label = btn.textContent.trim();
+        showComingSoon(label);
+      }
     };
   });
 
   // IDIOMA
   const langSelect = document.getElementById("langSelect");
-
   if (langSelect) {
     langSelect.addEventListener("change", (e) => {
       setLang(e.target.value);
@@ -119,4 +160,5 @@ export const SettingsView = () => {
     mount: mountSettings
   };
 };
+
 
