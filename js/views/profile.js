@@ -64,23 +64,32 @@ async function renderProfile(){
   if(!user){
     return `
       <section class="profile-page">
-
         <div class="profile-top">
           <button id="backProfileBtn">← Volver</button>
         </div>
-
         <div class="profile-empty">
           <h1>Perfil</h1>
           <p>No estás logueado</p>
           <button id="goLogin" class="btn-primary">Iniciar sesión</button>
         </div>
-
       </section>
     `;
   }
 
-  const name = getUserName(user.email);
-  const avatarUrl = getAvatarUrl(user);
+  // Cargar perfil de la tabla profiles para tener nombre y ubicación
+  let profile = {};
+  try {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+    profile = data || {};
+  } catch(e) {}
+
+  const displayName = profile.name || getUserName(user.email);
+  const avatarUrl = profile.avatar_url || getAvatarUrl(user);
+  const location = profile.location ? `📍 ${profile.location}` : "";
 
   return `
     <section class="profile-page">
@@ -92,16 +101,15 @@ async function renderProfile(){
       <div class="profile-pro-header">
 
         <button id="avatarUploadBtn" class="profile-avatar avatar-upload-btn" type="button">
-          <img id="profileAvatarImg" src="${avatarUrl}" alt="Avatar de ${name}">
+          <img id="profileAvatarImg" src="${avatarUrl}" alt="Avatar de ${displayName}">
           <span class="avatar-edit-badge">📷</span>
         </button>
 
         <input id="avatarInput" type="file" accept="image/*" hidden>
 
         <div class="profile-user-info">
-          <h1>${name}</h1>
-          <p>${user.email}</p>
-
+          <h1>${displayName}</h1>
+          ${location ? `<p style="color:#6b7280;font-size:14px;margin:2px 0 8px;">${location}</p>` : ""}
           <div class="profile-badge">
             <span>Verificado por Qwiplus</span>
           </div>
@@ -114,12 +122,10 @@ async function renderProfile(){
           <strong id="adsCount">0</strong>
           <span>Anuncios</span>
         </div>
-
         <div class="profile-stat">
           <strong id="likesCount">0</strong>
           <span>Favoritos recibidos</span>
         </div>
-
         <div class="profile-stat">
           <strong>Activo</strong>
           <span>Estado</span>
@@ -136,7 +142,6 @@ async function renderProfile(){
           <h2>Mis anuncios</h2>
           <button id="publishFromProfile" class="btn-primary small">Publicar</button>
         </div>
-
         <div id="myAdsContainer" class="ads-grid"></div>
       </div>
 
@@ -182,11 +187,7 @@ async function uploadAvatar(file){
   if(uploadError){
     console.error("AVATAR UPLOAD ERROR:", uploadError);
     alert(uploadError.message);
-
-    if(avatarImg && oldSrc){
-      avatarImg.src = oldSrc;
-    }
-
+    if(avatarImg && oldSrc) avatarImg.src = oldSrc;
     return;
   }
 
@@ -197,9 +198,7 @@ async function uploadAvatar(file){
   const publicUrl = `${publicData.publicUrl}?v=${Date.now()}`;
 
   const { data, error: updateError } = await supabase.auth.updateUser({
-    data: {
-      avatar_url: publicUrl
-    }
+    data: { avatar_url: publicUrl }
   });
 
   if(updateError){
@@ -211,17 +210,9 @@ async function uploadAvatar(file){
   user = data.user;
 
   const currentState = getState();
+  setState({ ...currentState, session: { user } });
 
-  setState({
-    ...currentState,
-    session: {
-      user
-    }
-  });
-
-  if(avatarImg){
-    avatarImg.src = publicUrl;
-  }
+  if(avatarImg) avatarImg.src = publicUrl;
 }
 
 /* ================= MOUNT ================= */
@@ -248,11 +239,9 @@ async function mountProfile(){
 
   if(avatarBtn && avatarInput){
     avatarBtn.onclick = () => avatarInput.click();
-
     avatarInput.onchange = async () => {
       const file = avatarInput.files?.[0];
       if(!file) return;
-
       await uploadAvatar(file);
       avatarInput.value = "";
     };
@@ -261,14 +250,8 @@ async function mountProfile(){
   const logoutBtn = document.getElementById("logoutBtn");
   if(logoutBtn){
     logoutBtn.onclick = async () => {
-
       await supabase.auth.signOut();
-
-      setState({
-        session:{ user:null },
-        guest:false
-      });
-
+      setState({ session:{ user:null }, guest:false });
       navigate("login");
     };
   }
@@ -315,28 +298,22 @@ async function mountProfile(){
 
   container.innerHTML = ads.map(ad => `
     <div class="card profile-ad-card" data-id="${ad.id}">
-
       <div class="card-image">
         <img src="${ad.image_url || "/img/placeholder.png"}" alt="${ad.title || "Anuncio"}">
       </div>
-
       <div class="card-info">
         <div class="card-title">${ad.title || ""}</div>
-
         <div class="card-bottom">
           <div class="price">${ad.price || 0}€</div>
-
           <div class="favorite-counter">
             ❤️ <span>${ad.favorites_count || 0}</span>
           </div>
         </div>
       </div>
-
       <div class="profile-card-actions">
         <button class="editAdBtn" data-id="${ad.id}">Editar</button>
         <button class="deleteAd" data-id="${ad.id}">🗑</button>
       </div>
-
     </div>
   `).join("");
 
@@ -356,9 +333,7 @@ async function mountProfile(){
 
   document.querySelectorAll(".deleteAd").forEach(btn => {
     btn.onclick = async (e) => {
-
       e.stopPropagation();
-
       const id = btn.dataset.id;
       const ok = confirm("¿Eliminar este anuncio?");
       if(!ok) return;
@@ -376,7 +351,6 @@ async function mountProfile(){
       }
 
       btn.closest(".card").remove();
-
       const currentAds = Number(adsCount?.textContent || 1);
       if(adsCount) adsCount.textContent = Math.max(currentAds - 1, 0);
     };
@@ -392,13 +366,10 @@ async function unmountProfile(){
 /* ================= EXPORT ================= */
 
 export const ProfileView = async () => {
-
   const html = await renderProfile();
-
   return {
     html,
     mount: mountProfile,
     unmount: unmountProfile
   };
-
 };
