@@ -127,10 +127,16 @@ function addMessage(msg){
   div.className = mine ? "bubble bubble-me" : "bubble bubble-other";
   div.innerText = msg.text;
 
+  if(!mine){
+    div.style.background = "linear-gradient(90deg,#2ed4a7,#6a8dff)";
+    div.style.color = "white";
+  }
+
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
 
 export const ChatView = createView(render, mount, unmount);
+
      
      
