@@ -177,46 +177,19 @@ function renderAd(container, ad, profile){
 
         ${isOwner || isVendido ? `` : `<button id="chatBtn" class="chat-btn">Enviar mensaje</button>`}
 
-        <!-- RESERVAR -->
-        ${!isOwner && currentUser && !isVendido ? `
+        <!-- RESERVADO INFO -->
+        ${!isOwner && isReserved ? `
           <div style="margin-top:12px;">
-            ${isReservedByMe ? `
-              <button id="cancelReserveBtn" style="
-                width:100%;padding:12px;
-                background:linear-gradient(135deg,#f59e0b,#d97706);
-                color:white;border:none;border-radius:14px;
-                font-size:14px;font-weight:700;cursor:pointer;
-              ">🔓 Cancelar reserva</button>
-            ` : isReserved ? `
-              <div style="
-                width:100%;padding:12px;text-align:center;
-                background:#fef9c3;border-radius:14px;
-                color:#92400e;font-weight:600;font-size:14px;
-              ">
-                🔒 Este anuncio está reservado
-              </div>
-            ` : `
-              <button id="reserveBtn" style="
-                width:100%;padding:12px;
-                background:linear-gradient(135deg,#f59e0b,#d97706);
-                color:white;border:none;border-radius:14px;
-                font-size:14px;font-weight:700;cursor:pointer;
-              ">🔒 Reservar</button>
-            `}
+            <div style="
+              width:100%;padding:12px;text-align:center;
+              background:#fef9c3;border-radius:14px;
+              color:#92400e;font-weight:600;font-size:14px;
+            ">
+              🔒 Este anuncio está reservado
+            </div>
           </div>
         ` : ""}
 
-        <!-- CANCELAR RESERVA (dueño) -->
-        ${isOwner && isReserved ? `
-          <div style="margin-top:12px;">
-            <button id="ownerCancelReserveBtn" style="
-              width:100%;padding:12px;
-              background:none;border:1.5px solid #f59e0b;
-              border-radius:14px;color:#d97706;
-              font-size:14px;font-weight:600;cursor:pointer;
-            ">🔓 Cancelar reserva del comprador</button>
-          </div>
-        ` : ""}
 
         <!-- COMPARTIR -->
         <div style="margin-top:12px;">
