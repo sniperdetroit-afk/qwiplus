@@ -54,6 +54,7 @@ async function mountAdDetail(){
     renderAd(container, data, profile);
     initChatButton(data);
     initReportButton(data);
+    initShareButton(data);
 
   } catch(err){
     showError(container, "Error cargando anuncio");
@@ -165,9 +166,22 @@ function renderAd(container, ad, profile){
 
         ${isOwner || isVendido ? `` : `<button id="chatBtn" class="chat-btn">Enviar mensaje</button>`}
 
-        <!-- REPORTAR (solo para no dueños y logueados) -->
+        <!-- COMPARTIR -->
+        <div style="margin-top:12px;">
+          <button id="shareBtn" style="
+            width:100%;padding:12px;
+            background:none;border:1.5px solid #e5e7eb;
+            border-radius:14px;color:#6b7280;
+            font-size:14px;font-weight:600;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+          ">
+            🔗 Compartir anuncio
+          </button>
+        </div>
+
+        <!-- REPORTAR -->
         ${!isOwner && currentUser ? `
-          <div style="margin-top:16px;">
+          <div style="margin-top:10px;">
             <button id="reportBtn" style="
               width:100%;padding:12px;
               background:none;border:1.5px solid #e5e7eb;
@@ -176,7 +190,6 @@ function renderAd(container, ad, profile){
             ">⚑ Reportar anuncio</button>
           </div>
 
-          <!-- FORM REPORTE (oculto) -->
           <div id="reportForm" style="display:none;margin-top:12px;">
             <div style="
               background:#f8fafc;border-radius:16px;padding:20px;
@@ -253,6 +266,36 @@ function renderAd(container, ad, profile){
   }
 }
 
+function initShareButton(ad){
+  const shareBtn = document.getElementById("shareBtn");
+  if(!shareBtn) return;
+
+  shareBtn.onclick = async () => {
+    const url = `https://qwiplus.vercel.app/ad/${ad.id}`;
+    const title = ad.title || "Mira este anuncio en Qwiplus";
+    const text = `${title} — ${ad.price || 0}€`;
+
+    if(navigator.share){
+      try {
+        await navigator.share({ title, text, url });
+      } catch(e) {
+        // Usuario canceló — no hacer nada
+      }
+    } else {
+      // Fallback: copiar al portapapeles
+      try {
+        await navigator.clipboard.writeText(url);
+        shareBtn.textContent = "✅ Enlace copiado";
+        setTimeout(() => {
+          shareBtn.innerHTML = "🔗 Compartir anuncio";
+        }, 2000);
+      } catch(e) {
+        alert("Copia este enlace: " + url);
+      }
+    }
+  };
+}
+
 async function initReportButton(ad){
 
   const submitReport = document.getElementById("submitReport");
@@ -278,7 +321,6 @@ async function initReportButton(ad){
 
     if(error){
       if(error.code === "23505"){
-        // Ya reportado
         document.getElementById("reportForm").innerHTML = `
           <div style="padding:16px;text-align:center;background:#fef2f2;border-radius:14px;">
             <p style="color:#ef4444;font-weight:600;">Ya has reportado este anuncio anteriormente.</p>
@@ -343,5 +385,3 @@ export const AdDetailView = async () => {
   const html = await renderAdDetail();
   return { html, mount: mountAdDetail, unmount: unmountAdDetail };
 };
-
-
