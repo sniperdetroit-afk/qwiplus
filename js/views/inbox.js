@@ -3,6 +3,7 @@ import { startInboxSync, stopInboxSync } from "../chat/syncEngine.js";
 import { getState, setState } from "../core/state.js";
 import { navigate } from "../core/router.js";
 import { createView } from "../core/createView.js";
+import { markConversationRead } from "../services/badgeService.js";
 
 let box;
 let userId;
@@ -119,6 +120,7 @@ function renderConversation(c){
   `;
 
   div.onclick = () => {
+    markConversationRead(c.id, userId);
     setState({ chat:{ conversationId:c.id } });
     navigate("chat");
   };
