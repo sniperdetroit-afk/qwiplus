@@ -53,6 +53,7 @@ async function mountAdDetail(){
 
     renderAd(container, data, profile);
     initChatButton(data);
+    initReportButton(data);
 
   } catch(err){
     showError(container, "Error cargando anuncio");
@@ -164,6 +165,52 @@ function renderAd(container, ad, profile){
 
         ${isOwner || isVendido ? `` : `<button id="chatBtn" class="chat-btn">Enviar mensaje</button>`}
 
+        <!-- REPORTAR (solo para no dueños y logueados) -->
+        ${!isOwner && currentUser ? `
+          <div style="margin-top:16px;">
+            <button id="reportBtn" style="
+              width:100%;padding:12px;
+              background:none;border:1.5px solid #e5e7eb;
+              border-radius:14px;color:#9ca3af;
+              font-size:14px;font-weight:600;cursor:pointer;
+            ">⚑ Reportar anuncio</button>
+          </div>
+
+          <!-- FORM REPORTE (oculto) -->
+          <div id="reportForm" style="display:none;margin-top:12px;">
+            <div style="
+              background:#f8fafc;border-radius:16px;padding:20px;
+              border:1.5px solid #e5e7eb;
+            ">
+              <h4 style="margin:0 0 14px;font-size:15px;font-weight:700;color:#111827;">
+                ¿Por qué reportas este anuncio?
+              </h4>
+
+              <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+                ${["Spam o publicidad", "Fraude o estafa", "Contenido inapropiado", "Precio abusivo", "Producto ilegal", "Otro"].map(reason => `
+                  <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                    <input type="radio" name="reportReason" value="${reason}" style="width:18px;height:18px;">
+                    <span style="font-size:14px;color:#374151;">${reason}</span>
+                  </label>
+                `).join("")}
+              </div>
+
+              <button id="submitReport" style="
+                width:100%;padding:12px;
+                background:linear-gradient(135deg,#ef4444,#dc2626);
+                color:white;border:none;border-radius:12px;
+                font-size:15px;font-weight:700;cursor:pointer;
+              ">Enviar reporte</button>
+
+              <button id="cancelReport" style="
+                width:100%;padding:10px;margin-top:8px;
+                background:none;border:none;
+                color:#9ca3af;font-size:14px;cursor:pointer;
+              ">Cancelar</button>
+            </div>
+          </div>
+        ` : ""}
+
       </div>
     </div>
   `;
@@ -186,6 +233,72 @@ function renderAd(container, ad, profile){
       navigate("profile");
     };
   }
+
+  const reportBtn = document.getElementById("reportBtn");
+  const reportForm = document.getElementById("reportForm");
+  const cancelReport = document.getElementById("cancelReport");
+
+  if(reportBtn){
+    reportBtn.onclick = () => {
+      reportForm.style.display = "block";
+      reportBtn.style.display = "none";
+    };
+  }
+
+  if(cancelReport){
+    cancelReport.onclick = () => {
+      reportForm.style.display = "none";
+      reportBtn.style.display = "block";
+    };
+  }
+}
+
+async function initReportButton(ad){
+
+  const submitReport = document.getElementById("submitReport");
+  if(!submitReport) return;
+
+  const state = getState();
+  const user = state.session?.user;
+  if(!user) return;
+
+  submitReport.onclick = async () => {
+
+    const selected = document.querySelector('input[name="reportReason"]:checked');
+    if(!selected){ alert("Selecciona un motivo"); return; }
+
+    submitReport.disabled = true;
+    submitReport.textContent = "Enviando...";
+
+    const { error } = await supabase.from("reports").insert({
+      reporter_id: user.id,
+      ad_id: ad.id,
+      reason: selected.value
+    });
+
+    if(error){
+      if(error.code === "23505"){
+        // Ya reportado
+        document.getElementById("reportForm").innerHTML = `
+          <div style="padding:16px;text-align:center;background:#fef2f2;border-radius:14px;">
+            <p style="color:#ef4444;font-weight:600;">Ya has reportado este anuncio anteriormente.</p>
+          </div>
+        `;
+      } else {
+        alert("Error: " + error.message);
+        submitReport.disabled = false;
+        submitReport.textContent = "Enviar reporte";
+      }
+      return;
+    }
+
+    document.getElementById("reportForm").innerHTML = `
+      <div style="padding:16px;text-align:center;background:#f0fdf4;border-radius:14px;">
+        <div style="font-size:28px;">✅</div>
+        <p style="color:#16a34a;font-weight:700;margin:8px 0 0;">Reporte enviado. Lo revisaremos pronto.</p>
+      </div>
+    `;
+  };
 }
 
 async function initChatButton(ad){
