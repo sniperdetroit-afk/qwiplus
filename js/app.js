@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 159 REGISTER");
+console.log("APP VERSION 160 REGISTER");
 
 /* ================= IMPORTS ================= */
 
@@ -211,6 +211,29 @@ document.addEventListener("click", async (e) => {
   navigate(view, params);
 });
 
+/* ================= BUSCADOR HEADER ================= */
+
+const globalSearch = document.getElementById("globalSearch");
+
+if(globalSearch){
+  globalSearch.addEventListener("input", () => {
+    const query = globalSearch.value.trim();
+    if(query.length < 2) return;
+
+    clearTimeout(window.__searchDebounce);
+    window.__searchDebounce = setTimeout(() => {
+      navigate("search", { query });
+    }, 400);
+  });
+
+  globalSearch.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      const query = globalSearch.value.trim();
+      if(query) navigate("search", { query });
+    }
+  });
+}
+
 /* ================= STORE ================= */
 
 subscribe(renderApp);
@@ -239,7 +262,6 @@ async function initApp() {
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user || null;
 
-    // ✅ Iniciar badge si hay usuario
     if(user) initBadge(user.id);
 
     setState({
@@ -270,7 +292,6 @@ supabase.auth.onAuthStateChange((event, session) => {
     }
   });
 
-  // ✅ Badge según estado de auth
   if(session?.user){
     initBadge(session.user.id);
   } else {
@@ -286,8 +307,3 @@ supabase.auth.onAuthStateChange((event, session) => {
 /* ================= SW ================= */
 
 // desactivado por ahora
-
-
-
-
-

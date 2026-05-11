@@ -188,12 +188,12 @@ function mountSearch(){
 
   const state = getState();
 
-  if(state.app?.query){
-    if(searchInput){
-      searchInput.value = state.app.query;
-    }
-    runSearch();
-  }
+  const query = state.app?.params?.query || state.app?.query;
+if(query){
+  if(searchInput) searchInput.value = query;
+  runSearch();
+}
+
 }
 
 /* =========================
