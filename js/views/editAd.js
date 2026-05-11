@@ -37,6 +37,7 @@ async function renderEditAd(state) {
   }
 
   const isVendido = ad.status === "vendido";
+  const isReserved = ad.reserved === true;
 
   return `
   <section class="edit-ad-page" style="max-width:480px;margin:0 auto;padding:20px;">
@@ -53,12 +54,12 @@ async function renderEditAd(state) {
     <div style="
       display:flex;align-items:center;gap:10px;
       padding:12px 16px;border-radius:14px;margin-bottom:20px;
-      background:${isVendido ? "#f0fdf4" : "#eff6ff"};
-      border:1.5px solid ${isVendido ? "#86efac" : "#bfdbfe"};
+      background:${isVendido ? "#f0fdf4" : isReserved ? "#fef9c3" : "#eff6ff"};
+      border:1.5px solid ${isVendido ? "#86efac" : isReserved ? "#fde68a" : "#bfdbfe"};
     ">
-      <span style="font-size:18px;">${isVendido ? "✅" : "🟢"}</span>
-      <span style="font-weight:600;color:${isVendido ? "#16a34a" : "#1d4ed8"};">
-        ${isVendido ? "Vendido" : "Activo"}
+      <span style="font-size:18px;">${isVendido ? "✅" : isReserved ? "🔒" : "🟢"}</span>
+      <span style="font-weight:600;color:${isVendido ? "#16a34a" : isReserved ? "#92400e" : "#1d4ed8"};">
+        ${isVendido ? "Vendido" : isReserved ? "Reservado" : "Activo"}
       </span>
     </div>
 
@@ -107,8 +108,33 @@ async function renderEditAd(state) {
 
     </form>
 
-    <!-- MARCAR COMO VENDIDO -->
+    <!-- RESERVAR -->
     <div style="margin-top:16px;">
+      ${isReserved ? `
+        <button id="cancelReservaBtn" data-id="${ad.id}" style="
+          width:100%;padding:14px;
+          background:linear-gradient(135deg,#f59e0b,#d97706);
+          color:white;border:none;border-radius:14px;
+          font-size:16px;font-weight:700;cursor:pointer;
+          box-shadow:0 4px 14px rgba(245,158,11,.35);
+        ">
+          🔓 Cancelar reserva
+        </button>
+      ` : !isVendido ? `
+        <button id="reservarBtn" data-id="${ad.id}" style="
+          width:100%;padding:14px;
+          background:linear-gradient(135deg,#f59e0b,#d97706);
+          color:white;border:none;border-radius:14px;
+          font-size:16px;font-weight:700;cursor:pointer;
+          box-shadow:0 4px 14px rgba(245,158,11,.35);
+        ">
+          🔒 Marcar como reservado
+        </button>
+      ` : ""}
+    </div>
+
+    <!-- MARCAR COMO VENDIDO -->
+    <div style="margin-top:12px;">
       ${isVendido ? `
         <button id="reactivarBtn" data-id="${ad.id}" style="
           width:100%;padding:14px;
@@ -144,9 +170,61 @@ function mountEditAd() {
   formRef = document.getElementById("editForm");
 
   if(backBtn) backBtn.onclick = () => navigate("profile");
-
   if(formRef) formRef.addEventListener("submit", handleSaveAd);
 
+  // RESERVAR
+  const reservarBtn = document.getElementById("reservarBtn");
+  if(reservarBtn){
+    reservarBtn.onclick = async () => {
+      const id = reservarBtn.dataset.id;
+      const ok = confirm("¿Marcar este anuncio como reservado?");
+      if(!ok) return;
+
+      reservarBtn.disabled = true;
+      reservarBtn.textContent = "Guardando...";
+
+      const { error } = await supabase
+        .from("ads")
+        .update({ reserved: true })
+        .eq("id", id);
+
+      if(error){
+        alert("Error: " + error.message);
+        reservarBtn.disabled = false;
+        reservarBtn.textContent = "🔒 Marcar como reservado";
+        return;
+      }
+
+      navigate("profile");
+    };
+  }
+
+  // CANCELAR RESERVA
+  const cancelReservaBtn = document.getElementById("cancelReservaBtn");
+  if(cancelReservaBtn){
+    cancelReservaBtn.onclick = async () => {
+      const id = cancelReservaBtn.dataset.id;
+
+      cancelReservaBtn.disabled = true;
+      cancelReservaBtn.textContent = "Cancelando...";
+
+      const { error } = await supabase
+        .from("ads")
+        .update({ reserved: false, reserved_by: null })
+        .eq("id", id);
+
+      if(error){
+        alert("Error: " + error.message);
+        cancelReservaBtn.disabled = false;
+        cancelReservaBtn.textContent = "🔓 Cancelar reserva";
+        return;
+      }
+
+      navigate("profile");
+    };
+  }
+
+  // MARCAR VENDIDO
   const vendidoBtn = document.getElementById("vendidoBtn");
   if(vendidoBtn){
     vendidoBtn.onclick = async () => {
@@ -159,7 +237,7 @@ function mountEditAd() {
 
       const { error } = await supabase
         .from("ads")
-        .update({ status: "vendido" })
+        .update({ status: "vendido", reserved: false, reserved_by: null })
         .eq("id", id);
 
       if(error){
@@ -172,6 +250,7 @@ function mountEditAd() {
     };
   }
 
+  // REACTIVAR
   const reactivarBtn = document.getElementById("reactivarBtn");
   if(reactivarBtn){
     reactivarBtn.onclick = async () => {
@@ -182,7 +261,7 @@ function mountEditAd() {
 
       const { error } = await supabase
         .from("ads")
-        .update({ status: "activo" })
+        .update({ status: "activo", reserved: false, reserved_by: null })
         .eq("id", id);
 
       if(error){
@@ -246,4 +325,5 @@ export const EditAdView = createView({
   mount: mountEditAd,
   unmount: unmountEditAd
 });
+
 
