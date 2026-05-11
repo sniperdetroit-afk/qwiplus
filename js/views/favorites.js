@@ -17,7 +17,7 @@ async function renderFavorites(state) {
 
   const { data, error } = await supabase
     .from("favorites")
-    .select("ads(*)")
+    .select("ads(*, profiles(name, avatar_url))")
     .eq("user_id", user.id);
 
   if (error) {
@@ -29,7 +29,6 @@ async function renderFavorites(state) {
   return `
     <section class="page">
       <h2>Favoritos</h2>
-
       ${
         ads.length === 0
           ? `<p>No tienes favoritos aún</p>`
@@ -39,9 +38,9 @@ async function renderFavorites(state) {
             </div>
           `
       }
-
     </section>
   `;
 }
 
 export const FavoritesView = createView(renderFavorites);
+

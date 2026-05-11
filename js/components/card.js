@@ -1,5 +1,4 @@
 import { getState } from "../core/state.js";
-import { navigate } from "../core/router.js";
 
 export function renderCard(ad) {
 
@@ -18,22 +17,13 @@ export function renderCard(ad) {
     : `<div class="card-img-empty"></div>`;
 
   return `
-   ><div 
-  class="card" 
- <div class="card" data-ad="${ad.id}">
+    <div class="card" data-ad="${ad.id}">
 
       <div class="card-image">
         ${imageHtml}
-
         ${
           !isOwner
-            ? `<button 
-  class="fav-btn" 
-  data-id="${ad.id}" 
-  data-fav="0"
->
-  ❤ ${favCount}
-</button>`
+            ? `<button class="fav-btn" data-id="${ad.id}" data-fav="0">❤ ${favCount}</button>`
             : ""
         }
       </div>
@@ -58,5 +48,6 @@ export function renderCard(ad) {
     </div>
   `;
 }
+
 
     
