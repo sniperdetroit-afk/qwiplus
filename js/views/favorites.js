@@ -17,7 +17,7 @@ async function renderFavorites(state) {
 
   const { data, error } = await supabase
     .from("favorites")
-    .select("ads(*, profiles(name, avatar_url))")
+    .select("ads(*, profiles!ads_user_id_fkey(name, avatar_url))")
     .eq("user_id", user.id);
 
   if (error) {
@@ -43,4 +43,5 @@ async function renderFavorites(state) {
 }
 
 export const FavoritesView = createView(renderFavorites);
+
 
