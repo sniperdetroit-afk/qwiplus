@@ -46,7 +46,8 @@
 
 .bubble-other{
   align-self:flex-start;
-  background:#e2e8f0;
-  color:#1e293b;
+  background:linear-gradient(90deg,#2ed4a7,#6a8dff);
+  color:white;
   font-weight:500;
 }
+
