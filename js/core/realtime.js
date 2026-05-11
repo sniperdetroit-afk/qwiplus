@@ -1,112 +1,83 @@
-// js/services/badgeService.js
+// js/core/realtime.js
 
-import { supabase } from "./supabase.js";
+import { supabase } from "../services/supabase.js";
 
-let badgeChannel = null;
+const channels = new Map();
 
-/* ================= ACTUALIZAR BADGE ================= */
+/* =========================
+   SUBSCRIBE
+========================= */
 
-async function updateBadge(userId) {
-  const badge = document.getElementById("msgBadge");
-  if (!badge || !userId) return;
+export function subscribeChannel(key, config, handler){
 
-  const { data: convs, error: convError } = await supabase
-    .from("conversations")
-    .select("id")
-    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
-
-  if (convError) {
-    console.error("BADGE CONVERSATIONS ERROR:", convError);
-    return;
+  if(!key || !config || !handler){
+    console.warn("Realtime subscribe inválido:", { key, config, handler });
+    return null;
   }
 
-  if (!convs?.length) {
-    badge.classList.add("hidden");
-    badge.textContent = "0";
-    return;
+  // Evita duplicados
+  if(channels.has(key)){
+    console.log("REALTIME ya activo:", key);
+    return channels.get(key);
   }
 
-  const convIds = convs.map(c => c.id);
-
-  const { count, error: msgError } = await supabase
-    .from("messages")
-    .select("id", { count: "exact", head: true })
-    .in("conversation_id", convIds)
-    .eq("read", false)
-    .neq("sender_id", userId);
-
-  if (msgError) {
-    console.error("BADGE MESSAGES ERROR:", msgError);
-    return;
-  }
-
-  if (!count) {
-    badge.classList.add("hidden");
-    badge.textContent = "0";
-    return;
-  }
-
-  badge.textContent = count > 9 ? "9+" : String(count);
-  badge.classList.remove("hidden");
-}
-
-/* ================= INICIAR ================= */
-
-export function initBadge(userId) {
-  if (!userId) return;
-
-  // 🔥 evita doble subscribe
-  stopBadge();
-
-  updateBadge(userId);
-
-  badgeChannel = supabase
-    .channel(`badge-channel-${userId}`)
+  const channel = supabase
+    .channel(key)
     .on(
       "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "messages"
-      },
-      () => updateBadge(userId)
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "messages"
-      },
-      () => updateBadge(userId)
+      config,
+      handler
     )
     .subscribe((status) => {
-      console.log("BADGE CHANNEL:", status);
+      console.log("REALTIME", key, status);
     });
+
+  channels.set(key, channel);
+
+  return channel;
 }
 
-/* ================= PARAR ================= */
+/* =========================
+   UNSUBSCRIBE ONE
+========================= */
 
-export function stopBadge() {
-  if (badgeChannel) {
-    supabase.removeChannel(badgeChannel);
-    badgeChannel = null;
+export async function unsubscribeChannel(key){
+
+  const channel = channels.get(key);
+  if(!channel) return;
+
+  try {
+    await supabase.removeChannel(channel);
+  } catch (err) {
+    console.error("REALTIME unsubscribe error:", key, err);
   }
+
+  channels.delete(key);
 }
 
-/* ================= MARCAR LEÍDOS ================= */
+/* =========================
+   UNSUBSCRIBE ALL
+========================= */
 
-export async function markConversationRead(conversationId, userId) {
-  if (!conversationId || !userId) return;
+export async function unsubscribeAll(){
 
-  const { error } = await supabase
-    .from("messages")
-    .update({ read: true })
-    .eq("conversation_id", conversationId)
-    .eq("read", false)
-    .neq("sender_id", userId);
+  for(const [key, channel] of channels){
 
-  if (error) {
-    console.error("MARK READ ERROR:", error);
+    try {
+      await supabase.removeChannel(channel);
+    } catch (err) {
+      console.error("REALTIME unsubscribe all error:", key, err);
+    }
+
   }
+
+  channels.clear();
+}
+
+/* =========================
+   DEBUG
+========================= */
+
+export function getActiveChannels(){
+  return Array.from(channels.keys());
 }
