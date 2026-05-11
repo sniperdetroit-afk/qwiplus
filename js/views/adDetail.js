@@ -55,6 +55,7 @@ async function mountAdDetail(){
     initChatButton(data);
     initReportButton(data);
     initShareButton(data);
+    initReserveButton(data);
 
   } catch(err){
     showError(container, "Error cargando anuncio");
@@ -86,6 +87,8 @@ function renderAd(container, ad, profile){
   const currentUser = state.session?.user;
   const isOwner = currentUser && currentUser.id === ad.user_id;
   const isVendido = ad.status === "vendido";
+  const isReserved = ad.reserved === true;
+  const isReservedByMe = currentUser && ad.reserved_by === currentUser.id;
 
   const avatar = profile?.avatar_url
     ? `<img src="${profile.avatar_url}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
@@ -98,7 +101,7 @@ function renderAd(container, ad, profile){
         <button id="backBtn">←</button>
       </div>
 
-      <!-- IMAGEN CON BADGE VENDIDO -->
+      <!-- IMAGEN CON BADGES -->
       <div style="position:relative;">
         <div class="ad-image-wrapper">
           <img class="ad-img" src="${ad.image_url || ""}">
@@ -111,6 +114,14 @@ function renderAd(container, ad, profile){
             font-size:13px;font-weight:800;
             box-shadow:0 4px 12px rgba(239,68,68,0.4);
           ">VENDIDO</div>
+        ` : isReserved ? `
+          <div style="
+            position:absolute;top:12px;left:12px;
+            background:#f59e0b;color:white;
+            padding:6px 14px;border-radius:999px;
+            font-size:13px;font-weight:800;
+            box-shadow:0 4px 12px rgba(245,158,11,0.4);
+          ">RESERVADO</div>
         ` : ""}
       </div>
 
@@ -165,6 +176,47 @@ function renderAd(container, ad, profile){
         <div class="ad-desc">${ad.description || "Sin descripción"}</div>
 
         ${isOwner || isVendido ? `` : `<button id="chatBtn" class="chat-btn">Enviar mensaje</button>`}
+
+        <!-- RESERVAR -->
+        ${!isOwner && currentUser && !isVendido ? `
+          <div style="margin-top:12px;">
+            ${isReservedByMe ? `
+              <button id="cancelReserveBtn" style="
+                width:100%;padding:12px;
+                background:linear-gradient(135deg,#f59e0b,#d97706);
+                color:white;border:none;border-radius:14px;
+                font-size:14px;font-weight:700;cursor:pointer;
+              ">🔓 Cancelar reserva</button>
+            ` : isReserved ? `
+              <div style="
+                width:100%;padding:12px;text-align:center;
+                background:#fef9c3;border-radius:14px;
+                color:#92400e;font-weight:600;font-size:14px;
+              ">
+                🔒 Este anuncio está reservado
+              </div>
+            ` : `
+              <button id="reserveBtn" style="
+                width:100%;padding:12px;
+                background:linear-gradient(135deg,#f59e0b,#d97706);
+                color:white;border:none;border-radius:14px;
+                font-size:14px;font-weight:700;cursor:pointer;
+              ">🔒 Reservar</button>
+            `}
+          </div>
+        ` : ""}
+
+        <!-- CANCELAR RESERVA (dueño) -->
+        ${isOwner && isReserved ? `
+          <div style="margin-top:12px;">
+            <button id="ownerCancelReserveBtn" style="
+              width:100%;padding:12px;
+              background:none;border:1.5px solid #f59e0b;
+              border-radius:14px;color:#d97706;
+              font-size:14px;font-weight:600;cursor:pointer;
+            ">🔓 Cancelar reserva del comprador</button>
+          </div>
+        ` : ""}
 
         <!-- COMPARTIR -->
         <div style="margin-top:12px;">
@@ -266,6 +318,54 @@ function renderAd(container, ad, profile){
   }
 }
 
+async function initReserveButton(ad){
+
+  const state = getState();
+  const user = state.session?.user;
+  if(!user) return;
+
+  const reserveBtn = document.getElementById("reserveBtn");
+  const cancelReserveBtn = document.getElementById("cancelReserveBtn");
+  const ownerCancelReserveBtn = document.getElementById("ownerCancelReserveBtn");
+
+  if(reserveBtn){
+    reserveBtn.onclick = async () => {
+      const ok = confirm("¿Reservar este anuncio?");
+      if(!ok) return;
+
+      reserveBtn.disabled = true;
+      reserveBtn.textContent = "Reservando...";
+
+      const { error } = await supabase
+        .from("ads")
+        .update({ reserved: true, reserved_by: user.id })
+        .eq("id", ad.id);
+
+      if(error){
+        alert("Error: " + error.message);
+        reserveBtn.disabled = false;
+        reserveBtn.textContent = "🔒 Reservar";
+        return;
+      }
+
+      navigate("adDetail", { id: ad.id });
+    };
+  }
+
+  const cancelReserve = async () => {
+    const { error } = await supabase
+      .from("ads")
+      .update({ reserved: false, reserved_by: null })
+      .eq("id", ad.id);
+
+    if(error){ alert("Error: " + error.message); return; }
+    navigate("adDetail", { id: ad.id });
+  };
+
+  if(cancelReserveBtn) cancelReserveBtn.onclick = cancelReserve;
+  if(ownerCancelReserveBtn) ownerCancelReserveBtn.onclick = cancelReserve;
+}
+
 function initShareButton(ad){
   const shareBtn = document.getElementById("shareBtn");
   if(!shareBtn) return;
@@ -278,17 +378,12 @@ function initShareButton(ad){
     if(navigator.share){
       try {
         await navigator.share({ title, text, url });
-      } catch(e) {
-        // Usuario canceló — no hacer nada
-      }
+      } catch(e) {}
     } else {
-      // Fallback: copiar al portapapeles
       try {
         await navigator.clipboard.writeText(url);
         shareBtn.textContent = "✅ Enlace copiado";
-        setTimeout(() => {
-          shareBtn.innerHTML = "🔗 Compartir anuncio";
-        }, 2000);
+        setTimeout(() => { shareBtn.innerHTML = "🔗 Compartir anuncio"; }, 2000);
       } catch(e) {
         alert("Copia este enlace: " + url);
       }
