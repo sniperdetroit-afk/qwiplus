@@ -28,9 +28,6 @@ async function renderEditAd(state) {
     .single();
 
   if (error || !ad) {
-
-    console.error("Error cargando anuncio:", error);
-
     return `
       <section class="edit-ad-page">
         <p>Error cargando anuncio</p>
@@ -39,40 +36,101 @@ async function renderEditAd(state) {
     `;
   }
 
+  const isVendido = ad.status === "vendido";
+
   return `
-  <section class="edit-ad-page">
+  <section class="edit-ad-page" style="max-width:480px;margin:0 auto;padding:20px;">
 
-    <button class="back-btn" id="backBtn">← Volver</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <button id="backBtn" style="
+        background:none;border:none;font-size:22px;
+        cursor:pointer;color:#6b7280;
+      ">←</button>
+      <h2 style="margin:0;font-size:22px;font-weight:700;color:#111827;">Editar anuncio</h2>
+    </div>
 
-    <h2>Editar anuncio</h2>
+    <!-- ESTADO ACTUAL -->
+    <div style="
+      display:flex;align-items:center;gap:10px;
+      padding:12px 16px;border-radius:14px;margin-bottom:20px;
+      background:${isVendido ? "#f0fdf4" : "#eff6ff"};
+      border:1.5px solid ${isVendido ? "#86efac" : "#bfdbfe"};
+    ">
+      <span style="font-size:18px;">${isVendido ? "✅" : "🟢"}</span>
+      <span style="font-weight:600;color:${isVendido ? "#16a34a" : "#1d4ed8"};">
+        ${isVendido ? "Vendido" : "Activo"}
+      </span>
+    </div>
 
-    <form class="publish-form" id="editForm">
+    <form id="editForm" style="display:flex;flex-direction:column;gap:14px;">
 
-      <input
-        type="text"
-        class="input-field"
-        id="editTitle"
-        value="${ad.title || ""}"
-        placeholder="Título del anuncio"
-      />
+      <div>
+        <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:6px;display:block;">Título</label>
+        <input
+          type="text"
+          id="editTitle"
+          value="${ad.title || ""}"
+          placeholder="Título del anuncio"
+          style="
+            width:100%;padding:12px 14px;
+            border:1.5px solid #e5e7eb;border-radius:12px;
+            font-size:15px;outline:none;box-sizing:border-box;
+          "
+        />
+      </div>
 
-      <input
-        type="number"
-        class="input-field"
-        id="editPrice"
-        value="${ad.price || ""}"
-        placeholder="Precio (€)"
-      />
+      <div>
+        <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:6px;display:block;">Precio (€)</label>
+        <input
+          type="number"
+          id="editPrice"
+          value="${ad.price || ""}"
+          placeholder="Precio"
+          style="
+            width:100%;padding:12px 14px;
+            border:1.5px solid #e5e7eb;border-radius:12px;
+            font-size:15px;outline:none;box-sizing:border-box;
+          "
+        />
+      </div>
 
-      <button
-        type="submit"
-        class="publish-btn"
-        id="saveAdBtn"
-        data-id="${ad.id}">
+      <button type="submit" id="saveAdBtn" data-id="${ad.id}" style="
+        width:100%;padding:14px;
+        background:linear-gradient(135deg,#3b82f6,#6366f1);
+        color:white;border:none;border-radius:14px;
+        font-size:16px;font-weight:700;cursor:pointer;
+        box-shadow:0 4px 14px rgba(99,102,241,.35);
+        margin-top:4px;
+      ">
         Guardar cambios
       </button>
 
     </form>
+
+    <!-- MARCAR COMO VENDIDO -->
+    <div style="margin-top:16px;">
+      ${isVendido ? `
+        <button id="reactivarBtn" data-id="${ad.id}" style="
+          width:100%;padding:14px;
+          background:linear-gradient(135deg,#10b981,#059669);
+          color:white;border:none;border-radius:14px;
+          font-size:16px;font-weight:700;cursor:pointer;
+          box-shadow:0 4px 14px rgba(16,185,129,.35);
+        ">
+          🔄 Reactivar anuncio
+        </button>
+      ` : `
+        <button id="vendidoBtn" data-id="${ad.id}" style="
+          width:100%;padding:14px;
+          background:linear-gradient(135deg,#f59e0b,#ef4444);
+          color:white;border:none;border-radius:14px;
+          font-size:16px;font-weight:700;cursor:pointer;
+          box-shadow:0 4px 14px rgba(245,158,11,.35);
+        ">
+          🏷️ Marcar como vendido
+        </button>
+      `}
+    </div>
 
   </section>
   `;
@@ -85,23 +143,63 @@ function mountEditAd() {
   const backBtn = document.getElementById("backBtn");
   formRef = document.getElementById("editForm");
 
-  if (backBtn) {
-    backBtn.onclick = () => navigate("profile");
+  if(backBtn) backBtn.onclick = () => navigate("profile");
+
+  if(formRef) formRef.addEventListener("submit", handleSaveAd);
+
+  const vendidoBtn = document.getElementById("vendidoBtn");
+  if(vendidoBtn){
+    vendidoBtn.onclick = async () => {
+      const id = vendidoBtn.dataset.id;
+      const ok = confirm("¿Marcar este anuncio como vendido?");
+      if(!ok) return;
+
+      vendidoBtn.disabled = true;
+      vendidoBtn.textContent = "Guardando...";
+
+      const { error } = await supabase
+        .from("ads")
+        .update({ status: "vendido" })
+        .eq("id", id);
+
+      if(error){
+        alert("Error: " + error.message);
+        vendidoBtn.disabled = false;
+        return;
+      }
+
+      navigate("profile");
+    };
   }
 
-  if (formRef) {
-    formRef.addEventListener("submit", handleSaveAd);
+  const reactivarBtn = document.getElementById("reactivarBtn");
+  if(reactivarBtn){
+    reactivarBtn.onclick = async () => {
+      const id = reactivarBtn.dataset.id;
+
+      reactivarBtn.disabled = true;
+      reactivarBtn.textContent = "Reactivando...";
+
+      const { error } = await supabase
+        .from("ads")
+        .update({ status: "activo" })
+        .eq("id", id);
+
+      if(error){
+        alert("Error: " + error.message);
+        reactivarBtn.disabled = false;
+        return;
+      }
+
+      navigate("profile");
+    };
   }
 }
 
 /* ================= UNMOUNT ================= */
 
 function unmountEditAd() {
-
-  if (formRef) {
-    formRef.removeEventListener("submit", handleSaveAd);
-  }
-
+  if(formRef) formRef.removeEventListener("submit", handleSaveAd);
   formRef = null;
 }
 
@@ -113,30 +211,28 @@ async function handleSaveAd(e) {
 
   const btn = document.getElementById("saveAdBtn");
   btn.disabled = true;
+  btn.textContent = "Guardando...";
 
   const id = btn.dataset.id;
-
   const title = document.getElementById("editTitle").value.trim();
   const price = document.getElementById("editPrice").value;
 
-  if (!title || !price) {
+  if(!title || !price){
     alert("Completa los campos");
     btn.disabled = false;
+    btn.textContent = "Guardar cambios";
     return;
   }
 
   const { error } = await supabase
     .from("ads")
-    .update({
-      title,
-      price
-    })
+    .update({ title, price })
     .eq("id", id);
 
-  if (error) {
-    console.error("Error actualizando anuncio:", error);
+  if(error){
     alert("Error guardando cambios");
     btn.disabled = false;
+    btn.textContent = "Guardar cambios";
     return;
   }
 
@@ -150,3 +246,4 @@ export const EditAdView = createView({
   mount: mountEditAd,
   unmount: unmountEditAd
 });
+
