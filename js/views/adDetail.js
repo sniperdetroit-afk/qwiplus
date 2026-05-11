@@ -490,31 +490,6 @@ export const AdDetailView = async () => {
 };
 
 
-function initShareButton(ad){
-  const shareBtn = document.getElementById("shareBtn");
-  if(!shareBtn) return;
-
-  shareBtn.onclick = async () => {
-    const url = `https://qwiplus.vercel.app/ad/${ad.id}`;
-    const title = ad.title || "Mira este anuncio en Qwiplus";
-    const text = `${title} — ${ad.price || 0}€`;
-
-    if(navigator.share){
-      try {
-        await navigator.share({ title, text, url });
-      } catch(e) {}
-    } else {
-      try {
-        await navigator.clipboard.writeText(url);
-        shareBtn.textContent = "✅ Enlace copiado";
-        setTimeout(() => { shareBtn.innerHTML = "🔗 Compartir anuncio"; }, 2000);
-      } catch(e) {
-        alert("Copia este enlace: " + url);
-      }
-    }
-  };
-}
-
 async function initReportButton(ad){
 
   const submitReport = document.getElementById("submitReport");
