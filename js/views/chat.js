@@ -1,8 +1,11 @@
+// js/views/chat.js
+
 import { createView } from "../core/createView.js";
 import { startChatSync, stopChatSync } from "../chat/syncEngine.js";
 import { supabase } from "../services/supabase.js";
 import { getState, setState } from "../core/state.js";
 import { navigate } from "../core/router.js";
+import { markConversationRead } from "../services/badgeService.js";
 
 let box;
 let alive = false;
@@ -55,7 +58,6 @@ async function mount(){
   if(!alive) return;
 
   if(conv?.ads){
-
     const ad = conv.ads;
 
     document.getElementById("chatAdHeader").innerHTML = `
@@ -84,6 +86,9 @@ async function mount(){
   startChatSync(conversationId, userId, addMessage);
 
   document.getElementById("sendMsg").onclick = sendMessage;
+
+  // ✅ Marcar mensajes como leídos al abrir el chat
+  await markConversationRead(conversationId, userId);
 }
 
 async function unmount(){
@@ -109,9 +114,7 @@ async function sendMessage(){
     .select()
     .single();
 
-  if(data){
-    addMessage(data);
-  }
+  if(data) addMessage(data);
 }
 
 function addMessage(msg){
@@ -137,6 +140,7 @@ function addMessage(msg){
 }
 
 export const ChatView = createView(render, mount, unmount);
+
 
      
      

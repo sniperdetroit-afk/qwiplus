@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 158 REGISTER");
+console.log("APP VERSION 159 REGISTER");
 
 /* ================= IMPORTS ================= */
 
@@ -10,6 +10,7 @@ import { getState, setState } from "./core/state.js";
 import { navigate, resolveRoute } from "./core/router.js";
 import { supabase } from "./services/supabase.js";
 import { initLang } from "./services/langService.js";
+import { initBadge, stopBadge } from "./services/badgeService.js";
 
 /* ================= ANTI DOBLE INIT ================= */
 
@@ -238,6 +239,9 @@ async function initApp() {
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user || null;
 
+    // ✅ Iniciar badge si hay usuario
+    if(user) initBadge(user.id);
+
     setState({
       session: { user },
       app: {
@@ -266,6 +270,13 @@ supabase.auth.onAuthStateChange((event, session) => {
     }
   });
 
+  // ✅ Badge según estado de auth
+  if(session?.user){
+    initBadge(session.user.id);
+  } else {
+    stopBadge();
+  }
+
   if (session?.user && getState().app?.view === "login") {
     navigate("home");
   }
@@ -275,6 +286,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 /* ================= SW ================= */
 
 // desactivado por ahora
+
 
 
 
