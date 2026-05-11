@@ -188,9 +188,9 @@ function renderAd(container, ad, profile){
               🔒 Este anuncio está reservado
             </div>
           </div>
-        ` : ""}
+        ` : ""} 
 
-        <!-- BOTÓN RESERVAR (solo si no es dueño y no está reservado) -->
+        <!-- BOTÓN RESERVAR -->
         ${!isOwner && !isVendido && !isReserved ? `
           <div style="margin-top:12px;">
             <button id="reserveBtn" data-id="${ad.id}" style="
@@ -202,7 +202,7 @@ function renderAd(container, ad, profile){
           </div>
         ` : ""}
 
-        <!-- BOTÓN CANCELAR RESERVA (solo el comprador que reservó) -->
+        <!-- CANCELAR RESERVA (comprador) -->
         ${isReservedByMe ? `
           <div style="margin-top:12px;">
             <button id="cancelReserveBtn" data-id="${ad.id}" style="
@@ -214,7 +214,7 @@ function renderAd(container, ad, profile){
           </div>
         ` : ""}
 
-        <!-- BOTÓN LIBERAR RESERVA (solo el dueño) -->
+        <!-- LIBERAR RESERVA (dueño) -->
         ${isOwner && isReserved ? `
           <div style="margin-top:12px;">
             <button id="ownerCancelReserveBtn" data-id="${ad.id}" style="
@@ -286,7 +286,7 @@ function renderAd(container, ad, profile){
 
       </div>
     </div>
-  `;
+  `; 
 
   const backBtn = document.getElementById("backBtn");
   if(backBtn) backBtn.onclick = () => history.back();
@@ -373,122 +373,6 @@ async function initReserveButton(ad){
   if(cancelReserveBtn) cancelReserveBtn.onclick = cancelReserve;
   if(ownerCancelReserveBtn) ownerCancelReserveBtn.onclick = cancelReserve;
 }
-
-function initShareButton(ad){
-  const shareBtn = document.getElementById("shareBtn");
-  if(!shareBtn) return;
-
-  shareBtn.onclick = async () => {
-    const url = `https://qwiplus.vercel.app/ad/${ad.id}`;
-    const title = ad.title || "Mira este anuncio en Qwiplus";
-    const text = `${title} — ${ad.price || 0}€`;
-
-    if(navigator.share){
-      try {
-        await navigator.share({ title, text, url });
-      } catch(e) {}
-    } else {
-      try {
-        await navigator.clipboard.writeText(url);
-        shareBtn.textContent = "✅ Enlace copiado";
-        setTimeout(() => { shareBtn.innerHTML = "🔗 Compartir anuncio"; }, 2000);
-      } catch(e) {
-        alert("Copia este enlace: " + url);
-      }
-    }
-  };
-}
-
-async function initReportButton(ad){
-
-  const submitReport = document.getElementById("submitReport");
-  if(!submitReport) return;
-
-  const state = getState();
-  const user = state.session?.user;
-  if(!user) return;
-
-  submitReport.onclick = async () => {
-
-    const selected = document.querySelector('input[name="reportReason"]:checked');
-    if(!selected){ alert("Selecciona un motivo"); return; }
-
-    submitReport.disabled = true;
-    submitReport.textContent = "Enviando...";
-
-    const { error } = await supabase.from("reports").insert({
-      reporter_id: user.id,
-      ad_id: ad.id,
-      reason: selected.value
-    });
-
-    if(error){
-      if(error.code === "23505"){
-        document.getElementById("reportForm").innerHTML = `
-          <div style="padding:16px;text-align:center;background:#fef2f2;border-radius:14px;">
-            <p style="color:#ef4444;font-weight:600;">Ya has reportado este anuncio anteriormente.</p>
-          </div>
-        `;
-      } else {
-        alert("Error: " + error.message);
-        submitReport.disabled = false;
-        submitReport.textContent = "Enviar reporte";
-      }
-      return;
-    }
-
-    document.getElementById("reportForm").innerHTML = `
-      <div style="padding:16px;text-align:center;background:#f0fdf4;border-radius:14px;">
-        <div style="font-size:28px;">✅</div>
-        <p style="color:#16a34a;font-weight:700;margin:8px 0 0;">Reporte enviado. Lo revisaremos pronto.</p>
-      </div>
-    `;
-  };
-}
-
-async function initChatButton(ad){
-
-  const btn = document.getElementById("chatBtn");
-  if(!btn) return;
-
-  btn.onclick = async () => {
-
-    const state = getState();
-    const user = state.session?.user;
-
-    if(!user){ navigate("login"); return; }
-    if(user.id === ad.user_id){ alert("No puedes enviarte mensajes a ti mismo"); return; }
-
-    const { data: existing } = await supabase
-      .from("conversations").select("*")
-      .eq("ad_id", ad.id).eq("buyer_id", user.id).eq("seller_id", ad.user_id)
-      .maybeSingle();
-
-    let conversationId;
-
-    if(existing){
-      conversationId = existing.id;
-    } else {
-      const { data: newConv, error } = await supabase
-        .from("conversations")
-        .insert({
-          ad_id: ad.id, buyer_id: user.id, seller_id: ad.user_id,
-          last_message: "", last_message_at: new Date().toISOString()
-        }).select().single();
-
-      if(error){ console.error("❌ Error creando conversación:", error); return; }
-      conversationId = newConv.id;
-    }
-
-    navigate("chat", { conversationId });
-  };
-}
-
-export const AdDetailView = async () => {
-  const html = await renderAdDetail();
-  return { html, mount: mountAdDetail, unmount: unmountAdDetail };
-};
-
 
 function initShareButton(ad){
   const shareBtn = document.getElementById("shareBtn");
