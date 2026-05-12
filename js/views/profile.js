@@ -130,19 +130,15 @@ async function renderProfile(){
           <span>Estado</span>
         </div>
       </div>
+<div class="profile-actions">
+  <button id="editProfile" class="btn-primary">Editar perfil</button>
+  <button id="publishFromProfile" class="btn-primary">Publicar</button>
+</div>
 
-      <div class="profile-actions">
-        <button id="editProfile" class="btn-primary">Editar perfil</button>
-      </div>
-
-        <div class="my-ads-section">
-        <div class="section-title-row"> 
-          <button id="publishFromProfile" class="btn-primary small">Publicar</button> </br>
-          <h2>Mis anuncios</h2>
-        </div>
-        <div id="myAdsContainer" class="ads-grid"></div>
-      </div>
-
+<div class="my-ads-section">
+  <h2 style="margin:20px 0 12px;font-size:18px;color:#111827;">Mis anuncios</h2>
+  <div id="myAdsContainer" class="ads-grid"></div>
+</div>
     </section>
   `;
 }
