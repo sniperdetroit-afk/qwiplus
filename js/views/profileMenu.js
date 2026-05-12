@@ -15,65 +15,45 @@ function renderProfileMenu(){
       <h2 style="margin:0;font-size:22px;font-weight:800;color:#111827;">${t("myAccount")}</h2>
     </div>
 
-    <div style="
-      background:white;
-      border:1px solid #e5e7eb;
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow:0 1px 3px rgba(0,0,0,0.04);
-    ">
+    <div style="display:flex;flex-direction:column;gap:12px;">
 
       <button class="profile-menu-btn" data-view="profile" style="
-        display:flex;align-items:center;gap:14px;
-        width:100%;padding:16px 18px;
-        background:white;border:none;
-        border-bottom:1px solid #f3f4f6;
-        cursor:pointer;text-align:left;
-        transition:background 0.15s;
-      " onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
-        <div style="
-          width:36px;height:36px;border-radius:10px;
-          background:#eff6ff;color:#3b82f6;
-          display:flex;align-items:center;justify-content:center;
-          font-size:18px;flex-shrink:0;
-        ">👤</div>
-        <span style="flex:1;font-size:15px;font-weight:600;color:#111827;">${t("viewProfile")}</span>
-        <span style="color:#d1d5db;font-size:20px;">›</span>
+        display:flex;align-items:center;gap:12px;
+        width:100%;padding:16px 20px;
+        background:linear-gradient(90deg,#3b82f6,#22c55e);
+        border:none;border-radius:999px;
+        font-size:15px;font-weight:700;color:white;
+        cursor:pointer;
+      ">
+        <span style="font-size:18px;">👤</span>
+        <span style="flex:1;text-align:center;">${t("viewProfile")}</span>
+        <span style="opacity:0.8;font-size:18px;">›</span>
       </button>
 
       <button class="profile-menu-btn" data-view="favorites" style="
-        display:flex;align-items:center;gap:14px;
-        width:100%;padding:16px 18px;
-        background:white;border:none;
-        border-bottom:1px solid #f3f4f6;
-        cursor:pointer;text-align:left;
-        transition:background 0.15s;
-      " onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
-        <div style="
-          width:36px;height:36px;border-radius:10px;
-          background:#fef2f2;color:#ef4444;
-          display:flex;align-items:center;justify-content:center;
-          font-size:18px;flex-shrink:0;
-        ">❤️</div>
-        <span style="flex:1;font-size:15px;font-weight:600;color:#111827;">${t("favorites")}</span>
-        <span style="color:#d1d5db;font-size:20px;">›</span>
+        display:flex;align-items:center;gap:12px;
+        width:100%;padding:16px 20px;
+        background:linear-gradient(90deg,#3b82f6,#22c55e);
+        border:none;border-radius:999px;
+        font-size:15px;font-weight:700;color:white;
+        cursor:pointer;
+      ">
+        <span style="font-size:18px;">❤️</span>
+        <span style="flex:1;text-align:center;">${t("favorites")}</span>
+        <span style="opacity:0.8;font-size:18px;">›</span>
       </button>
 
       <button class="profile-menu-btn" data-view="settings" style="
-        display:flex;align-items:center;gap:14px;
-        width:100%;padding:16px 18px;
-        background:white;border:none;
-        cursor:pointer;text-align:left;
-        transition:background 0.15s;
-      " onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
-        <div style="
-          width:36px;height:36px;border-radius:10px;
-          background:#f0fdf4;color:#10b981;
-          display:flex;align-items:center;justify-content:center;
-          font-size:18px;flex-shrink:0;
-        ">⚙️</div>
-        <span style="flex:1;font-size:15px;font-weight:600;color:#111827;">${t("config")}</span>
-        <span style="color:#d1d5db;font-size:20px;">›</span>
+        display:flex;align-items:center;gap:12px;
+        width:100%;padding:16px 20px;
+        background:linear-gradient(90deg,#3b82f6,#22c55e);
+        border:none;border-radius:999px;
+        font-size:15px;font-weight:700;color:white;
+        cursor:pointer;
+      ">
+        <span style="font-size:18px;">⚙️</span>
+        <span style="flex:1;text-align:center;">${t("config")}</span>
+        <span style="opacity:0.8;font-size:18px;">›</span>
       </button>
 
     </div>
