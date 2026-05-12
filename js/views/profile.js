@@ -137,7 +137,7 @@ async function renderProfile(){
 
         <div class="my-ads-section">
         <div class="section-title-row"> 
-          <button id="publishFromProfile" class="btn-primary small">Publicar</button>
+          <button id="publishFromProfile" class="btn-primary small">Publicar</button></br>
           <h2>Mis anuncios</h2>
         </div>
         <div id="myAdsContainer" class="ads-grid"></div>
