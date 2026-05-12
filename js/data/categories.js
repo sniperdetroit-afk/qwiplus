@@ -181,7 +181,7 @@ export const categories = [
 
   {
     id: "tecnosfera",
-    name: "tecnosfera digital",
+    name: "Tecnosfera digital",
     sub: [
       "Software",
       "Plantillas",

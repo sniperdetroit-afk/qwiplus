@@ -267,7 +267,7 @@ export const categories = [
   },
   {
     id: "digitales",
-    name: "tecnologia digital",
+    name: "Tecnologia digital",
     sub: [
       "Software",
       "Plantillas",
