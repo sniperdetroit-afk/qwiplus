@@ -28,17 +28,17 @@ async function updateBadge(userId) {
 
   const convIds = convs.map(c => c.id);
 
-  const { count, error: msgError } = await supabase
+  // 🔍 DEBUG: ver qué mensajes están sin leer
+  const { data: unread } = await supabase
     .from("messages")
-    .select("id", { count: "exact", head: true })
+    .select("id, conversation_id, sender_id, text, read")
     .in("conversation_id", convIds)
     .eq("read", false)
     .neq("sender_id", userId);
 
-  if (msgError) {
-    console.error("BADGE MESSAGES ERROR:", msgError);
-    return;
-  }
+  console.log("🔔 BADGE - Mensajes sin leer:", unread?.length || 0, unread);
+
+  const count = unread?.length || 0;
 
   if (!count) {
     badge.classList.add("hidden");
@@ -55,7 +55,6 @@ async function updateBadge(userId) {
 export function initBadge(userId) {
   if (!userId) return;
 
-  // Evita crear dos canales badge a la vez
   stopBadge();
 
   updateBadge(userId);
@@ -96,48 +95,27 @@ export function stopBadge() {
 
 /* ================= MARCAR LEÍDOS ================= */
 
-async function updateBadge(userId) {
-  const badge = document.getElementById("msgBadge");
-  if (!badge || !userId) return;
+export async function markConversationRead(conversationId, userId) {
+  if (!conversationId || !userId) return;
 
-  const { data: convs, error: convError } = await supabase
-    .from("conversations")
-    .select("id")
-    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+  console.log("📨 MARK READ - conv:", conversationId, "user:", userId);
 
-  if (convError) {
-    console.error("BADGE CONVERSATIONS ERROR:", convError);
-    return;
-  }
-
-  if (!convs?.length) {
-    badge.classList.add("hidden");
-    badge.textContent = "0";
-    return;
-  }
-
-  const convIds = convs.map(c => c.id);
-
-  // 🔍 DEBUG: ver qué mensajes están sin leer
-  const { data: unread } = await supabase
+  const { data, error } = await supabase
     .from("messages")
-    .select("id, conversation_id, sender_id, text, read")
-    .in("conversation_id", convIds)
+    .update({ read: true })
+    .eq("conversation_id", conversationId)
     .eq("read", false)
-    .neq("sender_id", userId);
+    .neq("sender_id", userId)
+    .select();
 
-  console.log("🔔 BADGE - Mensajes sin leer:", unread?.length || 0, unread);
-
-  const count = unread?.length || 0;
-
-  if (!count) {
-    badge.classList.add("hidden");
-    badge.textContent = "0";
+  if (error) {
+    console.error("MARK READ ERROR:", error);
     return;
   }
 
-  badge.textContent = count > 9 ? "9+" : String(count);
-  badge.classList.remove("hidden");
+  console.log("✅ Mensajes marcados como leídos:", data?.length || 0, data);
+
+  await updateBadge(userId);
 }
 
 
