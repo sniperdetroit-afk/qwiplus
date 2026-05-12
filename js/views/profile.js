@@ -133,7 +133,6 @@ async function renderProfile(){
 
       <div class="profile-actions">
         <button id="editProfile" class="btn-primary">Editar perfil</button>
-        <button id="logoutBtn" class="btn-danger">Cerrar sesión</button>
       </div>
 
       <div class="my-ads-section">
