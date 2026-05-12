@@ -126,11 +126,11 @@ function renderAd(container, ad, profile){
 
       <div class="ad-body">
 
+        <h2 class="ad-title">${ad.title}</h2>
+        
         <div class="ad-price" style="${isVendido ? "text-decoration:line-through;color:#9ca3af;" : ""}">
           ${ad.price || 0}€
         </div>
-
-        <h2 class="ad-title">${ad.title}</h2>
 
         <!-- VENDEDOR -->
         <div id="sellerBtn" style="
