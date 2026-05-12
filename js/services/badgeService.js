@@ -96,27 +96,49 @@ export function stopBadge() {
 
 /* ================= MARCAR LEÍDOS ================= */
 
-export async function markConversationRead(conversationId, userId) {
-  if (!conversationId || !userId) return;
+async function updateBadge(userId) {
+  const badge = document.getElementById("msgBadge");
+  if (!badge || !userId) return;
 
-  console.log("📨 MARK READ - conv:", conversationId, "user:", userId);
+  const { data: convs, error: convError } = await supabase
+    .from("conversations")
+    .select("id")
+    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
 
-  const { data, error } = await supabase
-    .from("messages")
-    .update({ read: true })
-    .eq("conversation_id", conversationId)
-    .eq("read", false)
-    .neq("sender_id", userId)
-    .select();
-
-  if (error) {
-    console.error("MARK READ ERROR:", error);
+  if (convError) {
+    console.error("BADGE CONVERSATIONS ERROR:", convError);
     return;
   }
 
-  console.log("✅ Mensajes marcados como leídos:", data?.length || 0, data);
+  if (!convs?.length) {
+    badge.classList.add("hidden");
+    badge.textContent = "0";
+    return;
+  }
 
-  await updateBadge(userId);
+  const convIds = convs.map(c => c.id);
+
+  // 🔍 DEBUG: ver qué mensajes están sin leer
+  const { data: unread } = await supabase
+    .from("messages")
+    .select("id, conversation_id, sender_id, text, read")
+    .in("conversation_id", convIds)
+    .eq("read", false)
+    .neq("sender_id", userId);
+
+  console.log("🔔 BADGE - Mensajes sin leer:", unread?.length || 0, unread);
+
+  const count = unread?.length || 0;
+
+  if (!count) {
+    badge.classList.add("hidden");
+    badge.textContent = "0";
+    return;
+  }
+
+  badge.textContent = count > 9 ? "9+" : String(count);
+  badge.classList.remove("hidden");
 }
+
 
 
