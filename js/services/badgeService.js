@@ -99,19 +99,24 @@ export function stopBadge() {
 export async function markConversationRead(conversationId, userId) {
   if (!conversationId || !userId) return;
 
-  const { error } = await supabase
+  console.log("📨 MARK READ - conv:", conversationId, "user:", userId);
+
+  const { data, error } = await supabase
     .from("messages")
     .update({ read: true })
     .eq("conversation_id", conversationId)
     .eq("read", false)
-    .neq("sender_id", userId);
+    .neq("sender_id", userId)
+    .select();
 
   if (error) {
     console.error("MARK READ ERROR:", error);
     return;
   }
 
-  // Forzar actualización inmediata del badge sin esperar realtime
+  console.log("✅ Mensajes marcados como leídos:", data?.length || 0, data);
+
   await updateBadge(userId);
 }
+
 
