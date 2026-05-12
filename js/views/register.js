@@ -29,11 +29,11 @@ async function renderRegister() {
       <!-- LOGO -->
       <div style="text-align:center;margin-bottom:32px;">
         <img src="/img/logo-qwiplus.png" style="
-          width:72px;height:72px;border-radius:20px;
-          box-shadow:0 8px 24px rgba(0,0,0,0.4);
-          margin-bottom:14px;object-fit:cover;
+          width:260px;height:auto;
+          margin-bottom:14px;
+          object-fit:contain;
+          mix-blend-mode:lighten;
         ">
-        <h1 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Qwiplus</h1>
         <p style="margin:6px 0 0;color:#94a3b8;font-size:14px;">Crea tu cuenta gratis</p>
       </div>
 
