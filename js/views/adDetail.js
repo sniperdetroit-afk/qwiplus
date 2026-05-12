@@ -152,7 +152,6 @@ function renderAd(container, ad, profile){
         <div class="ad-actions">
           ${isOwner
             ? `
-              <button id="editBtn" class="btn-edit">Editar anuncio</button>
               <button id="deleteBtn" class="btn-delete">Eliminar</button>
             `
             : isVendido
