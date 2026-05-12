@@ -96,10 +96,17 @@ function renderAd(container, ad, profile){
   container.innerHTML = `
     <div class="ad-detail">
 
-      <div class="ad-top">
-        <button id="backBtn">←</button>
+      <!-- BARRA SUPERIOR -->
+      <div class="ad-top" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;">
+        <button id="backBtn" style="background:none;border:none;font-size:22px;cursor:pointer;color:#374151;">←</button>
+        <div style="display:flex;align-items:center;gap:14px;">
+          ${isOwner ? `
+            <button id="editBtn" title="Editar anuncio" style="background:none;border:none;cursor:pointer;font-size:22px;">✏️</button>
+          ` : ""}
+          <button id="shareBtn" title="Compartir" style="background:none;border:none;cursor:pointer;font-size:22px;">⬆️</button>
+        </div>
       </div>
-    
+
       <!-- IMAGEN CON BADGES -->
       <div style="position:relative;">
         <div class="ad-image-wrapper">
@@ -150,11 +157,7 @@ function renderAd(container, ad, profile){
         </div>
 
         <div class="ad-actions">
-          ${isOwner
-            ? `
-              <button id="deleteBtn" class="btn-delete">Eliminar</button>
-            `
-            : isVendido
+          ${isVendido
             ? `
               <div style="
                 width:100%;padding:14px;text-align:center;
@@ -164,18 +167,29 @@ function renderAd(container, ad, profile){
                 Este artículo ya está vendido
               </div>
             `
-            : `
+            : !isOwner ? `
               <button id="buyBtn" class="btn-buy">Comprar</button>
               <button id="offerBtn" class="btn-offer">Hacer oferta</button>
-            `
+            ` : ""
           }
         </div>
 
+        ${isOwner ? `
+          <div style="margin-top:12px;">
+            <button id="deleteBtn" style="
+              width:100%;padding:12px;background:#fef2f2;
+              border:1.5px solid #fecaca;border-radius:14px;color:#ef4444;
+              font-size:14px;font-weight:600;cursor:pointer;">
+              🗑️ Eliminar anuncio
+            </button>
+          </div>
+        ` : ""}
+
         <div class="ad-desc">${ad.description || "Sin descripción"}</div>
 
-        ${isOwner || isVendido ? `` : `<button id="chatBtn" class="chat-btn">Enviar mensaje</button>`}
+        ${!isOwner && !isVendido ? `<button id="chatBtn" class="chat-btn">Enviar mensaje</button>` : ""}
 
-        <!-- BOTÓN RESERVAR (solo el dueño, si no está ya reservado) -->
+        <!-- BOTÓN RESERVAR -->
         ${isOwner && !isVendido && !isReserved ? `
           <div style="margin-top:12px;">
             <button id="reserveBtn" data-id="${ad.id}" style="
@@ -185,9 +199,9 @@ function renderAd(container, ad, profile){
               🔒 Marcar como reservado
             </button>
           </div>
-        ` : ""} 
+        ` : ""}
 
-        <!-- BOTÓN LIBERAR RESERVA (solo el dueño, si está reservado) -->
+        <!-- BOTÓN LIBERAR RESERVA -->
         ${isOwner && isReserved ? `
           <div style="margin-top:12px;">
             <button id="reserveBtn" data-id="${ad.id}" style="
@@ -199,7 +213,7 @@ function renderAd(container, ad, profile){
           </div>
         ` : ""}
 
-        <!-- AVISO RESERVADO (para otros usuarios) -->
+        <!-- AVISO RESERVADO -->
         ${!isOwner && isReserved ? `
           <div style="margin-top:12px;">
             <div style="
@@ -212,19 +226,6 @@ function renderAd(container, ad, profile){
           </div>
         ` : ""}
 
-        <!-- COMPARTIR -->
-        <div style="margin-top:12px;">
-          <button id="shareBtn" style="
-            width:100%;padding:12px;
-            background:none;border:1.5px solid #e5e7eb;
-            border-radius:14px;color:#6b7280;
-            font-size:14px;font-weight:600;cursor:pointer;
-            display:flex;align-items:center;justify-content:center;gap:8px;
-          ">
-            🔗 Compartir anuncio
-          </button>
-        </div>
-
         <!-- REPORTAR -->
         ${!isOwner && currentUser ? `
           <div style="margin-top:10px;">
@@ -232,8 +233,7 @@ function renderAd(container, ad, profile){
               width:100%;padding:12px;
               background:none;border:1.5px solid #e5e7eb;
               border-radius:14px;color:#9ca3af;
-              font-size:14px;font-weight:600;cursor:pointer;
-            ">⚑ Reportar anuncio</button>
+              font-size:14px;font-weight:600;cursor:pointer;">⚑ Reportar anuncio</button>
           </div>
 
           <div id="reportForm" style="display:none;margin-top:12px;">
@@ -244,7 +244,6 @@ function renderAd(container, ad, profile){
               <h4 style="margin:0 0 14px;font-size:15px;font-weight:700;color:#111827;">
                 ¿Por qué reportas este anuncio?
               </h4>
-
               <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
                 ${["Spam o publicidad", "Fraude o estafa", "Contenido inapropiado", "Precio abusivo", "Producto ilegal", "Otro"].map(reason => `
                   <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
@@ -253,14 +252,12 @@ function renderAd(container, ad, profile){
                   </label>
                 `).join("")}
               </div>
-
               <button id="submitReport" style="
                 width:100%;padding:12px;
                 background:linear-gradient(135deg,#ef4444,#dc2626);
                 color:white;border:none;border-radius:12px;
                 font-size:15px;font-weight:700;cursor:pointer;
               ">Enviar reporte</button>
-
               <button id="cancelReport" style="
                 width:100%;padding:10px;margin-top:8px;
                 background:none;border:none;
@@ -310,7 +307,7 @@ function renderAd(container, ad, profile){
       reportBtn.style.display = "block";
     };
   }
-} 
+}
 
 async function initReserveButton(ad){
 
@@ -363,8 +360,8 @@ function initShareButton(ad){
     } else {
       try {
         await navigator.clipboard.writeText(url);
-        shareBtn.textContent = "✅ Enlace copiado";
-        setTimeout(() => { shareBtn.innerHTML = "🔗 Compartir anuncio"; }, 2000);
+        shareBtn.textContent = "✅";
+        setTimeout(() => { shareBtn.innerHTML = "⬆️"; }, 2000);
       } catch(e) {
         alert("Copia este enlace: " + url);
       }
