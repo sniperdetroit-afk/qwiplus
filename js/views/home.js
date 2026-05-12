@@ -120,9 +120,49 @@ function startRealtime(){
         if(count){
           count.textContent = ad.favorites_count || 0;
         }
+
+        // Actualizar badge de estado en tiempo real
+        const badgeWrapper = card.querySelector(".status-badge");
+        if(badgeWrapper) badgeWrapper.remove();
+
+        const newBadge = getStatusBadge(ad);
+        if(newBadge){
+          const imageWrapper = card.querySelector(".card-image");
+          imageWrapper.insertAdjacentHTML("afterbegin", newBadge);
+        }
       }
     )
     .subscribe();
+}
+
+/* =========================
+   STATUS BADGE
+========================= */
+
+function getStatusBadge(ad){
+  if(ad.status === "vendido"){
+    return `
+      <div class="status-badge" style="
+        position:absolute;top:8px;left:8px;z-index:2;
+        background:#ef4444;color:white;
+        padding:4px 10px;border-radius:999px;
+        font-size:11px;font-weight:800;
+        box-shadow:0 2px 8px rgba(239,68,68,0.4);
+      ">VENDIDO</div>
+    `;
+  }
+  if(ad.status === "reservado"){
+    return `
+      <div class="status-badge" style="
+        position:absolute;top:8px;left:8px;z-index:2;
+        background:#f59e0b;color:white;
+        padding:4px 10px;border-radius:999px;
+        font-size:11px;font-weight:800;
+        box-shadow:0 2px 8px rgba(245,158,11,0.4);
+      ">RESERVADO</div>
+    `;
+  }
+  return "";
 }
 
 /* =========================
@@ -195,14 +235,18 @@ function renderAd(ad){
   const state = getState();
   const userId = state.session?.user?.id;
   const isMine = ad.user_id === userId;
+  const isVendido = ad.status === "vendido";
 
   const div = document.createElement("div");
   div.className = "card";
   div.dataset.id = ad.id;
 
+  const statusBadge = getStatusBadge(ad);
+
   div.innerHTML = `
-    <div class="card-image">
-      <img src="${ad.image_url || '/img/placeholder.png'}">
+    <div class="card-image" style="position:relative;">
+      ${statusBadge}
+      <img src="${ad.image_url || '/img/placeholder.png'}" style="${isVendido ? 'opacity:0.6;' : ''}">
 
       ${
         !isMine ? `
@@ -215,7 +259,7 @@ function renderAd(ad){
       <div class="card-title">${ad.title}</div>
 
       <div class="card-bottom">
-        <div class="price">${ad.price}€</div>
+        <div class="price" style="${isVendido ? 'text-decoration:line-through;color:#9ca3af;' : ''}">${ad.price}€</div>
 
         <div class="favorite-counter">
           ❤️ <span class="fav-count">${ad.favorites_count || 0}</span>

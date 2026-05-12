@@ -55,7 +55,7 @@ async function mountAdDetail(){
     initChatButton(data);
     initReportButton(data);
     initShareButton(data);
-    initReserveButton(data);
+    initStatusButtons(data);
 
   } catch(err){
     showError(container, "Error cargando anuncio");
@@ -87,7 +87,7 @@ function renderAd(container, ad, profile){
   const currentUser = state.session?.user;
   const isOwner = currentUser && currentUser.id === ad.user_id;
   const isVendido = ad.status === "vendido";
-  const isReserved = ad.reserved === true;
+  const isReservado = ad.status === "reservado";
 
   const avatar = profile?.avatar_url
     ? `<img src="${profile.avatar_url}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
@@ -110,7 +110,7 @@ function renderAd(container, ad, profile){
       <!-- IMAGEN CON BADGES -->
       <div style="position:relative;">
         <div class="ad-image-wrapper">
-          <img class="ad-img" src="${ad.image_url || ""}">
+          <img class="ad-img" src="${ad.image_url || ""}" style="${isVendido ? 'opacity:0.7;' : ''}">
         </div>
         ${isVendido ? `
           <div style="
@@ -120,7 +120,7 @@ function renderAd(container, ad, profile){
             font-size:13px;font-weight:800;
             box-shadow:0 4px 12px rgba(239,68,68,0.4);
           ">VENDIDO</div>
-        ` : isReserved ? `
+        ` : isReservado ? `
           <div style="
             position:absolute;top:12px;left:12px;
             background:#f59e0b;color:white;
@@ -156,65 +156,53 @@ function renderAd(container, ad, profile){
           <span style="color:#9ca3af;font-size:20px;">›</span>
         </div>
 
-        <div class="ad-actions">
-          ${isVendido
-            ? `
-              <div style="
-                width:100%;padding:14px;text-align:center;
-                background:#fef2f2;border-radius:14px;
-                color:#ef4444;font-weight:700;font-size:15px;
-              ">
-                Este artículo ya está vendido
-              </div>
-            `
-            : !isOwner ? `
-              <button id="buyBtn" class="btn-buy">Comprar</button>
-              <button id="offerBtn" class="btn-offer">Hacer oferta</button>
-            ` : ""
-          }
-        </div>
-
-        ${isOwner ? `
-          <div style="margin-top:12px;">
-            <button id="deleteBtn" style="
-              width:100%;padding:12px;background:#fef2f2;
-              border:1.5px solid #fecaca;border-radius:14px;color:#ef4444;
-              font-size:14px;font-weight:600;cursor:pointer;">
-              🗑️ Eliminar anuncio
+        <!-- ACCIONES COMPRADOR -->
+        ${!isOwner && !isVendido ? `
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <button id="buyBtn" style="
+              flex:1;padding:14px;border-radius:14px;border:none;
+              background:linear-gradient(135deg,#e0e7ff,#c7d2fe);
+              color:#4338ca;font-weight:700;font-size:15px;cursor:pointer;
+              position:relative;opacity:0.85;
+            ">
+              🛒 Comprar
+              <span style="
+                position:absolute;top:-8px;right:-8px;
+                background:#6366f1;color:white;
+                font-size:10px;font-weight:700;
+                padding:2px 7px;border-radius:999px;
+              ">Próximamente</span>
+            </button>
+            <button id="offerBtn" style="
+              flex:1;padding:14px;border-radius:14px;border:none;
+              background:linear-gradient(135deg,#fef3c7,#fde68a);
+              color:#92400e;font-weight:700;font-size:15px;cursor:pointer;
+              position:relative;opacity:0.85;
+            ">
+              🏷️ Hacer oferta
+              <span style="
+                position:absolute;top:-8px;right:-8px;
+                background:#f59e0b;color:white;
+                font-size:10px;font-weight:700;
+                padding:2px 7px;border-radius:999px;
+              ">Próximamente</span>
             </button>
           </div>
         ` : ""}
 
-        <div class="ad-desc">${ad.description || "Sin descripción"}</div>
-
-        ${!isOwner && !isVendido ? `<button id="chatBtn" class="chat-btn">Enviar mensaje</button>` : ""}
-
-        <!-- BOTÓN RESERVAR -->
-        ${isOwner && !isVendido && !isReserved ? `
-          <div style="margin-top:12px;">
-            <button id="reserveBtn" data-id="${ad.id}" style="
-              width:100%;padding:12px;background:#f59e0b;
-              border:none;border-radius:14px;color:#fff;
-              font-size:14px;font-weight:600;cursor:pointer;">
-              🔒 Marcar como reservado
-            </button>
+        <!-- ARTÍCULO VENDIDO -->
+        ${isVendido && !isOwner ? `
+          <div style="
+            width:100%;padding:14px;text-align:center;margin-top:8px;
+            background:#fef2f2;border-radius:14px;
+            color:#ef4444;font-weight:700;font-size:15px;
+          ">
+            Este artículo ya está vendido
           </div>
-        ` : ""}
+        ` : ""} 
 
-        <!-- BOTÓN LIBERAR RESERVA -->
-        ${isOwner && isReserved ? `
-          <div style="margin-top:12px;">
-            <button id="reserveBtn" data-id="${ad.id}" style="
-              width:100%;padding:12px;background:#6b7280;
-              border:none;border-radius:14px;color:#fff;
-              font-size:14px;font-weight:600;cursor:pointer;">
-              🔓 Quitar reserva
-            </button>
-          </div>
-        ` : ""}
-
-        <!-- AVISO RESERVADO -->
-        ${!isOwner && isReserved ? `
+        <!-- AVISO RESERVADO (para otros) -->
+        ${!isOwner && isReservado ? `
           <div style="margin-top:12px;">
             <div style="
               width:100%;padding:12px;text-align:center;
@@ -225,6 +213,63 @@ function renderAd(container, ad, profile){
             </div>
           </div>
         ` : ""}
+
+        <!-- BOTONES DEL DUEÑO -->
+        ${isOwner ? `
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+
+            ${!isVendido && !isReservado ? `
+              <button id="reserveBtn" style="
+                width:100%;padding:12px;background:#f59e0b;
+                border:none;border-radius:14px;color:#fff;
+                font-size:14px;font-weight:600;cursor:pointer;">
+                🔒 Marcar como reservado
+              </button>
+              <button id="soldBtn" style="
+                width:100%;padding:12px;background:#ef4444;
+                border:none;border-radius:14px;color:#fff;
+                font-size:14px;font-weight:600;cursor:pointer;">
+                ✅ Marcar como vendido
+              </button>
+            ` : ""}
+
+            ${isReservado ? `
+              <button id="unreserveBtn" style="
+                width:100%;padding:12px;background:#6b7280;
+                border:none;border-radius:14px;color:#fff;
+                font-size:14px;font-weight:600;cursor:pointer;">
+                🔓 Quitar reserva
+              </button>
+              <button id="soldBtn" style="
+                width:100%;padding:12px;background:#ef4444;
+                border:none;border-radius:14px;color:#fff;
+                font-size:14px;font-weight:600;cursor:pointer;">
+                ✅ Marcar como vendido
+              </button>
+            ` : ""}
+
+            ${isVendido ? `
+              <button id="reactivateBtn" style="
+                width:100%;padding:12px;background:#10b981;
+                border:none;border-radius:14px;color:#fff;
+                font-size:14px;font-weight:600;cursor:pointer;">
+                ↩️ Reactivar anuncio
+              </button>
+            ` : ""}
+
+            <button id="deleteBtn" style="
+              width:100%;padding:12px;background:#fef2f2;
+              border:1.5px solid #fecaca;border-radius:14px;color:#ef4444;
+              font-size:14px;font-weight:600;cursor:pointer;">
+              🗑️ Eliminar anuncio
+            </button>
+
+          </div>
+        ` : ""}
+
+        <div class="ad-desc" style="margin-top:14px;">${ad.description || "Sin descripción"}</div>
+
+        ${!isOwner && !isVendido ? `<button id="chatBtn" class="chat-btn">Enviar mensaje</button>` : ""}
 
         <!-- REPORTAR -->
         ${!isOwner && currentUser ? `
@@ -274,6 +319,26 @@ function renderAd(container, ad, profile){
   const backBtn = document.getElementById("backBtn");
   if(backBtn) backBtn.onclick = () => history.back();
 
+  // Toast próximamente
+  const showToast = (msg) => {
+    const toast = document.createElement("div");
+    toast.textContent = msg;
+    toast.style.cssText = `
+      position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+      background:#1e1b4b;color:white;padding:12px 24px;
+      border-radius:999px;font-size:14px;font-weight:600;
+      box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:9999;
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  };
+
+  const buyBtn = document.getElementById("buyBtn");
+  if(buyBtn) buyBtn.onclick = () => showToast("🚀 Próximamente disponible");
+
+  const offerBtn = document.getElementById("offerBtn");
+  if(offerBtn) offerBtn.onclick = () => showToast("🚀 Próximamente disponible");
+
   const sellerBtn = document.getElementById("sellerBtn");
   if(sellerBtn) sellerBtn.onclick = () => navigate("publicProfile", { userId: ad.user_id });
 
@@ -309,39 +374,58 @@ function renderAd(container, ad, profile){
   }
 }
 
-async function initReserveButton(ad){
+/* ================= STATUS BUTTONS ================= */
 
-  const state = getState();
-  const user = state.session?.user;
-  if(!user) return;
+async function initStatusButtons(ad){
 
   const reserveBtn = document.getElementById("reserveBtn");
-  if(!reserveBtn) return;
+  const unreserveBtn = document.getElementById("unreserveBtn");
+  const soldBtn = document.getElementById("soldBtn");
+  const reactivateBtn = document.getElementById("reactivateBtn");
 
-  const isReserved = ad.reserved === true;
-
-  reserveBtn.onclick = async () => {
-    const newReserved = !isReserved;
-    const msg = newReserved ? "¿Marcar este anuncio como reservado?" : "¿Quitar la reserva de este anuncio?";
-    const ok = confirm(msg);
+  const updateStatus = async (newStatus, confirmMsg) => {
+    const ok = confirm(confirmMsg);
     if(!ok) return;
-
-    reserveBtn.disabled = true;
-    reserveBtn.textContent = "Guardando...";
 
     const { error } = await supabase
       .from("ads")
-      .update({ reserved: newReserved })
-      .eq("id", ad.id);
+      .update({ status: newStatus })
+      .eq("id", ad.id); 
 
-    if(error){
-      alert("Error: " + error.message);
-      reserveBtn.disabled = false;
-      return;
-    }
+    if(error){ alert("Error: " + error.message); return; }
 
-    navigate("adDetail", { id: ad.id });
+    ad.status = newStatus;
+    const container = document.getElementById("adContent");
+
+    let profile = null;
+    try {
+      const { data: p } = await supabase
+        .from("profiles").select("*").eq("id", ad.user_id).maybeSingle();
+      profile = p;
+    } catch(e){}
+
+    renderAd(container, ad, profile);
+    initStatusButtons(ad);
+    initChatButton(ad);
+    initReportButton(ad);
+    initShareButton(ad);
   };
+
+  if(reserveBtn){
+    reserveBtn.onclick = () => updateStatus("reservado", "¿Marcar este anuncio como reservado?");
+  }
+
+  if(unreserveBtn){
+    unreserveBtn.onclick = () => updateStatus("activo", "¿Quitar la reserva de este anuncio?");
+  }
+
+  if(soldBtn){
+    soldBtn.onclick = () => updateStatus("vendido", "¿Marcar este anuncio como VENDIDO? Ya no será visible para compradores.");
+  }
+
+  if(reactivateBtn){
+    reactivateBtn.onclick = () => updateStatus("activo", "¿Reactivar este anuncio?");
+  }
 }
 
 function initShareButton(ad){
