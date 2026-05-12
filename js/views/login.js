@@ -34,7 +34,6 @@ async function renderLogin(){
           width:260px;height:auto;
           margin-bottom:14px;
           object-fit:contain;
-          mix-blend-mode: lighten;
         ">
         <p style="margin:6px 0 0;color:#94a3b8;font-size:14px;">Compra y vende lo que quieras</p>
       </div>
