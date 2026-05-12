@@ -108,5 +108,10 @@ export async function markConversationRead(conversationId, userId) {
 
   if (error) {
     console.error("MARK READ ERROR:", error);
+    return;
   }
+
+  // Forzar actualización inmediata del badge sin esperar realtime
+  await updateBadge(userId);
 }
+
