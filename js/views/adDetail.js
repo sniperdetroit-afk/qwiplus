@@ -99,7 +99,7 @@ function renderAd(container, ad, profile){
       <div class="ad-top">
         <button id="backBtn">←</button>
       </div>
-
+                               <button id="editBtn" class="btn-edit">Editar anuncio</button>
       <!-- IMAGEN CON BADGES -->
       <div style="position:relative;">
         <div class="ad-image-wrapper">
@@ -127,7 +127,7 @@ function renderAd(container, ad, profile){
       <div class="ad-body">
 
         <h2 class="ad-title">${ad.title}</h2>
-        
+
         <div class="ad-price" style="${isVendido ? "text-decoration:line-through;color:#9ca3af;" : ""}">
           ${ad.price || 0}€
         </div>
