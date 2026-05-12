@@ -99,7 +99,7 @@ function renderAd(container, ad, profile){
       <div class="ad-top">
         <button id="backBtn">←</button>
       </div>
-                               <button id="editBtn" class="btn-edit">Editar anuncio</button>
+    
       <!-- IMAGEN CON BADGES -->
       <div style="position:relative;">
         <div class="ad-image-wrapper">
