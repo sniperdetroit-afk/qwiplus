@@ -69,7 +69,7 @@ async function renderRegister() {
 
           <div style="position:relative;">
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;">🔒</span>
-            <input id="passwordInput" type="password" placeholder="Contraseña (mín. 6 caracteres)" style="
+            <input id="passwordInput" type="password" placeholder="Contraseña (mín. 6)" style="
               width:100%;height:50px;
               border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
               padding:0 16px 0 42px;font-size:15px;
