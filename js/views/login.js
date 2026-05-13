@@ -31,7 +31,7 @@ async function renderLogin(){
       <!-- LOGO -->
       <div style="text-align:center;margin-bottom:32px;">
         <img src="/img/logo-qwiplus.png" style="
-          width:260px;height:auto;
+          width:320px;height:auto;
           margin-bottom:14px;
           object-fit:contain;
         ">
