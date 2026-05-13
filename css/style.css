@@ -720,17 +720,19 @@ body {
 
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
   height: 64px;
-  background: linear-gradient(90deg, #6DA8FF, #5aa0ff);
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+  border-radius: 999px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  z-index: 50;
 }
+
 
 .nav-item {
   position: relative;
