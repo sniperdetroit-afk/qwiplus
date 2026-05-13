@@ -26,6 +26,24 @@ async function renderHome(){
 }
 
 /* =========================
+   SKELETON
+========================= */
+
+function renderSkeletons(count = 6){
+  let html = "";
+  for(let i = 0; i < count; i++){
+    html += `
+      <div class="skeleton-card">
+        <div class="skeleton-image"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+      </div>
+    `;
+  }
+  return html;
+}
+
+/* =========================
    AUTH GUARD
 ========================= */
 
@@ -68,7 +86,8 @@ async function mountHome(){
   loading = false;
   renderedIds.clear();
 
-  box.innerHTML = `<p style="text-align:center">Cargando anuncios...</p>`;
+  // Skeleton inmediato
+  box.innerHTML = renderSkeletons(6);
 
   window.removeEventListener("scroll", onScroll);
   window.addEventListener("scroll", onScroll);
@@ -118,10 +137,16 @@ function startRealtime(){
 
         const count = card.querySelector(".fav-count");
         if(count){
-          count.textContent = ad.favorites_count || 0;
+          const oldVal = Number(count.textContent);
+          const newVal = ad.favorites_count || 0;
+          count.textContent = newVal;
+          if(newVal !== oldVal){
+            count.classList.remove("bump");
+            void count.offsetWidth;
+            count.classList.add("bump");
+          }
         }
 
-        // Actualizar badge de estado en tiempo real
         const badgeWrapper = card.querySelector(".status-badge");
         if(badgeWrapper) badgeWrapper.remove();
 
@@ -246,7 +271,7 @@ function renderAd(ad){
   div.innerHTML = `
     <div class="card-image" style="position:relative;">
       ${statusBadge}
-      <img src="${ad.image_url || '/img/placeholder.png'}" style="${isVendido ? 'opacity:0.6;' : ''}">
+      <img src="${ad.image_url || '/img/placeholder.png'}" loading="lazy" style="${isVendido ? 'opacity:0.6;' : ''}">
 
       ${
         !isMine ? `
@@ -282,6 +307,11 @@ function renderAd(ad){
         return;
       }
 
+      // Animación inmediata
+      favBtn.classList.remove("pop");
+      void favBtn.offsetWidth;
+      favBtn.classList.add("pop");
+
       const countEl = div.querySelector(".fav-count");
       let current = Number(countEl.textContent);
 
@@ -311,6 +341,11 @@ function renderAd(ad){
         favBtn.textContent = "💖";
         countEl.textContent = current + 1;
       }
+
+      // bump del contador
+      countEl.classList.remove("bump");
+      void countEl.offsetWidth;
+      countEl.classList.add("bump");
     });
   }
 
