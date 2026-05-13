@@ -6,12 +6,14 @@ import { supabase } from "../services/supabase.js";
 import { getState, setState } from "../core/state.js";
 import { navigate } from "../core/router.js";
 import { markConversationRead } from "../services/badgeService.js";
+import { translate, detectLanguage, getUserLanguage } from "../services/translatorService.js";
 
 let box;
 let alive = false;
 let userId;
 let conversationId;
 let rendered = new Set();
+let userLang;
 
 async function render(){
   return `
@@ -43,6 +45,7 @@ async function mount(){
 
   userId = user.id;
   conversationId = state.chat.conversationId;
+  userLang = getUserLanguage();
 
   box = document.getElementById("chatMessages");
   if(!box) return;
@@ -68,9 +71,8 @@ async function mount(){
     `;
 
     document.getElementById("backToAd").onclick = () => {
-  history.back();
-};
-
+      history.back();
+    };
   }
 
   const { data: msgs } = await supabase
@@ -87,7 +89,6 @@ async function mount(){
 
   document.getElementById("sendMsg").onclick = sendMessage;
 
-  // ✅ Marcar mensajes como leídos al abrir el chat
   await markConversationRead(conversationId, userId);
 }
 
@@ -125,17 +126,88 @@ function addMessage(msg){
   rendered.add(msg.id);
 
   const mine = msg.sender_id === userId;
+  const wrapper = document.createElement("div");
+  wrapper.className = "bubble-wrapper";
+  wrapper.style.cssText = `
+    display:flex;flex-direction:column;
+    align-items:${mine ? "flex-end" : "flex-start"};
+    gap:4px;
+  `;
 
-  const div = document.createElement("div");
-  div.className = mine ? "bubble bubble-me" : "bubble bubble-other";
-  div.innerText = msg.text;
+  const bubble = document.createElement("div");
+  bubble.className = mine ? "bubble bubble-me" : "bubble bubble-other";
+  bubble.innerText = msg.text;
 
   if(!mine){
-    div.style.background = "linear-gradient(90deg,#2ed4a7,#6a8dff)";
-    div.style.color = "white";
+    bubble.style.background = "linear-gradient(90deg,#2ed4a7,#6a8dff)";
+    bubble.style.color = "white";
   }
 
-  box.appendChild(div);
+  wrapper.appendChild(bubble);
+
+  // Solo añadimos botón traducir si el mensaje no es mío
+  // y el idioma detectado no coincide con el del usuario
+  if(!mine){
+    const detected = detectLanguage(msg.text);
+
+    if(detected !== userLang){
+      const translateBtn = document.createElement("button");
+      translateBtn.innerText = "🌐 Traducir";
+      translateBtn.style.cssText = `
+        background:none;border:none;
+        color:#6b7280;font-size:12px;
+        cursor:pointer;padding:2px 6px;
+        margin-left:4px;
+      `;
+
+      let translatedBox = null;
+
+      translateBtn.onclick = async () => {
+
+        if(translatedBox){
+          translatedBox.remove();
+          translatedBox = null;
+          translateBtn.innerText = "🌐 Traducir";
+          return;
+        }
+
+        translateBtn.innerText = "Traduciendo...";
+        translateBtn.disabled = true;
+
+        const result = await translate(msg.text, detected, userLang);
+
+        translateBtn.disabled = false;
+
+        if(!result){
+          translateBtn.innerText = "❌ No disponible";
+          setTimeout(() => {
+            translateBtn.innerText = "🌐 Traducir";
+          }, 2000);
+          return;
+        }
+
+        translatedBox = document.createElement("div");
+        translatedBox.innerText = result;
+        translatedBox.style.cssText = `
+          max-width:70%;
+          padding:8px 12px;
+          border-radius:14px;
+          background:#f3f4f6;
+          color:#374151;
+          font-size:13px;
+          font-style:italic;
+          align-self:${mine ? "flex-end" : "flex-start"};
+        `;
+
+        wrapper.insertBefore(translatedBox, translateBtn);
+        translateBtn.innerText = "✕ Ocultar traducción";
+      };
+
+      wrapper.appendChild(translateBtn);
+    }
+  }
+
+  box.appendChild(wrapper);
   box.scrollTop = box.scrollHeight;
 }
 
