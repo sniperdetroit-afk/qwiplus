@@ -6,7 +6,7 @@ import { supabase } from "../services/supabase.js";
 import { getState, setState } from "../core/state.js";
 import { navigate } from "../core/router.js";
 import { markConversationRead } from "../services/badgeService.js";
-import { translate, detectLanguage, getUserLanguage } from "../services/translatorService.js";
+import { translate, detectLanguage, getUserLanguage } from "../services/TransLatorService.js";
 
 let box;
 let alive = false;
