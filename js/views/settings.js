@@ -26,14 +26,16 @@ function showComingSoon(label) {
     bottom: 90px;
     left: 50%;
     transform: translateX(-50%);
-    background: #1e293b;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
     color: white;
     padding: 12px 20px;
     border-radius: 999px;
     font-size: 14px;
     font-weight: 600;
     z-index: 9999;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+    border: 1px solid rgba(56, 189, 248, 0.3);
     opacity: 1;
     transition: opacity 0.3s;
   `;
@@ -51,22 +53,25 @@ function settingsItem(icon, label, view) {
       align-items: center;
       gap: 14px;
       width: 100%;
-      padding: 14px 16px;
-      background: white;
-      border: none;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px;
       font-size: 15px;
       font-weight: 500;
-      color: #111827;
+      color: #F5F7FA;
       cursor: pointer;
       text-align: left;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-      margin-bottom: 8px;
-      transition: background 0.15s;
-    ">
+      backdrop-filter: blur(10px);
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
+    "
+    onmouseover="this.style.background='rgba(56, 189, 248, 0.12)';this.style.borderColor='rgba(56, 189, 248, 0.4)';"
+    onmouseout="this.style.background='rgba(255, 255, 255, 0.05)';this.style.borderColor='rgba(255, 255, 255, 0.08)';"
+    >
       <span style="font-size:20px;width:28px;text-align:center;">${icon}</span>
       <span style="flex:1;">${label}</span>
-      <span style="color:#9ca3af;font-size:18px;">›</span>
+      <span style="color:#38BDF8;font-size:18px;font-weight:300;">›</span>
     </button>
   `;
 }
@@ -76,66 +81,117 @@ function settingsItem(icon, label, view) {
 function renderSettings() {
 
   const langOptions = LANGUAGES.map(l => `
-    <option value="${l.code}" ${getLang() === l.code ? "selected" : ""}>
+    <option value="${l.code}" ${getLang() === l.code ? "selected" : ""} style="background:#0B0F14;color:#F5F7FA;">
       ${l.label}
     </option>
   `).join("");
 
   return `
-  <section style="max-width:480px;margin:0 auto;padding:20px;padding-bottom:40px;">
+  <section style="
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0B0F14 0%, #12161D 50%, #1a1f2e 100%);
+    padding: 20px;
+    padding-bottom: 100px;
+  ">
+    <div style="max-width:480px;margin:0 auto;">
 
-    <!-- HEADER -->
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
-      <button id="backSettings" style="
-        background:none;border:none;font-size:22px;
-        cursor:pointer;color:#6b7280;padding:4px 8px;border-radius:8px;
-      ">←</button>
-      <h2 style="margin:0;font-size:22px;font-weight:700;color:#111827;">Configuración</h2>
-    </div>
+      <!-- HEADER -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+        <button id="backSettings" style="
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          font-size: 20px;
+          cursor: pointer;
+          color: #F5F7FA;
+          padding: 8px 14px;
+          border-radius: 12px;
+          transition: all 0.2s;
+        "
+        onmouseover="this.style.background='rgba(56, 189, 248, 0.15)';"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.05)';"
+        >←</button>
+        <h2 style="
+          margin: 0;
+          font-size: 24px;
+          font-weight: 800;
+          color: #F5F7FA;
+          letter-spacing: -0.02em;
+        ">Configuración</h2>
+      </div>
 
-    <!-- CUENTA -->
-    <p style="font-size:12px;font-weight:700;color:#9ca3af;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px 4px;">Cuenta</p>
-    ${settingsItem("✏️", "Editar perfil", "editProfile")}
-    ${settingsItem("✅", "Verificación", "verification")}
-    ${settingsItem("🔒", "Seguridad", "security")}
+      <!-- CUENTA -->
+      <p style="
+        font-size: 11px;
+        font-weight: 800;
+        color: #F5B942;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 0 0 12px 4px;
+      ">⚡ Cuenta</p>
+      ${settingsItem("✏️", "Editar perfil", "editProfile")}
+      ${settingsItem("✅", "Verificación", "verification")}
+      ${settingsItem("🔒", "Seguridad", "security")}
 
-    <!-- PAGOS -->
-    <p style="font-size:12px;font-weight:700;color:#9ca3af;letter-spacing:.08em;text-transform:uppercase;margin:20px 0 10px 4px;">Pagos</p>
-    ${settingsItem("📦", "Dirección de envío", "shipping")}
-    ${settingsItem("💳", "Métodos de pago", "payments")}
+      <!-- PAGOS -->
+      <p style="
+        font-size: 11px;
+        font-weight: 800;
+        color: #F5B942;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 24px 0 12px 4px;
+      ">💳 Pagos</p>
+      ${settingsItem("📦", "Dirección de envío", "shipping")}
+      ${settingsItem("💳", "Métodos de pago", "payments")}
 
-    <!-- SISTEMA -->
-    <p style="font-size:12px;font-weight:700;color:#9ca3af;letter-spacing:.08em;text-transform:uppercase;margin:20px 0 10px 4px;">Sistema</p>
-    ${settingsItem("🔔", "Notificaciones", "notifications")}
-    ${settingsItem("💡", "Sugerencias", "suggestions")}
+      <!-- SISTEMA -->
+      <p style="
+        font-size: 11px;
+        font-weight: 800;
+        color: #F5B942;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 24px 0 12px 4px;
+      ">⚙️ Sistema</p>
+      ${settingsItem("🔔", "Notificaciones", "notifications")}
+      ${settingsItem("💡", "Sugerencias", "suggestions")}
 
-    <!-- IDIOMA -->
-    <p style="font-size:12px;font-weight:700;color:#9ca3af;letter-spacing:.08em;text-transform:uppercase;margin:20px 0 10px 4px;">🌐 Idioma</p>
-    <div style="
-      background:white;
-      border-radius:14px;
-      padding:4px 16px;
-      box-shadow:0 1px 4px rgba(0,0,0,0.06);
-    ">
-      <select id="langSelect" style="
-        width:100%;
-        padding:14px 0;
-        border:none;
-        background:transparent;
-        font-size:15px;
-        font-weight:500;
-        color:#111827;
-        outline:none;
-        cursor:pointer;
+      <!-- IDIOMA -->
+      <p style="
+        font-size: 11px;
+        font-weight: 800;
+        color: #F5B942;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 24px 0 12px 4px;
+      ">🌐 Idioma</p>
+      <div style="
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 4px 16px;
+        backdrop-filter: blur(10px);
+        transition: all 0.2s;
       ">
-        ${langOptions}
-      </select>
-    </div>
+        <select id="langSelect" style="
+          width: 100%;
+          padding: 14px 0;
+          border: none;
+          background: transparent;
+          font-size: 15px;
+          font-weight: 500;
+          color: #F5F7FA;
+          outline: none;
+          cursor: pointer;
+        ">
+          ${langOptions}
+        </select>
+      </div>
 
+    </div>
   </section>
   `;
 }
-
 /* ================= MOUNT ================= */
 
 function mountSettings() {

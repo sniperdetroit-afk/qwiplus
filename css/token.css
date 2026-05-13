@@ -1,18 +1,18 @@
 :root {
 
-  --bg: #f6f8fc;
-  --card: #ffffff;
+  --bg: #0B0F14;
+  --card: #161B24;
 
-  --text: #1f2937;
-  --muted: #6b7280;
+  --text: #F5F7FA;
+  --muted: #94A3B8;
 
-  --accent: #6c8cff;
-  --accent2: #58d6a3;
+  --accent: #2563EB;
+  --accent2: #F5B942;
 
   --radius-soft: 16px;
   --radius-pill: 999px;
 
-  --shadow-soft: 0 8px 30px rgba(0,0,0,0.06);
-  --shadow-card: 0 4px 14px rgba(0,0,0,0.08);
+  --shadow-soft: 0 8px 30px rgba(0,0,0,0.4);
+  --shadow-card: 0 4px 14px rgba(0,0,0,0.3);
 
 }

@@ -15,11 +15,12 @@
   --accent2: #6EE7B7;
 
   /* UI */
-  --bg:    #F4F7FD;
-  --card:  #ffffff;
+  --bg:           #0B0F14;
+--card:         #161B24;
 
-  --text:  #1f2937;
-  --muted: #6b7280;
+
+  --text:  #F5F7FA;
+  --muted: #94A3B8;
 
   /* DESIGN */
   --radius: 18px;
@@ -784,7 +785,9 @@ body {
   gap: 18px;
   padding: 18px;
   margin: 12px 0 18px;
-  background: linear-gradient(135deg, #eef4ff, #ecfdf5);
+    background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
   border-radius: 22px;
 }
 
@@ -800,7 +803,7 @@ body {
   height: 82px;
   border-radius: 50%;
   overflow: hidden;
-  background: #fff;
+  background: #1a1f2e;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
   flex-shrink: 0;
 }
@@ -858,7 +861,7 @@ body {
 }
 
 .profile-stat {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 18px;
   padding: 14px;
   text-align: center;
