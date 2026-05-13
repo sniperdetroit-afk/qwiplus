@@ -6,7 +6,7 @@ import { supabase } from "../services/supabase.js";
 import { getState, setState } from "../core/state.js";
 import { navigate } from "../core/router.js";
 import { markConversationRead } from "../services/badgeService.js";
-import { translate, detectLanguage, getUserLanguage } from "../services/TransLatorService.js";
+import { translate, detectLanguage, getUserLanguage } from "../services/translatorService.js";
 
 let box;
 let alive = false;
@@ -145,8 +145,6 @@ function addMessage(msg){
 
   wrapper.appendChild(bubble);
 
-  // Solo añadimos botón traducir si el mensaje no es mío
-  // y el idioma detectado no coincide con el del usuario
   if(!mine){
     const detected = detectLanguage(msg.text);
 
