@@ -68,9 +68,9 @@ async function mount(){
     `;
 
     document.getElementById("backToAd").onclick = () => {
-      setState({ adId: ad.id });
-      navigate("adDetail");
-    };
+  history.back();
+};
+
   }
 
   const { data: msgs } = await supabase
