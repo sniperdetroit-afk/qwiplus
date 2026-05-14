@@ -195,7 +195,7 @@ function renderAd(container, ad, profile){
                 background:#6366f1;color:white;
                 font-size:10px;font-weight:700;
                 padding:2px 7px;border-radius:999px;
-              ">Próximamente</span>
+              "></span>
             </button>
             <button id="offerBtn" style="
               flex:1;padding:14px;border-radius:14px;border:none;
@@ -209,7 +209,7 @@ function renderAd(container, ad, profile){
                 background:#f59e0b;color:white;
                 font-size:10px;font-weight:700;
                 padding:2px 7px;border-radius:999px;
-              ">Próximamente</span>
+              "></span>
             </button>
           </div>
         ` : ""}

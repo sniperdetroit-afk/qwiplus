@@ -384,10 +384,15 @@ async function renderSubcategories(state){
         }
 
         return `
-          <button class="subcategory-item">
-            ${typeof sub === "object" ? sub.name : sub}
-          </button>
-        `;
+  <button 
+    class="subcategory-item"
+    data-view="searchResults"
+    data-category="${category.id}"
+    data-subcategory="${typeof sub === "object" ? sub.name : sub}"
+  >
+    ${typeof sub === "object" ? sub.name : sub}
+  </button>
+`;
 
       }).join("")}
     </div>
@@ -448,9 +453,14 @@ async function renderSubSubcategories(state){
 
     <div class="subcategory-grid">
       ${sub.sub.map(item => `
-        <button class="subcategory-item">
-          ${item}
-        </button>
+        <button 
+  class="subcategory-item"
+  data-view="searchResults"
+  data-category="${category.id}"
+  data-subcategory="${item}"
+>
+  ${item}
+</button>
       `).join("")}
     </div>
 
