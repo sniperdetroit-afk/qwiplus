@@ -8,6 +8,7 @@
   <title>Qwiplus</title>
   <link rel="icon" href="/img/icon-192.png" type="image/png">
 
+
   <!-- SEO -->
   <meta name="description" content="Compra, vende y conecta en Qwiplus" />
 
@@ -29,6 +30,7 @@
   <link rel="stylesheet" href="css/pages.css" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="/css/animations.css">
+
 
   <!-- BASE DARK -->
   <style>
@@ -116,4 +118,69 @@
   </nav>
 
   <!-- ================= APP ================= -->
-  <script type="module" src="
+  <script type="module" src="js/app.js"></script>
+
+  <!-- ================= ICONOS ================= -->
+  <script>
+    function loadIcons(){
+      if(window.lucide){
+        lucide.createIcons();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadIcons);
+
+    const main = document.getElementById("main");
+
+    if(main){
+      const observer = new MutationObserver(loadIcons);
+
+      observer.observe(main, {
+        childList: true,
+        subtree: true
+      });
+    }
+  </script>
+
+  <!-- ================= TRANSICIONES ================= -->
+  <script>
+    function animateViewChange() {
+      const mainView = document.getElementById("main");
+      if (!mainView) return;
+
+      mainView.style.opacity = "0";
+      mainView.style.transform = "translateY(10px)";
+
+      setTimeout(() => {
+        mainView.style.transition = "all 0.25s ease";
+        mainView.style.opacity = "1";
+        mainView.style.transform = "translateY(0)";
+      }, 50);
+    }
+
+    const mainView = document.getElementById("main");
+
+    if (mainView) {
+      const observerView = new MutationObserver(animateViewChange);
+
+      observerView.observe(mainView, {
+        childList: true,
+        subtree: true
+      });
+    }
+  </script>
+  <!-- ============ SERVICE WORKER ============ -->
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => console.log("✅ SW registrado:", reg.scope))
+        .catch((err) => console.warn("⚠️ SW falló:", err));
+    });
+  }
+</script>
+
+
+</body>
+</html>
