@@ -332,7 +332,7 @@ body {
 .category-card {
   position: relative;
   height: 120px;
-  background: white;
+  background: var(--card-bg);
   border: none;
   border-radius: 18px;
   overflow: hidden;
@@ -436,7 +436,7 @@ body {
 }
 
 .subcategory-item {
-  background: white;
+  background: var(--card-bg);
   border: none;
   border-radius: 16px;
   padding: 14px 12px;
