@@ -1,6 +1,7 @@
 import { createView } from "../core/createView.js";
 import { supabase } from "../services/supabase.js";
 import { renderCard } from "../components/card.js";
+import { toggleFavorite } from "../services/favoritesService.js";
 
 async function renderFavorites(state) {
 
@@ -42,6 +43,21 @@ async function renderFavorites(state) {
   `;
 }
 
-export const FavoritesView = createView(renderFavorites);
+async function mountFavorites(state) {
+  const user = state?.session?.user;
+  if (!user) return;
+
+  document.querySelectorAll(".fav-btn").forEach(btn => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const adId = btn.dataset.id;
+      await toggleFavorite(user.id, adId);
+      btn.closest(".card")?.remove();
+    });
+  });
+}
+
+export const FavoritesView = createView(renderFavorites, mountFavorites);
+
 
 
