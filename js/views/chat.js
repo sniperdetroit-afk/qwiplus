@@ -64,9 +64,16 @@ async function mount(){
     const ad = conv.ads;
 
     document.getElementById("chatAdHeader").innerHTML = `
-      <div class="chat-ad-mini">
+      <div class="chat-ad-mini" data-view="adDetail" data-ad="${ad.id}" style="cursor:pointer;">
         <img src="${ad.image_url}">
         <div>${ad.title}</div>
+      </div>
+    `;
+
+    document.getElementById("chatSeller").innerHTML = `
+      <div class="chat-seller-link" data-view="publicProfile" data-user-id="${ad.user_id}"
+ style="cursor:pointer;font-size:13px;color:#6a8dff;padding:4px 8px;">
+        Ver perfil del vendedor →
       </div>
     `;
 
@@ -210,6 +217,7 @@ function addMessage(msg){
 }
 
 export const ChatView = createView(render, mount, unmount);
+
 
 
      

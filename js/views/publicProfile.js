@@ -68,7 +68,7 @@ async function renderPublicProfile() {
 async function mountPublicProfile() {
 
   const state = getState();
-  const userId = state.app?.params?.userId;
+  const userId = state.app?.params?.userId || state.app?.params?.user || state.user;
   const currentUser = state.session?.user;
   const container = document.getElementById("publicProfileContent");
 
