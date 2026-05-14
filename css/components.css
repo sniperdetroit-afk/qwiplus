@@ -10,8 +10,11 @@
   position:absolute;
   top:10px;
   right:10px;
-  background:white;
+  background: rgba(22, 27, 36, 0.85);
   border-radius:50%;
   width:36px;
   height:36px;
+  z-index: 10;
+  pointer-events: all;
+  cursor: pointer;
 }
