@@ -323,24 +323,36 @@ function renderAd(ad){
         .maybeSingle();
 
       if(existing){
+  await supabase
+    .from("favorites")
+    .delete()
+    .eq("id", existing.id);
 
-        await supabase
-          .from("favorites")
-          .delete()
-          .eq("id", existing.id);
+  const newCount = Math.max(current - 1, 0);
+  favBtn.textContent = "❤️";
+  countEl.textContent = newCount;
 
-        favBtn.textContent = "❤️";
-        countEl.textContent = Math.max(current - 1, 0);
+  await supabase
+    .from("ads")
+    .update({ favorites_count: newCount })
+    .eq("id", ad.id);
 
-      } else {
+} else {
 
-        await supabase
-          .from("favorites")
-          .insert([{ user_id: userId, ad_id: ad.id }]);
+  await supabase
+    .from("favorites")
+    .insert([{ user_id: userId, ad_id: ad.id }]);
 
-        favBtn.textContent = "💖";
-        countEl.textContent = current + 1;
-      }
+  const newCount = current + 1;
+  favBtn.textContent = "💖";
+  countEl.textContent = newCount;
+
+  await supabase
+    .from("ads")
+    .update({ favorites_count: newCount })
+    .eq("id", ad.id);
+}
+
 
       // bump del contador
       countEl.classList.remove("bump");
