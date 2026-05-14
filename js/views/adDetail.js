@@ -108,10 +108,34 @@ function renderAd(container, ad, profile){
       </div>
 
       <!-- IMAGEN CON BADGES -->
-      <div style="position:relative;">
-        <div class="ad-image-wrapper">
-          <img class="ad-img" src="${ad.image_url || ""}" style="${isVendido ? 'opacity:0.7;' : ''}">
+<div style="position:relative;">
+  <div class="ad-image-wrapper" style="position:relative;overflow:hidden;">
+    ${(() => {
+      const imgs = (ad.images && ad.images.length > 0) ? ad.images : (ad.image_url ? [ad.image_url] : []);
+      if (imgs.length === 0) return `<div style="width:100%;aspect-ratio:1;background:#1a1f2e;"></div>`;
+      if (imgs.length === 1) return `<img class="ad-img" src="${imgs[0]}" style="${isVendido ? 'opacity:0.7;' : ''}">`;
+      return `
+        <div id="imgCarousel" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;">
+          <style>#imgCarousel::-webkit-scrollbar{display:none}</style>
+          ${imgs.map(url => `
+            <div style="min-width:100%;scroll-snap-align:start;">
+              <img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;${isVendido ? 'opacity:0.7;' : ''}">
+            </div>
+          `).join("")}
         </div>
+        <div style="display:flex;justify-content:center;gap:6px;padding:8px 0;background:rgba(0,0,0,0.3);position:absolute;bottom:0;width:100%;">
+          ${imgs.map((_, i) => `
+            <div class="img-dot" data-index="${i}" style="
+              width:${i === 0 ? '20px' : '8px'};height:8px;
+              border-radius:999px;
+              background:${i === 0 ? '#38BDF8' : 'rgba(255,255,255,0.4)'};
+              transition:all 0.3s;cursor:pointer;
+            "></div>
+          `).join("")}
+        </div>
+      `;
+    })()}
+  </div>
         ${isVendido ? `
           <div style="
             position:absolute;top:12px;left:12px;
@@ -318,6 +342,23 @@ function renderAd(container, ad, profile){
 
   const backBtn = document.getElementById("backBtn");
   if(backBtn) backBtn.onclick = () => history.back();
+    // Carrusel
+  const carousel = document.getElementById("imgCarousel");
+  if (carousel) {
+    const dots = document.querySelectorAll(".img-dot");
+    carousel.addEventListener("scroll", () => {
+      const index = Math.round(carousel.scrollLeft / carousel.offsetWidth);
+      dots.forEach((dot, i) => {
+        dot.style.width = i === index ? "20px" : "8px";
+        dot.style.background = i === index ? "#38BDF8" : "rgba(255,255,255,0.4)";
+      });
+    });
+    dots.forEach(dot => {
+      dot.onclick = () => {
+        carousel.scrollTo({ left: Number(dot.dataset.index) * carousel.offsetWidth, behavior: "smooth" });
+      };
+    });
+  }
 
   // Toast próximamente
   const showToast = (msg) => {
