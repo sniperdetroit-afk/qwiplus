@@ -111,14 +111,14 @@ async function renderLogin(){
             <span style="font-size:18px;">G</span> Google
           </button>
 
-          <button id="facebookBtn" style="
+         <!--<button id="facebookBtn" style="
             flex:1;height:46px;border-radius:14px;border:0;
             background:#1877f2;color:white;
             font-weight:700;font-size:14px;cursor:pointer;
             display:flex;align-items:center;justify-content:center;gap:8px;
           ">
             <span style="font-size:18px;">f</span> Facebook
-          </button>
+          </button>-->
 
         </div>
 
