@@ -35,35 +35,35 @@
   "screenshots": [
     {
       "src": "/img/home.png",
-      "sizes": "887x1920",
+      "sizes": "1170x2007",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Inicio de Qwiplus"
     },
     {
       "src": "/img/categories.png",
-      "sizes": "887x1920",
+      "sizes": "893x1255",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Categorías"
     },
     {
       "src": "/img/favorites.png",
-      "sizes": "887x1920",
+      "sizes": "900x1261",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Favoritos"
     },
     {
       "src": "/img/profile.png",
-      "sizes": "887x1920",
+      "sizes": "1170x2325",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Perfil"
     },
     {
       "src": "/img/chat.png",
-      "sizes": "887x1920",
+      "sizes": "900x1255",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Chat"
@@ -98,6 +98,7 @@
     }
   ]
 }
+
 
 
 
