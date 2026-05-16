@@ -282,7 +282,7 @@ export const categories = [
   },
   {
     id: "servicios",
-    name: "Servicios en mi zona",
+    name: "Servicios y eventos",
     sub: [
       "Fontanero",
       "Electricista",

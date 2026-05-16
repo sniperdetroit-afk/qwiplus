@@ -57,7 +57,7 @@ async function mount(){
 
     const { data: conv } = await supabase
     .from("conversations")
-    .select(`id, buyer_id, seller_id, ads(id,title,image_url,user_id,sold,sold_to)`)
+    .select(`id, buyer_id, seller_id, ads(id,title,image_url,user_id,sold,sold_to,sale_confirmed_by_buyer)`)
     .eq("id", conversationId)
     .single();
 
@@ -89,10 +89,14 @@ async function mount(){
       history.back();
     };
 
-    // BOTÓN "HE VENDIDO ESTO" - Solo lo ve el vendedor
+    // ESTADO DE LA VENTA
     const isSeller = (userId === conv.seller_id);
+    const isBuyer = (userId === conv.buyer_id);
     const adIsSold = ad.sold === true;
+    const saleConfirmed = ad.sale_confirmed_by_buyer === true;
+    const iAmTheSoldTo = (ad.sold_to === userId);
 
+    // BOTÓN "HE VENDIDO ESTO" - Solo lo ve el vendedor cuando aún no está vendido
     if(isSeller && !adIsSold){
       document.getElementById("chatActions").innerHTML = `
         <button id="markSoldBtn" style="
@@ -110,10 +114,69 @@ async function mount(){
           ✓ He vendido esto a este usuario
         </button>
       `;
-
       document.getElementById("markSoldBtn").onclick = markAsSold;
     }
+
+    // BOTONES CONFIRMACIÓN COMPRADOR - Solo los ve el comprador cuando hay venta pendiente
+    if(isBuyer && adIsSold && iAmTheSoldTo && !saleConfirmed){
+      document.getElementById("chatActions").innerHTML = `
+        <div style="padding:12px;background:#fff8e1;border-radius:12px;margin:8px 0;border:1px solid #ffe082;">
+          <div style="font-size:13px;color:#5d4037;margin-bottom:10px;font-weight:600;">
+            El vendedor dice que te ha vendido este artículo. ¿Lo confirmas?
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button id="confirmSaleBtn" style="
+              flex:1;
+              padding:10px;
+              background:linear-gradient(90deg,#2ed4a7,#6a8dff);
+              color:white;
+              border:none;
+              border-radius:10px;
+              font-weight:700;
+              font-size:13px;
+              cursor:pointer;
+            ">✓ Sí, le compré</button>
+            <button id="rejectSaleBtn" style="
+              flex:1;
+              padding:10px;
+              background:#f3f4f6;
+              color:#374151;
+              border:none;
+              border-radius:10px;
+              font-weight:700;
+              font-size:13px;
+              cursor:pointer;
+            ">✗ No, no fue a mí</button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("confirmSaleBtn").onclick = confirmSale;
+      document.getElementById("rejectSaleBtn").onclick = rejectSale;
     }
+
+    // VENTA PENDIENTE DE CONFIRMACIÓN - Mensaje para el vendedor mientras espera
+    if(isSeller && adIsSold && !saleConfirmed){
+      document.getElementById("chatActions").innerHTML = `
+        <div style="padding:12px;background:#fff8e1;border-radius:12px;margin:8px 0;border:1px solid #ffe082;text-align:center;">
+          <div style="font-size:13px;color:#5d4037;font-weight:600;">
+            ⏳ Esperando confirmación del comprador
+          </div>
+        </div>
+      `;
+    }
+
+    // VENTA CONFIRMADA - Mensaje para ambos
+    if(adIsSold && saleConfirmed){
+      document.getElementById("chatActions").innerHTML = `
+        <div style="padding:12px;background:#e8f5e9;border-radius:12px;margin:8px 0;border:1px solid #a5d6a7;text-align:center;">
+          <div style="font-size:13px;color:#2e7d32;font-weight:600;">
+            ✓ Venta confirmada
+          </div>
+        </div>
+      `;
+    }
+  }
 
   const { data: msgs } = await supabase
     .from("messages")
@@ -248,6 +311,7 @@ function addMessage(msg){
   box.appendChild(wrapper);
   box.scrollTop = box.scrollHeight;
 }
+
 async function markAsSold(){
   const ok = confirm("¿Confirmas que has vendido este artículo a este usuario? El comprador tendrá que confirmarlo y luego podréis valoraros mutuamente.");
   if(!ok) return;
@@ -274,7 +338,57 @@ async function markAsSold(){
   location.reload();
 }
 
+async function confirmSale(){
+  const ok = confirm("¿Confirmas que has comprado este artículo a este vendedor? Después de confirmar, podréis valoraros mutuamente.");
+  if(!ok) return;
 
+  const { data: conv } = await supabase
+    .from("conversations")
+    .select("ad_id")
+    .eq("id", conversationId)
+    .single();
+
+  if(!conv) return;
+
+  const { error } = await supabase
+    .from("ads")
+    .update({ sale_confirmed_by_buyer: true })
+    .eq("id", conv.ad_id);
+
+  if(error){
+    alert("Error al confirmar la venta: " + error.message);
+    return;
+  }
+
+  alert("✓ Venta confirmada. Ya podéis valoraros mutuamente.");
+  location.reload();
+}
+
+async function rejectSale(){
+  const ok = confirm("¿Rechazas esta venta? El vendedor podrá marcar el anuncio como vendido a otro usuario.");
+  if(!ok) return;
+
+  const { data: conv } = await supabase
+    .from("conversations")
+    .select("ad_id")
+    .eq("id", conversationId)
+    .single();
+
+  if(!conv) return;
+
+  const { error } = await supabase
+    .from("ads")
+    .update({ sold: false, sold_to: null })
+    .eq("id", conv.ad_id);
+
+  if(error){
+    alert("Error al rechazar la venta: " + error.message);
+    return;
+  }
+
+  alert("Has rechazado la venta. El anuncio vuelve a estar disponible.");
+  location.reload();
+}
 
 export const ChatView = createView(render, mount, unmount);
 
