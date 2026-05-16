@@ -7,6 +7,8 @@ import { getState, setState } from "../core/state.js";
 import { navigate } from "../core/router.js";
 import { markConversationRead } from "../services/badgeService.js";
 import { translate, detectLanguage, getUserLanguage } from "../services/translatorService.js";
+import { blockUser, isBlocked } from "../services/blockService.js";
+import { reportUser, USER_REPORT_REASONS } from "../services/reportService.js";
 
 let box;
 let alive = false;
@@ -14,6 +16,8 @@ let userId;
 let conversationId;
 let rendered = new Set();
 let userLang;
+let iBlockedOther = false;
+let otherBlockedMe = false;
 
 async function render(){
   return `
@@ -22,6 +26,10 @@ async function render(){
       <button id="backToAd">←</button>
       <div id="chatAdHeader"></div>
       <div id="chatSeller"></div>
+      <button id="chatMoreBtn" style="
+        background:none;border:none;font-size:22px;
+        cursor:pointer;color:#6b7280;padding:4px 10px;margin-left:auto;
+      ">⋮</button>
     </div>
 
         <div id="chatMessages" class="chat-messages"></div>
@@ -65,6 +73,11 @@ async function mount(){
 
   if(conv?.ads){
     const ad = conv.ads;
+    const otherUserId = (userId === conv.seller_id) ? conv.buyer_id : conv.seller_id;
+
+    // COMPROBAR BLOQUEOS (en ambas direcciones)
+    iBlockedOther = await isBlocked(userId, otherUserId);
+    otherBlockedMe = await isBlocked(otherUserId, userId);
 
     document.getElementById("chatAdHeader").innerHTML = `
       <div class="chat-ad-mini" data-view="adDetail" data-ad="${ad.id}" style="cursor:pointer;">
@@ -75,7 +88,6 @@ async function mount(){
 
         // Si yo soy el vendedor, muestro el perfil del COMPRADOR
     // Si yo soy el comprador, muestro el perfil del VENDEDOR
-    const otherUserId = (userId === conv.seller_id) ? conv.buyer_id : conv.seller_id;
     const otherUserLabel = (userId === conv.seller_id) ? "Ver perfil del comprador" : "Ver perfil del vendedor";
 
     document.getElementById("chatSeller").innerHTML = `
@@ -89,6 +101,279 @@ async function mount(){
       history.back();
     };
 
+    // BOTÓN ⋮ - Menú de acciones
+    const moreBtn = document.getElementById("chatMoreBtn");
+    if(moreBtn){
+      moreBtn.onclick = () => openChatMenu(otherUserId);
+    }
+
+    // SI BLOQUEO ACTIVO - banner arriba y deshabilitar input
+    if(iBlockedOther){
+      showBlockBanner("Has bloqueado a este usuario. No puedes enviar ni recibir mensajes.");
+      disableInput();
+    } else if(otherBlockedMe){
+      showBlockBanner("Este usuario te ha bloqueado. No puedes enviarle mensajes.");
+      disableInput();
+    } else {
+      renderSaleActions(conv, ad);
+    }
+  }
+
+  const { data: msgs } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("conversation_id", conversationId)
+    .order("created_at");
+
+  if(!alive) return;
+
+  msgs?.forEach(addMessage);
+
+  startChatSync(conversationId, userId, addMessage);
+
+  document.getElementById("sendMsg").onclick = sendMessage;
+
+  await markConversationRead(conversationId, userId);
+}
+
+async function unmount(){
+  alive = false;
+  stopChatSync();
+}
+
+/* ================= BLOQUEO / BANNERS ================= */
+
+function showBlockBanner(text){
+  const actions = document.getElementById("chatActions");
+  if(!actions) return;
+  actions.innerHTML = `
+    <div style="padding:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;margin:8px 0;display:flex;align-items:center;gap:10px;">
+      <div style="font-size:20px;">🚫</div>
+      <div style="flex:1;font-size:13px;color:#991b1b;font-weight:600;">${text}</div>
+    </div>
+  `;
+}
+
+function disableInput(){
+  const input = document.getElementById("chatText");
+  const sendBtn = document.getElementById("sendMsg");
+  if(input){
+    input.disabled = true;
+    input.placeholder = "No puedes enviar mensajes";
+    input.style.opacity = "0.5";
+  }
+  if(sendBtn){
+    sendBtn.disabled = true;
+    sendBtn.style.opacity = "0.5";
+  }
+}
+
+/* ================= MENÚ ⋮ ================= */
+
+function openChatMenu(otherUserId){
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.5);
+    z-index:9999;display:flex;align-items:flex-end;justify-content:center;
+  `;
+
+  const sheet = document.createElement("div");
+  sheet.style.cssText = `
+    width:100%;max-width:500px;background:white;
+    border-radius:20px 20px 0 0;padding:20px;
+    box-shadow:0 -8px 32px rgba(0,0,0,0.2);
+  `;
+
+  sheet.innerHTML = `
+    <div style="width:40px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 16px;"></div>
+
+    <button id="goProfileBtn" style="
+      width:100%;padding:14px;text-align:left;
+      background:none;border:none;
+      font-size:15px;color:#374151;font-weight:600;
+      cursor:pointer;border-radius:10px;
+      display:flex;align-items:center;gap:12px;
+    ">
+      <span style="font-size:20px;">👤</span>
+      Ver perfil del usuario
+    </button>
+
+    <button id="reportUserBtn" style="
+      width:100%;padding:14px;text-align:left;
+      background:none;border:none;
+      font-size:15px;color:#374151;font-weight:600;
+      cursor:pointer;border-radius:10px;
+      display:flex;align-items:center;gap:12px;
+    ">
+      <span style="font-size:20px;">🚩</span>
+      Denunciar usuario
+    </button>
+
+    ${!iBlockedOther ? `
+      <button id="blockChatBtn" style="
+        width:100%;padding:14px;text-align:left;
+        background:none;border:none;
+        font-size:15px;color:#dc2626;font-weight:700;
+        cursor:pointer;border-radius:10px;
+        display:flex;align-items:center;gap:12px;
+      ">
+        <span style="font-size:20px;">🚫</span>
+        Bloquear usuario
+      </button>
+    ` : `
+      <div style="padding:14px;color:#9ca3af;font-size:14px;text-align:center;">
+        Este usuario ya está bloqueado
+      </div>
+    `}
+
+    <button id="cancelChatMenu" style="
+      width:100%;margin-top:8px;padding:14px;
+      background:#f3f4f6;border:none;border-radius:10px;
+      font-size:15px;color:#374151;font-weight:600;cursor:pointer;
+    ">Cancelar</button>
+  `;
+
+  overlay.appendChild(sheet);
+  document.body.appendChild(overlay);
+
+  overlay.onclick = (e) => {
+    if(e.target === overlay) overlay.remove();
+  };
+
+  sheet.querySelector("#cancelChatMenu").onclick = () => overlay.remove();
+
+  const goProfileBtn = sheet.querySelector("#goProfileBtn");
+  if(goProfileBtn){
+    goProfileBtn.onclick = () => {
+      overlay.remove();
+      setState({ app:{ params:{ userId: otherUserId } } });
+      navigate("publicProfile");
+    };
+  }
+
+  const reportUserBtn = sheet.querySelector("#reportUserBtn");
+  if(reportUserBtn){
+    reportUserBtn.onclick = () => {
+      overlay.remove();
+      openReportModal(otherUserId);
+    };
+  }
+
+  const blockChatBtn = sheet.querySelector("#blockChatBtn");
+  if(blockChatBtn){
+    blockChatBtn.onclick = async () => {
+      const ok = confirm("¿Bloquear a este usuario?\n\nNo podrá escribirte más mensajes y no verás sus anuncios.");
+      if(!ok) return;
+
+      const { error } = await blockUser(userId, otherUserId);
+      if(error){
+        alert("Error al bloquear: " + (error.message || error));
+        return;
+      }
+
+      overlay.remove();
+      alert("Usuario bloqueado.");
+      location.reload();
+    };
+  }
+}
+
+/* ================= MODAL DENUNCIAR USUARIO ================= */
+
+function openReportModal(reportedUserId){
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.6);
+    z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;
+  `;
+
+  const modal = document.createElement("div");
+  modal.style.cssText = `
+    background:white;border-radius:16px;padding:24px;
+    max-width:400px;width:100%;
+    box-shadow:0 10px 40px rgba(0,0,0,0.2);
+  `;
+
+  const reasonsHTML = USER_REPORT_REASONS.map((reason, i) => `
+    <label style="
+      display:flex;align-items:center;gap:10px;
+      padding:12px;border:1px solid #e5e7eb;border-radius:10px;
+      margin-bottom:8px;cursor:pointer;
+      font-size:14px;color:#374151;
+    ">
+      <input type="radio" name="reportReason" value="${reason}" style="margin:0;">
+      <span>${reason}</span>
+    </label>
+  `).join("");
+
+  modal.innerHTML = `
+    <h3 style="margin:0 0 8px;font-size:18px;color:#111;">Denunciar usuario</h3>
+    <p style="margin:0 0 16px;font-size:13px;color:#6b7280;">
+      ¿Por qué denuncias a este usuario?
+    </p>
+
+    <div id="reasonsList">${reasonsHTML}</div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button id="cancelReportBtn" style="
+        flex:1;padding:12px;
+        background:#f3f4f6;color:#374151;
+        border:none;border-radius:10px;
+        font-weight:700;font-size:14px;cursor:pointer;
+      ">Cancelar</button>
+      <button id="submitReportBtn" style="
+        flex:1;padding:12px;
+        background:linear-gradient(90deg,#dc2626,#ef4444);
+        color:white;border:none;border-radius:10px;
+        font-weight:700;font-size:14px;cursor:pointer;
+        opacity:0.5;
+      " disabled>Enviar denuncia</button>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  const radios = modal.querySelectorAll('input[name="reportReason"]');
+  const submitBtn = modal.querySelector("#submitReportBtn");
+
+  radios.forEach(radio => {
+    radio.onchange = () => {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = "1";
+    };
+  });
+
+  overlay.onclick = (e) => {
+    if(e.target === overlay) overlay.remove();
+  };
+
+  modal.querySelector("#cancelReportBtn").onclick = () => overlay.remove();
+
+  submitBtn.onclick = async () => {
+    const selected = modal.querySelector('input[name="reportReason"]:checked');
+    if(!selected) return;
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Enviando...";
+
+    const { error } = await reportUser(userId, reportedUserId, selected.value);
+
+    if(error){
+      alert("Error al enviar la denuncia: " + (error.message || error));
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Enviar denuncia";
+      return;
+    }
+
+    overlay.remove();
+    alert("✓ Denuncia enviada. Nuestro equipo la revisará.");
+  };
+}
+
+/* ================= VENTAS / VALORACIONES ================= */
+
+async function renderSaleActions(conv, ad){
     // ESTADO DE LA VENTA
     const isSeller = (userId === conv.seller_id);
     const isBuyer = (userId === conv.buyer_id);
@@ -117,7 +402,7 @@ async function mount(){
       document.getElementById("markSoldBtn").onclick = markAsSold;
     }
 
-    // BOTONES CONFIRMACIÓN COMPRADOR - Solo los ve el comprador cuando hay venta pendiente
+    // BOTONES CONFIRMACIÓN COMPRADOR
     if(isBuyer && adIsSold && iAmTheSoldTo && !saleConfirmed){
       document.getElementById("chatActions").innerHTML = `
         <div style="padding:12px;background:#fff8e1;border-radius:12px;margin:8px 0;border:1px solid #ffe082;">
@@ -126,26 +411,16 @@ async function mount(){
           </div>
           <div style="display:flex;gap:8px;">
             <button id="confirmSaleBtn" style="
-              flex:1;
-              padding:10px;
+              flex:1;padding:10px;
               background:linear-gradient(90deg,#2ed4a7,#6a8dff);
-              color:white;
-              border:none;
-              border-radius:10px;
-              font-weight:700;
-              font-size:13px;
-              cursor:pointer;
+              color:white;border:none;border-radius:10px;
+              font-weight:700;font-size:13px;cursor:pointer;
             ">✓ Sí, le compré</button>
             <button id="rejectSaleBtn" style="
-              flex:1;
-              padding:10px;
-              background:#f3f4f6;
-              color:#374151;
-              border:none;
-              border-radius:10px;
-              font-weight:700;
-              font-size:13px;
-              cursor:pointer;
+              flex:1;padding:10px;
+              background:#f3f4f6;color:#374151;
+              border:none;border-radius:10px;
+              font-weight:700;font-size:13px;cursor:pointer;
             ">✗ No, no fue a mí</button>
           </div>
         </div>
@@ -155,7 +430,7 @@ async function mount(){
       document.getElementById("rejectSaleBtn").onclick = rejectSale;
     }
 
-    // VENTA PENDIENTE DE CONFIRMACIÓN - Mensaje para el vendedor mientras espera
+    // VENTA PENDIENTE - Mensaje para el vendedor
     if(isSeller && adIsSold && !saleConfirmed){
       document.getElementById("chatActions").innerHTML = `
         <div style="padding:12px;background:#fff8e1;border-radius:12px;margin:8px 0;border:1px solid #ffe082;text-align:center;">
@@ -166,9 +441,8 @@ async function mount(){
       `;
     }
 
-    // VENTA CONFIRMADA - Mensaje + opción de valorar (solo comprador)
+    // VENTA CONFIRMADA + valorar
     if(adIsSold && saleConfirmed){
-      // Verificar si el comprador ya valoró al vendedor
       let alreadyReviewed = false;
       if(isBuyer){
         const { data: existing } = await supabase
@@ -188,20 +462,13 @@ async function mount(){
         </div>
       `;
 
-      // Si soy comprador, puedo valorar al vendedor
       if(isBuyer && !alreadyReviewed){
         actionHTML += `
           <button id="rateBtn" style="
-            width:100%;
-            padding:12px;
-            margin:8px 0;
+            width:100%;padding:12px;margin:8px 0;
             background:linear-gradient(90deg,#ffb300,#ff8f00);
-            color:white;
-            border:none;
-            border-radius:12px;
-            font-weight:700;
-            font-size:14px;
-            cursor:pointer;
+            color:white;border:none;border-radius:12px;
+            font-weight:700;font-size:14px;cursor:pointer;
           ">
             ⭐ Valorar al vendedor
           </button>
@@ -222,31 +489,11 @@ async function mount(){
         document.getElementById("rateBtn").onclick = () => openRatingModal(ad.id, conv.seller_id);
       }
     }
-  }
-
-  const { data: msgs } = await supabase
-    .from("messages")
-    .select("*")
-    .eq("conversation_id", conversationId)
-    .order("created_at");
-
-  if(!alive) return;
-
-  msgs?.forEach(addMessage);
-
-  startChatSync(conversationId, userId, addMessage);
-
-  document.getElementById("sendMsg").onclick = sendMessage;
-
-  await markConversationRead(conversationId, userId);
-}
-
-async function unmount(){
-  alive = false;
-  stopChatSync();
 }
 
 async function sendMessage(){
+
+  if(iBlockedOther || otherBlockedMe) return;
 
   const input = document.getElementById("chatText");
   const text = input.value.trim();
@@ -437,28 +684,19 @@ async function rejectSale(){
 }
 
 function openRatingModal(adId, sellerId){
-  // Crear overlay
   const overlay = document.createElement("div");
   overlay.id = "ratingOverlay";
   overlay.style.cssText = `
-    position:fixed;
-    top:0;left:0;right:0;bottom:0;
+    position:fixed;top:0;left:0;right:0;bottom:0;
     background:rgba(0,0,0,0.6);
-    z-index:9999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
+    z-index:9999;display:flex;
+    align-items:center;justify-content:center;padding:20px;
   `;
 
-  // Crear modal
   const modal = document.createElement("div");
   modal.style.cssText = `
-    background:white;
-    border-radius:16px;
-    padding:24px;
-    max-width:400px;
-    width:100%;
+    background:white;border-radius:16px;padding:24px;
+    max-width:400px;width:100%;
     box-shadow:0 10px 40px rgba(0,0,0,0.2);
   `;
 
@@ -471,52 +709,32 @@ function openRatingModal(adId, sellerId){
     <div id="starsContainer" style="display:flex;justify-content:center;gap:8px;margin-bottom:16px;">
       ${[1,2,3,4,5].map(n => `
         <button class="star-btn" data-rating="${n}" style="
-          background:none;
-          border:none;
-          font-size:36px;
-          cursor:pointer;
-          padding:4px;
-          color:#d1d5db;
-          transition:color 0.2s;
+          background:none;border:none;
+          font-size:36px;cursor:pointer;padding:4px;
+          color:#d1d5db;transition:color 0.2s;
         ">★</button>
       `).join("")}
     </div>
 
     <textarea id="ratingComment" placeholder="Escribe un comentario (opcional)" style="
-      width:100%;
-      min-height:80px;
-      padding:10px;
-      border:1px solid #e5e7eb;
-      border-radius:10px;
-      font-family:inherit;
-      font-size:13px;
-      resize:vertical;
-      box-sizing:border-box;
-      margin-bottom:16px;
+      width:100%;min-height:80px;padding:10px;
+      border:1px solid #e5e7eb;border-radius:10px;
+      font-family:inherit;font-size:13px;resize:vertical;
+      box-sizing:border-box;margin-bottom:16px;
     "></textarea>
 
     <div style="display:flex;gap:8px;">
       <button id="cancelRatingBtn" style="
-        flex:1;
-        padding:12px;
-        background:#f3f4f6;
-        color:#374151;
-        border:none;
-        border-radius:10px;
-        font-weight:700;
-        font-size:14px;
-        cursor:pointer;
+        flex:1;padding:12px;
+        background:#f3f4f6;color:#374151;
+        border:none;border-radius:10px;
+        font-weight:700;font-size:14px;cursor:pointer;
       ">Cancelar</button>
       <button id="submitRatingBtn" style="
-        flex:1;
-        padding:12px;
+        flex:1;padding:12px;
         background:linear-gradient(90deg,#ffb300,#ff8f00);
-        color:white;
-        border:none;
-        border-radius:10px;
-        font-weight:700;
-        font-size:14px;
-        cursor:pointer;
+        color:white;border:none;border-radius:10px;
+        font-weight:700;font-size:14px;cursor:pointer;
         opacity:0.5;
       " disabled>Enviar valoración</button>
     </div>
@@ -529,7 +747,6 @@ function openRatingModal(adId, sellerId){
   const stars = modal.querySelectorAll(".star-btn");
   const submitBtn = modal.querySelector("#submitRatingBtn");
 
-  // Manejar click en estrellas
   stars.forEach(star => {
     star.onclick = () => {
       selectedRating = parseInt(star.dataset.rating);
@@ -540,7 +757,6 @@ function openRatingModal(adId, sellerId){
       submitBtn.style.opacity = "1";
     };
 
-    // Hover preview
     star.onmouseenter = () => {
       const hoverRating = parseInt(star.dataset.rating);
       stars.forEach((s, i) => {
@@ -549,24 +765,20 @@ function openRatingModal(adId, sellerId){
     };
   });
 
-  // Al salir del contenedor de estrellas, restaurar al rating seleccionado
   modal.querySelector("#starsContainer").onmouseleave = () => {
     stars.forEach((s, i) => {
       s.style.color = (i < selectedRating) ? "#ffb300" : "#d1d5db";
     });
   };
 
-  // Cancelar
   modal.querySelector("#cancelRatingBtn").onclick = () => {
     overlay.remove();
   };
 
-  // Click fuera del modal cierra
   overlay.onclick = (e) => {
     if(e.target === overlay) overlay.remove();
   };
 
-  // Enviar valoración
   submitBtn.onclick = async () => {
     if(selectedRating === 0) return;
 
