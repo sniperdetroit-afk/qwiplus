@@ -126,12 +126,16 @@ async function mount(){
       .eq("id", otherUserId)
       .maybeSingle();
 
-    document.getElementById("chatAdHeader").innerHTML = `
-      <div class="chat-ad-mini" data-view="adDetail" data-ad="${ad.id}" style="cursor:pointer;">
+        document.getElementById("chatAdHeader").innerHTML = `
+      <div id="chatAdMini" class="chat-ad-mini" style="cursor:pointer;">
         <img src="${ad.image_url}">
         <div>${ad.title}</div>
       </div>
     `;
+
+    document.getElementById("chatAdMini").onclick = () => {
+      navigate("adDetail", { id: ad.id });
+    };
 
     // AVATAR del otro usuario (clickable, te lleva a su perfil)
     const avatarTitle = (userId === conv.seller_id) ? "Ver perfil del comprador" : "Ver perfil del vendedor";
