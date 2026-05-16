@@ -166,15 +166,61 @@ async function mount(){
       `;
     }
 
-    // VENTA CONFIRMADA - Mensaje para ambos
+    // VENTA CONFIRMADA - Mensaje + opción de valorar (solo comprador)
     if(adIsSold && saleConfirmed){
-      document.getElementById("chatActions").innerHTML = `
+      // Verificar si el comprador ya valoró al vendedor
+      let alreadyReviewed = false;
+      if(isBuyer){
+        const { data: existing } = await supabase
+          .from("reviews")
+          .select("id")
+          .eq("reviewer_id", userId)
+          .eq("ad_id", ad.id)
+          .maybeSingle();
+        alreadyReviewed = !!existing;
+      }
+
+      let actionHTML = `
         <div style="padding:12px;background:#e8f5e9;border-radius:12px;margin:8px 0;border:1px solid #a5d6a7;text-align:center;">
           <div style="font-size:13px;color:#2e7d32;font-weight:600;">
             ✓ Venta confirmada
           </div>
         </div>
       `;
+
+      // Si soy comprador, puedo valorar al vendedor
+      if(isBuyer && !alreadyReviewed){
+        actionHTML += `
+          <button id="rateBtn" style="
+            width:100%;
+            padding:12px;
+            margin:8px 0;
+            background:linear-gradient(90deg,#ffb300,#ff8f00);
+            color:white;
+            border:none;
+            border-radius:12px;
+            font-weight:700;
+            font-size:14px;
+            cursor:pointer;
+          ">
+            ⭐ Valorar al vendedor
+          </button>
+        `;
+      } else if(isBuyer && alreadyReviewed){
+        actionHTML += `
+          <div style="padding:10px;background:#f3f4f6;border-radius:12px;margin:8px 0;text-align:center;">
+            <div style="font-size:13px;color:#6b7280;font-weight:600;">
+              ✓ Ya has valorado a este vendedor
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById("chatActions").innerHTML = actionHTML;
+
+      if(isBuyer && !alreadyReviewed){
+        document.getElementById("rateBtn").onclick = () => openRatingModal(ad.id, conv.seller_id);
+      }
     }
   }
 
@@ -313,7 +359,7 @@ function addMessage(msg){
 }
 
 async function markAsSold(){
-  const ok = confirm("¿Confirmas que has vendido este artículo a este usuario? El comprador tendrá que confirmarlo y luego podréis valoraros mutuamente.");
+  const ok = confirm("¿Confirmas que has vendido este artículo a este usuario? El comprador tendrá que confirmarlo y luego podrá valorarte.");
   if(!ok) return;
 
   const { data: conv } = await supabase
@@ -339,7 +385,7 @@ async function markAsSold(){
 }
 
 async function confirmSale(){
-  const ok = confirm("¿Confirmas que has comprado este artículo a este vendedor? Después de confirmar, podréis valoraros mutuamente.");
+  const ok = confirm("¿Confirmas que has comprado este artículo a este vendedor? Después de confirmar, podrás valorarlo.");
   if(!ok) return;
 
   const { data: conv } = await supabase
@@ -360,7 +406,7 @@ async function confirmSale(){
     return;
   }
 
-  alert("✓ Venta confirmada. Ya podéis valoraros mutuamente.");
+  alert("✓ Venta confirmada. Ya puedes valorar al vendedor.");
   location.reload();
 }
 
@@ -390,9 +436,166 @@ async function rejectSale(){
   location.reload();
 }
 
+function openRatingModal(adId, sellerId){
+  // Crear overlay
+  const overlay = document.createElement("div");
+  overlay.id = "ratingOverlay";
+  overlay.style.cssText = `
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.6);
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  `;
+
+  // Crear modal
+  const modal = document.createElement("div");
+  modal.style.cssText = `
+    background:white;
+    border-radius:16px;
+    padding:24px;
+    max-width:400px;
+    width:100%;
+    box-shadow:0 10px 40px rgba(0,0,0,0.2);
+  `;
+
+  modal.innerHTML = `
+    <h3 style="margin:0 0 8px;font-size:18px;color:#111;">Valorar al vendedor</h3>
+    <p style="margin:0 0 16px;font-size:13px;color:#6b7280;">
+      ¿Cómo fue tu experiencia con este vendedor?
+    </p>
+
+    <div id="starsContainer" style="display:flex;justify-content:center;gap:8px;margin-bottom:16px;">
+      ${[1,2,3,4,5].map(n => `
+        <button class="star-btn" data-rating="${n}" style="
+          background:none;
+          border:none;
+          font-size:36px;
+          cursor:pointer;
+          padding:4px;
+          color:#d1d5db;
+          transition:color 0.2s;
+        ">★</button>
+      `).join("")}
+    </div>
+
+    <textarea id="ratingComment" placeholder="Escribe un comentario (opcional)" style="
+      width:100%;
+      min-height:80px;
+      padding:10px;
+      border:1px solid #e5e7eb;
+      border-radius:10px;
+      font-family:inherit;
+      font-size:13px;
+      resize:vertical;
+      box-sizing:border-box;
+      margin-bottom:16px;
+    "></textarea>
+
+    <div style="display:flex;gap:8px;">
+      <button id="cancelRatingBtn" style="
+        flex:1;
+        padding:12px;
+        background:#f3f4f6;
+        color:#374151;
+        border:none;
+        border-radius:10px;
+        font-weight:700;
+        font-size:14px;
+        cursor:pointer;
+      ">Cancelar</button>
+      <button id="submitRatingBtn" style="
+        flex:1;
+        padding:12px;
+        background:linear-gradient(90deg,#ffb300,#ff8f00);
+        color:white;
+        border:none;
+        border-radius:10px;
+        font-weight:700;
+        font-size:14px;
+        cursor:pointer;
+        opacity:0.5;
+      " disabled>Enviar valoración</button>
+    </div>
+  `;
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  let selectedRating = 0;
+  const stars = modal.querySelectorAll(".star-btn");
+  const submitBtn = modal.querySelector("#submitRatingBtn");
+
+  // Manejar click en estrellas
+  stars.forEach(star => {
+    star.onclick = () => {
+      selectedRating = parseInt(star.dataset.rating);
+      stars.forEach((s, i) => {
+        s.style.color = (i < selectedRating) ? "#ffb300" : "#d1d5db";
+      });
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = "1";
+    };
+
+    // Hover preview
+    star.onmouseenter = () => {
+      const hoverRating = parseInt(star.dataset.rating);
+      stars.forEach((s, i) => {
+        s.style.color = (i < hoverRating) ? "#ffb300" : "#d1d5db";
+      });
+    };
+  });
+
+  // Al salir del contenedor de estrellas, restaurar al rating seleccionado
+  modal.querySelector("#starsContainer").onmouseleave = () => {
+    stars.forEach((s, i) => {
+      s.style.color = (i < selectedRating) ? "#ffb300" : "#d1d5db";
+    });
+  };
+
+  // Cancelar
+  modal.querySelector("#cancelRatingBtn").onclick = () => {
+    overlay.remove();
+  };
+
+  // Click fuera del modal cierra
+  overlay.onclick = (e) => {
+    if(e.target === overlay) overlay.remove();
+  };
+
+  // Enviar valoración
+  submitBtn.onclick = async () => {
+    if(selectedRating === 0) return;
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Enviando...";
+
+    const comment = modal.querySelector("#ratingComment").value.trim();
+
+    const { error } = await supabase
+      .from("reviews")
+      .insert({
+        reviewer_id: userId,
+        reviewed_id: sellerId,
+        ad_id: adId,
+        rating: selectedRating,
+        comment: comment || null
+      });
+
+    if(error){
+      alert("Error al enviar la valoración: " + error.message);
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Enviar valoración";
+      return;
+    }
+
+    overlay.remove();
+    alert("✓ ¡Gracias por tu valoración!");
+    location.reload();
+  };
+}
+
 export const ChatView = createView(render, mount, unmount);
-
-
-
-     
-     
