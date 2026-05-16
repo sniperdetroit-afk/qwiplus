@@ -3,6 +3,7 @@
 import { supabase } from "../services/supabase.js";
 import { navigate } from "../core/router.js";
 import { getState } from "../core/state.js";
+import { blockUser, unblockUser, isBlocked } from "../services/blockService.js";
 
 function getInitials(name = "") {
   const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
@@ -88,6 +89,15 @@ async function mountPublicProfile() {
   const reviewsList = reviewsRes.data || [];
   const avg = avgRating(reviewsList);
 
+  // ¿Es otro usuario? (no yo mismo)
+  const isOtherUser = currentUser && currentUser.id !== userId;
+
+  // ¿Ya lo tengo bloqueado?
+  let blocked = false;
+  if (isOtherUser) {
+    blocked = await isBlocked(currentUser.id, userId);
+  }
+
   // ¿Puede valorar? Solo si es otro usuario y tiene conversación con él
   let canReview = false;
   let alreadyReviewed = false;
@@ -116,11 +126,17 @@ async function mountPublicProfile() {
   container.innerHTML = `
 
     <!-- HEADER -->
-    <div style="display:flex;align-items:center;gap:12px;padding:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;">
       <button id="backPublicProfile" style="
         background:none;border:none;font-size:22px;
         cursor:pointer;color:#6b7280;
       ">←</button>
+      ${isOtherUser ? `
+        <button id="moreBtn" style="
+          background:none;border:none;font-size:22px;
+          cursor:pointer;color:#6b7280;padding:4px 10px;
+        ">⋮</button>
+      ` : ""}
     </div>
 
     <!-- INFO USUARIO -->
@@ -141,6 +157,21 @@ async function mountPublicProfile() {
         ` : `<p style="margin:4px 0 0;font-size:12px;color:#9ca3af;">Sin valoraciones aún</p>`}
       </div>
     </div>
+
+    ${blocked ? `
+      <!-- BANNER USUARIO BLOQUEADO -->
+      <div style="margin:0 20px 16px;padding:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px;display:flex;align-items:center;gap:10px;">
+        <div style="font-size:20px;">🚫</div>
+        <div style="flex:1;font-size:13px;color:#991b1b;font-weight:600;">
+          Has bloqueado a este usuario
+        </div>
+        <button id="unblockBtn" style="
+          background:#dc2626;color:white;border:none;
+          padding:6px 12px;border-radius:8px;
+          font-size:12px;font-weight:700;cursor:pointer;
+        ">Desbloquear</button>
+      </div>
+    ` : ""}
 
     <!-- STATS -->
     <div style="display:flex;gap:10px;padding:0 20px 16px;">
@@ -175,7 +206,7 @@ async function mountPublicProfile() {
     <div id="tabContent" style="padding:0 20px;"></div>
 
     <!-- BOTÓN VALORAR -->
-    ${canReview && !alreadyReviewed ? `
+    ${canReview && !alreadyReviewed && !blocked ? `
       <div style="padding:16px 20px;">
         <button id="openReviewBtn" style="
           width:100%;padding:14px;
@@ -302,6 +333,91 @@ async function mountPublicProfile() {
 
   const backBtn = document.getElementById("backPublicProfile");
   if (backBtn) backBtn.onclick = () => history.back();
+
+  // Menú ⋮ (bloquear)
+  const moreBtn = document.getElementById("moreBtn");
+  if (moreBtn) {
+    moreBtn.onclick = () => openBlockMenu(currentUser.id, userId, name);
+  }
+
+  // Desbloquear
+  const unblockBtn = document.getElementById("unblockBtn");
+  if (unblockBtn) {
+    unblockBtn.onclick = async () => {
+      const ok = confirm(`¿Desbloquear a ${name}?`);
+      if (!ok) return;
+
+      const { error } = await unblockUser(currentUser.id, userId);
+      if (error) {
+        alert("Error al desbloquear: " + (error.message || error));
+        return;
+      }
+      alert(`${name} ya no está bloqueado.`);
+      location.reload();
+    };
+  }
+}
+
+/* ================= MENÚ ⋮ BLOQUEAR ================= */
+
+function openBlockMenu(currentUserId, targetUserId, targetName) {
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.5);
+    z-index:9999;display:flex;align-items:flex-end;justify-content:center;
+  `;
+
+  const sheet = document.createElement("div");
+  sheet.style.cssText = `
+    width:100%;max-width:500px;background:white;
+    border-radius:20px 20px 0 0;padding:20px;
+    box-shadow:0 -8px 32px rgba(0,0,0,0.2);
+  `;
+
+  sheet.innerHTML = `
+    <div style="width:40px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 16px;"></div>
+
+    <button id="blockBtnAction" style="
+      width:100%;padding:14px;text-align:left;
+      background:none;border:none;
+      font-size:15px;color:#dc2626;font-weight:700;
+      cursor:pointer;border-radius:10px;
+      display:flex;align-items:center;gap:12px;
+    ">
+      <span style="font-size:20px;">🚫</span>
+      Bloquear a ${targetName}
+    </button>
+
+    <button id="cancelBlock" style="
+      width:100%;margin-top:8px;padding:14px;
+      background:#f3f4f6;border:none;border-radius:10px;
+      font-size:15px;color:#374151;font-weight:600;cursor:pointer;
+    ">Cancelar</button>
+  `;
+
+  overlay.appendChild(sheet);
+  document.body.appendChild(overlay);
+
+  overlay.onclick = (e) => {
+    if (e.target === overlay) overlay.remove();
+  };
+
+  sheet.querySelector("#cancelBlock").onclick = () => overlay.remove();
+
+  sheet.querySelector("#blockBtnAction").onclick = async () => {
+    const ok = confirm(`¿Bloquear a ${targetName}?\n\nNo podrá escribirte mensajes y no verás sus anuncios.`);
+    if (!ok) return;
+
+    const { error } = await blockUser(currentUserId, targetUserId);
+    if (error) {
+      alert("Error al bloquear: " + (error.message || error));
+      return;
+    }
+
+    overlay.remove();
+    alert(`${targetName} ha sido bloqueado.`);
+    location.reload();
+  };
 }
 
 /* ================= TAB ADS ================= */
