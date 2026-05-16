@@ -24,9 +24,12 @@ async function render(){
       <div id="chatSeller"></div>
     </div>
 
-    <div id="chatMessages" class="chat-messages"></div>
+        <div id="chatMessages" class="chat-messages"></div>
+
+    <div id="chatActions"></div>
 
     <div class="chat-input">
+
       <input id="chatText" placeholder="Mensaje">
       <button id="sendMsg">Enviar</button>
     </div>
@@ -54,7 +57,7 @@ async function mount(){
 
     const { data: conv } = await supabase
     .from("conversations")
-    .select(`id, buyer_id, seller_id, ads(id,title,image_url,user_id)`)
+    .select(`id, buyer_id, seller_id, ads(id,title,image_url,user_id,sold,sold_to)`)
     .eq("id", conversationId)
     .single();
 
@@ -85,7 +88,32 @@ async function mount(){
     document.getElementById("backToAd").onclick = () => {
       history.back();
     };
-  }
+
+    // BOTÓN "HE VENDIDO ESTO" - Solo lo ve el vendedor
+    const isSeller = (userId === conv.seller_id);
+    const adIsSold = ad.sold === true;
+
+    if(isSeller && !adIsSold){
+      document.getElementById("chatActions").innerHTML = `
+        <button id="markSoldBtn" style="
+          width:100%;
+          padding:12px;
+          margin:8px 0;
+          background:linear-gradient(90deg,#2ed4a7,#6a8dff);
+          color:white;
+          border:none;
+          border-radius:12px;
+          font-weight:700;
+          font-size:14px;
+          cursor:pointer;
+        ">
+          ✓ He vendido esto a este usuario
+        </button>
+      `;
+
+      document.getElementById("markSoldBtn").onclick = markAsSold;
+    }
+    }
 
   const { data: msgs } = await supabase
     .from("messages")
@@ -220,6 +248,33 @@ function addMessage(msg){
   box.appendChild(wrapper);
   box.scrollTop = box.scrollHeight;
 }
+async function markAsSold(){
+  const ok = confirm("¿Confirmas que has vendido este artículo a este usuario? El comprador tendrá que confirmarlo y luego podréis valoraros mutuamente.");
+  if(!ok) return;
+
+  const { data: conv } = await supabase
+    .from("conversations")
+    .select("ad_id, buyer_id, seller_id")
+    .eq("id", conversationId)
+    .single();
+
+  if(!conv) return;
+
+  const { error } = await supabase
+    .from("ads")
+    .update({ sold: true, sold_to: conv.buyer_id })
+    .eq("id", conv.ad_id);
+
+  if(error){
+    alert("Error al marcar como vendido: " + error.message);
+    return;
+  }
+
+  alert("✓ Anuncio marcado como vendido. Esperando confirmación del comprador.");
+  location.reload();
+}
+
+
 
 export const ChatView = createView(render, mount, unmount);
 
