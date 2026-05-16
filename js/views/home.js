@@ -12,6 +12,8 @@ let adsChannel = null;
 
 let renderedIds = new Set();
 let requestId = 0;
+let myFavorites = new Set();
+
 
 /* =========================
    RENDER
@@ -92,10 +94,11 @@ async function mountHome(){
   window.removeEventListener("scroll", onScroll);
   window.addEventListener("scroll", onScroll);
 
-  startRealtime();
+      startRealtime();
 
-  await loadMore();
-}
+    await loadMyFavorites();
+    await loadMore();
+  }
 
 /* =========================
    UNMOUNT
@@ -247,7 +250,6 @@ async function loadMore(){
     loading = false;
   }
 }
-
 /* =========================
    CARD
 ========================= */
@@ -261,6 +263,7 @@ function renderAd(ad){
   const userId = state.session?.user?.id;
   const isMine = ad.user_id === userId;
   const isVendido = ad.sold === true;
+  const isFav = myFavorites.has(ad.id);
 
   const div = document.createElement("div");
   div.className = "card";
@@ -275,7 +278,7 @@ function renderAd(ad){
 
       ${
         !isMine ? `
-        <button class="fav-btn">❤️</button>
+          <button class="fav-btn ${isFav ? "is-fav" : ""}">${isFav ? "❤️" : "🤍"}</button>
         ` : ""
       }
     </div>
@@ -323,35 +326,42 @@ function renderAd(ad){
         .maybeSingle();
 
       if(existing){
-  await supabase
-    .from("favorites")
-    .delete()
-    .eq("id", existing.id);
+        // QUITAR de favoritos
+        await supabase
+          .from("favorites")
+          .delete()
+          .eq("id", existing.id);
 
-  const newCount = Math.max(current - 1, 0);
-  favBtn.textContent = "❤️";
-  countEl.textContent = newCount;
+        myFavorites.delete(ad.id);
 
-  await supabase
-    .from("ads")
-    .update({ favorites_count: newCount })
-    .eq("id", ad.id);
+        const newCount = Math.max(current - 1, 0);
+        favBtn.textContent = "🤍";
+        favBtn.classList.remove("is-fav");
+        countEl.textContent = newCount;
 
-} else {
+        await supabase
+          .from("ads")
+          .update({ favorites_count: newCount })
+          .eq("id", ad.id);
 
-  await supabase
-    .from("favorites")
-    .insert([{ user_id: userId, ad_id: ad.id }]);
+      } else {
+        // AÑADIR a favoritos
+        await supabase
+          .from("favorites")
+          .insert([{ user_id: userId, ad_id: ad.id }]);
 
-  const newCount = current + 1;
-  favBtn.textContent = "💖";
-  countEl.textContent = newCount;
+        myFavorites.add(ad.id);
 
-  await supabase
-    .from("ads")
-    .update({ favorites_count: newCount })
-    .eq("id", ad.id);
-}
+        const newCount = current + 1;
+        favBtn.textContent = "❤️";
+        favBtn.classList.add("is-fav");
+        countEl.textContent = newCount;
+
+        await supabase
+          .from("ads")
+          .update({ favorites_count: newCount })
+          .eq("id", ad.id);
+      }
 
 
       // bump del contador
@@ -368,6 +378,23 @@ function renderAd(ad){
 
   box.appendChild(div);
 }
+/* ================= FAVORITES ================= */
+
+async function loadMyFavorites(){
+  const userId = getState().session?.user?.id;
+  if(!userId){
+    myFavorites = new Set();
+    return;
+  }
+
+  const { data } = await supabase
+    .from("favorites")
+    .select("ad_id")
+    .eq("user_id", userId);
+
+  myFavorites = new Set((data || []).map(f => f.ad_id));
+}
+
 
 /* =========================
    EXPORT
