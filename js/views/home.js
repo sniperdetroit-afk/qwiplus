@@ -165,7 +165,7 @@ function startRealtime(){
 ========================= */
 
 function getStatusBadge(ad){
-  if(ad.status === "vendido"){
+  if(ad.sold === true){
     return `
       <div class="status-badge" style="
         position:absolute;top:8px;left:8px;z-index:2;
@@ -176,7 +176,7 @@ function getStatusBadge(ad){
       ">VENDIDO</div>
     `;
   }
-  if(ad.status === "reservado"){
+  if(ad.reserved === true){
     return `
       <div class="status-badge" style="
         position:absolute;top:8px;left:8px;z-index:2;
@@ -260,7 +260,7 @@ function renderAd(ad){
   const state = getState();
   const userId = state.session?.user?.id;
   const isMine = ad.user_id === userId;
-  const isVendido = ad.status === "vendido";
+  const isVendido = ad.sold === true;
 
   const div = document.createElement("div");
   div.className = "card";
