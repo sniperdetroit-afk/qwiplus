@@ -395,6 +395,66 @@ function renderAd(container, ad, profile){
       navigate("profile");
     };
   }
+    const reactivateBtn = document.getElementById("reactivateBtn");
+  if(reactivateBtn){
+    reactivateBtn.onclick = async () => {
+      const ok = confirm("¿Reactivar este anuncio? Volverá a estar disponible para la venta.");
+      if(!ok) return;
+      const { error } = await supabase
+        .from("ads")
+        .update({ sold: false, sold_to: null, sale_confirmed_by_buyer: false })
+        .eq("id", ad.id);
+      if(error){ alert("Error: " + error.message); return; }
+      alert("✓ Anuncio reactivado. Vuelve a estar disponible.");
+      location.reload();
+    };
+  }
+
+  const reserveBtn = document.getElementById("reserveBtn");
+  if(reserveBtn){
+    reserveBtn.onclick = async () => {
+      const ok = confirm("¿Marcar este anuncio como reservado?");
+      if(!ok) return;
+      const { error } = await supabase
+        .from("ads")
+        .update({ reserved: true })
+        .eq("id", ad.id);
+      if(error){ alert("Error: " + error.message); return; }
+      alert("✓ Anuncio marcado como reservado.");
+      location.reload();
+    };
+  }
+
+  const unreserveBtn = document.getElementById("unreserveBtn");
+  if(unreserveBtn){
+    unreserveBtn.onclick = async () => {
+      const ok = confirm("¿Quitar la reserva del anuncio?");
+      if(!ok) return;
+      const { error } = await supabase
+        .from("ads")
+        .update({ reserved: false, reserved_by: null })
+        .eq("id", ad.id);
+      if(error){ alert("Error: " + error.message); return; }
+      alert("✓ Reserva eliminada.");
+      location.reload();
+    };
+  }
+
+  const soldBtn = document.getElementById("soldBtn");
+  if(soldBtn){
+    soldBtn.onclick = async () => {
+      const ok = confirm("¿Marcar este anuncio como vendido?\n\nNota: Si lo vendiste a un usuario concreto, es mejor marcarlo desde el chat para que pueda valorarte.");
+      if(!ok) return;
+      const { error } = await supabase
+        .from("ads")
+        .update({ sold: true })
+        .eq("id", ad.id);
+      if(error){ alert("Error: " + error.message); return; }
+      alert("✓ Anuncio marcado como vendido.");
+      location.reload();
+    };
+  }
+
 
   const reportBtn = document.getElementById("reportBtn");
   const reportForm = document.getElementById("reportForm");
