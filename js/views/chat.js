@@ -52,9 +52,9 @@ async function mount(){
 
   rendered = new Set();
 
-  const { data: conv } = await supabase
+    const { data: conv } = await supabase
     .from("conversations")
-    .select(`id, ads(id,title,image_url,user_id)`)
+    .select(`id, buyer_id, seller_id, ads(id,title,image_url,user_id)`)
     .eq("id", conversationId)
     .single();
 
@@ -70,10 +70,15 @@ async function mount(){
       </div>
     `;
 
+        // Si yo soy el vendedor, muestro el perfil del COMPRADOR
+    // Si yo soy el comprador, muestro el perfil del VENDEDOR
+    const otherUserId = (userId === conv.seller_id) ? conv.buyer_id : conv.seller_id;
+    const otherUserLabel = (userId === conv.seller_id) ? "Ver perfil del comprador" : "Ver perfil del vendedor";
+
     document.getElementById("chatSeller").innerHTML = `
-      <div class="chat-seller-link" data-view="publicProfile" data-user-id="${ad.user_id}"
+      <div class="chat-seller-link" data-view="publicProfile" data-user-id="${otherUserId}"
  style="cursor:pointer;font-size:13px;color:#6a8dff;padding:4px 8px;">
-        Ver perfil del vendedor →
+        ${otherUserLabel} →
       </div>
     `;
 
