@@ -19,6 +19,46 @@ let userLang;
 let iBlockedOther = false;
 let otherBlockedMe = false;
 
+/* ================= AVATAR HELPERS ================= */
+
+function getInitials(name = "") {
+  const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+}
+
+function getColorFromString(str = "") {
+  const colors = [
+    "#EF4444", "#F59E0B", "#10B981", "#3B82F6",
+    "#8B5CF6", "#EC4899", "#14B8A6", "#F97316",
+    "#6366F1", "#84CC16", "#06B6D4", "#A855F7"
+  ];
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function avatarHtml(profile, size = 36) {
+  if (profile?.avatar_url) {
+    return `<img src="${profile.avatar_url}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%;">`;
+  }
+  const name = profile?.name || "?";
+  const initials = getInitials(name);
+  const color = getColorFromString(name);
+  return `
+    <div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};
+      display:flex;align-items:center;justify-content:center;
+      color:white;font-size:${Math.floor(size * 0.4)}px;font-weight:700;">
+      ${initials}
+    </div>
+  `;
+}
+
+/* ================= RENDER ================= */
+
 async function render(){
   return `
   <section class="chat-page">
@@ -28,7 +68,7 @@ async function render(){
       <div id="chatSeller"></div>
       <button id="chatMoreBtn" style="
         background:none;border:none;font-size:22px;
-        cursor:pointer;color:#6b7280;padding:4px 10px;margin-left:auto;
+        cursor:pointer;color:#6b7280;padding:4px 10px;
       ">⋮</button>
     </div>
 
@@ -79,6 +119,13 @@ async function mount(){
     iBlockedOther = await isBlocked(userId, otherUserId);
     otherBlockedMe = await isBlocked(otherUserId, userId);
 
+    // CARGAR PERFIL DEL OTRO USUARIO (para mostrar avatar en el header)
+    const { data: otherProfile } = await supabase
+      .from("profiles")
+      .select("name, avatar_url")
+      .eq("id", otherUserId)
+      .maybeSingle();
+
     document.getElementById("chatAdHeader").innerHTML = `
       <div class="chat-ad-mini" data-view="adDetail" data-ad="${ad.id}" style="cursor:pointer;">
         <img src="${ad.image_url}">
@@ -86,16 +133,26 @@ async function mount(){
       </div>
     `;
 
-        // Si yo soy el vendedor, muestro el perfil del COMPRADOR
-    // Si yo soy el comprador, muestro el perfil del VENDEDOR
-    const otherUserLabel = (userId === conv.seller_id) ? "Ver perfil del comprador" : "Ver perfil del vendedor";
+    // AVATAR del otro usuario (clickable, te lleva a su perfil)
+    const avatarTitle = (userId === conv.seller_id) ? "Ver perfil del comprador" : "Ver perfil del vendedor";
 
     document.getElementById("chatSeller").innerHTML = `
-      <div class="chat-seller-link" data-view="publicProfile" data-user-id="${otherUserId}"
- style="cursor:pointer;font-size:13px;color:#6a8dff;padding:4px 8px;">
-        ${otherUserLabel} →
+      <div id="otherUserAvatar" title="${avatarTitle}" style="
+        cursor:pointer;display:flex;align-items:center;
+        margin:0 4px;
+      ">
+        ${avatarHtml(otherProfile, 36)}
       </div>
     `;
+
+    // Click en avatar → ir al perfil público
+    const avatarEl = document.getElementById("otherUserAvatar");
+    if(avatarEl){
+      avatarEl.onclick = () => {
+        setState({ app:{ params:{ userId: otherUserId } } });
+        navigate("publicProfile");
+      };
+    }
 
     document.getElementById("backToAd").onclick = () => {
       history.back();
@@ -294,7 +351,7 @@ function openReportModal(reportedUserId){
     box-shadow:0 10px 40px rgba(0,0,0,0.2);
   `;
 
-  const reasonsHTML = USER_REPORT_REASONS.map((reason, i) => `
+  const reasonsHTML = USER_REPORT_REASONS.map((reason) => `
     <label style="
       display:flex;align-items:center;gap:10px;
       padding:12px;border:1px solid #e5e7eb;border-radius:10px;
@@ -374,27 +431,19 @@ function openReportModal(reportedUserId){
 /* ================= VENTAS / VALORACIONES ================= */
 
 async function renderSaleActions(conv, ad){
-    // ESTADO DE LA VENTA
     const isSeller = (userId === conv.seller_id);
     const isBuyer = (userId === conv.buyer_id);
     const adIsSold = ad.sold === true;
     const saleConfirmed = ad.sale_confirmed_by_buyer === true;
     const iAmTheSoldTo = (ad.sold_to === userId);
 
-    // BOTÓN "HE VENDIDO ESTO" - Solo lo ve el vendedor cuando aún no está vendido
     if(isSeller && !adIsSold){
       document.getElementById("chatActions").innerHTML = `
         <button id="markSoldBtn" style="
-          width:100%;
-          padding:12px;
-          margin:8px 0;
+          width:100%;padding:12px;margin:8px 0;
           background:linear-gradient(90deg,#2ed4a7,#6a8dff);
-          color:white;
-          border:none;
-          border-radius:12px;
-          font-weight:700;
-          font-size:14px;
-          cursor:pointer;
+          color:white;border:none;border-radius:12px;
+          font-weight:700;font-size:14px;cursor:pointer;
         ">
           ✓ He vendido esto a este usuario
         </button>
@@ -402,7 +451,6 @@ async function renderSaleActions(conv, ad){
       document.getElementById("markSoldBtn").onclick = markAsSold;
     }
 
-    // BOTONES CONFIRMACIÓN COMPRADOR
     if(isBuyer && adIsSold && iAmTheSoldTo && !saleConfirmed){
       document.getElementById("chatActions").innerHTML = `
         <div style="padding:12px;background:#fff8e1;border-radius:12px;margin:8px 0;border:1px solid #ffe082;">
@@ -430,7 +478,6 @@ async function renderSaleActions(conv, ad){
       document.getElementById("rejectSaleBtn").onclick = rejectSale;
     }
 
-    // VENTA PENDIENTE - Mensaje para el vendedor
     if(isSeller && adIsSold && !saleConfirmed){
       document.getElementById("chatActions").innerHTML = `
         <div style="padding:12px;background:#fff8e1;border-radius:12px;margin:8px 0;border:1px solid #ffe082;text-align:center;">
@@ -441,7 +488,6 @@ async function renderSaleActions(conv, ad){
       `;
     }
 
-    // VENTA CONFIRMADA + valorar
     if(adIsSold && saleConfirmed){
       let alreadyReviewed = false;
       if(isBuyer){
