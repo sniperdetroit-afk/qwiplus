@@ -2,7 +2,7 @@
 // Objetivo: cumplir requisito PWA para Play Store sin romper auth/Supabase.
 // Estrategia: siempre red primero, cache solo como fallback offline.
 
-const CACHE_NAME = "qwiplus-v1";
+const CACHE_NAME = "qwiplus-v2";
 const OFFLINE_URL = "/offline.html";
 
 // Recursos mínimos a cachear para que offline.html funcione
