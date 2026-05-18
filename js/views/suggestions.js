@@ -23,6 +23,7 @@ function renderSuggestions() {
       <textarea id="suggestionText" placeholder="Escribe tu sugerencia aquí..." style="
         width:100%;min-height:150px;padding:16px;
         background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+        
         border-radius:14px;color:#F5F7FA;font-size:15px;resize:none;
         box-sizing:border-box;outline:none;
       "></textarea>
