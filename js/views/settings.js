@@ -158,46 +158,38 @@ function renderSettings() {
       ${settingsItem("💡", "Sugerencias", "suggestions")}
 
       <!-- IDIOMA -->
-<p style="
-  font-size: 11px;
-  font-weight: 800;
-  color: #F5B942;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin: 24px 0 12px 4px;
-">🌐 Idioma</p>
-<div style="
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 0;
-  backdrop-filter: blur(10px);
-  overflow: hidden;
-">
-  <div style="
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 18px;
-    position: relative;
-  ">
-    <span style="font-size:20px;width:28px;text-align:center;">🌐</span>
-    <span style="flex:1;font-size:15px;font-weight:500;color:#F5F7FA;" id="langLabel">
-      ${LANGUAGES.find(l => l.code === getLang())?.label || "🇪🇸 Español"}
-    </span>
-    <span style="color:#38BDF8;font-size:18px;font-weight:300;">›</span>
-    <select id="langSelect" style="
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    ">
-      ${langOptions}
-    </select>
-  </div>
-</div>
+      <p style="
+        font-size: 11px;
+        font-weight: 800;
+        color: #F5B942;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 24px 0 12px 4px;
+      ">🌐 Idioma</p>
+      <div style="
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 4px 16px;
+        backdrop-filter: blur(10px);
+        transition: all 0.2s;
+      ">
+        <select id="langSelect" style="
+          width: 100%;
+          padding: 14px 0;
+          border: none;
+          background: transparent;
+          font-size: 15px;
+          font-weight: 500;
+          color: #F5F7FA;
+          outline: none;
+          cursor: pointer;
+        ">
+          ${langOptions}
+        </select>
+      </div>
+
+    </div>
 
   </section>
   `;
