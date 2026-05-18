@@ -55,7 +55,6 @@ import { EditAdView } from "./views/editAd.js";
 import { InboxView } from "./views/inbox.js";
 import { ChatView } from "./views/chat.js";
 import { PublicProfileView } from "./views/publicProfile.js";
-import { SuggestionsView } from "./views/suggestions.js";
 
 /* ================= ROUTES ================= */
 
