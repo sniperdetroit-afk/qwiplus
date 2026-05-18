@@ -79,7 +79,7 @@ const routes = {
   messages: InboxView,
   chat: ChatView,
   publicProfile: PublicProfileView,
-  suggestions: SuggestionsView
+  
 };
 
 /* ================= RENDER ================= */
