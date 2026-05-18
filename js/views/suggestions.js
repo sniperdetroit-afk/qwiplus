@@ -1,5 +1,6 @@
 import { navigate } from "../core/router.js";
-import { supabase } from "../services/supabaseClient.js";
+import { supabase } from "../services/supabase.js";
+
 
 function renderSuggestions() {
   return `
