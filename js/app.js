@@ -130,7 +130,6 @@ async function renderApp(){
       editProfile: { header: false, nav: false },
       editAd: { header: false, nav: false },
       publicProfile: { header: false, nav: false },
-      suggestions: { header: false, nav: false }
     };
 
     const layout = layoutConfig[viewName] || { header: false, nav: true };
