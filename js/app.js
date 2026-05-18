@@ -55,6 +55,7 @@ import { EditAdView } from "./views/editAd.js";
 import { InboxView } from "./views/inbox.js";
 import { ChatView } from "./views/chat.js";
 import { PublicProfileView } from "./views/publicProfile.js";
+import { SuggestionsView } from "./views/suggestions.js";
 
 /* ================= ROUTES ================= */
 
@@ -79,7 +80,7 @@ const routes = {
   messages: InboxView,
   chat: ChatView,
   publicProfile: PublicProfileView,
-  
+  suggestions: SuggestionsView,
 };
 
 /* ================= RENDER ================= */
@@ -130,6 +131,7 @@ async function renderApp(){
       editProfile: { header: false, nav: false },
       editAd: { header: false, nav: false },
       publicProfile: { header: false, nav: false },
+      suggestions: { header: false, nav: false },
     };
 
     const layout = layoutConfig[viewName] || { header: false, nav: true };
@@ -308,3 +310,4 @@ supabase.auth.onAuthStateChange((event, session) => {
 /* ================= SW ================= */
 
 // desactivado por ahora
+

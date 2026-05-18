@@ -12,7 +12,8 @@ const LANGUAGES = [
   { code: "it", label: "🇮🇹 Italiano" },
 ];
 
-const EXISTING_VIEWS = ["editProfile"];
+const EXISTING_VIEWS = ["editProfile", "suggestions"];
+
 
 function showComingSoon(label) {
   const existing = document.getElementById("qw-toast");
