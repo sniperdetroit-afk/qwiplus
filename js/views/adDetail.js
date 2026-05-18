@@ -374,11 +374,94 @@ function renderAd(container, ad, profile){
     setTimeout(() => toast.remove(), 2500);
   };
 
-  const buyBtn = document.getElementById("buyBtn");
-  if(buyBtn) buyBtn.onclick = () => showToast("🚀 Próximamente disponible");
+  // Función para iniciar chat con mensaje automático
+async function startChatWithMessage(ad, currentUser, mensaje) {
+  try {
+    // Buscar conversación existente
+    let { data: existing } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("ad_id", ad.id)
+      .eq("buyer_id", currentUser.id)
+      .eq("seller_id", ad.user_id)
+      .single();
 
-  const offerBtn = document.getElementById("offerBtn");
-  if(offerBtn) offerBtn.onclick = () => showToast("🚀 Próximamente disponible");
+    let conversationId = existing?.id;
+
+    // Si no existe, crearla
+    if (!conversationId) {
+      const { data: newConv, error } = await supabase
+        .from("conversations")
+        .insert({ ad_id: ad.id, buyer_id: currentUser.id, seller_id: ad.user_id })
+        .select("id")
+        .single();
+      if (error) return showToast("Error al abrir el chat");
+      conversationId = newConv.id;
+    }
+
+    // Enviar mensaje automático
+    await supabase.from("messages").insert({
+      conversation_id: conversationId,
+      sender_id: currentUser.id,
+      content: mensaje
+    });
+
+    // Navegar al chat
+    navigate("chat", { conversationId });
+  } catch(e) {
+    showToast("Error al abrir el chat");
+  }
+}
+
+// Modal de oferta
+function showOfferModal(ad, currentUser) {
+  const modal = document.createElement("div");
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.5);
+    display:flex;align-items:center;justify-content:center;z-index:9999;
+  `;
+  modal.innerHTML = `
+    <div style="background:white;border-radius:16px;padding:24px;width:90%;max-width:340px;">
+      <h3 style="margin:0 0 16px;font-size:18px;">💰 Hacer una oferta</h3>
+      <p style="color:#666;font-size:14px;margin:0 0 12px;">Precio original: <b>${ad.price}€</b></p>
+      <input id="offerAmount" type="number" placeholder="Tu oferta en €"
+        style="width:100%;padding:12px;border:1.5px solid #ddd;border-radius:10px;
+        font-size:16px;box-sizing:border-box;margin-bottom:16px;"/>
+      <button id="sendOffer" style="width:100%;padding:14px;background:linear-gradient(135deg,#fef3c7,#fde68a);
+        border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;color:#92400e;">
+        Enviar oferta
+      </button>
+      <button id="cancelOffer" style="width:100%;padding:10px;margin-top:8px;
+        background:none;border:none;color:#999;cursor:pointer;font-size:14px;">
+        Cancelar
+      </button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById("cancelOffer").onclick = () => modal.remove();
+  document.getElementById("sendOffer").onclick = async () => {
+    const amount = document.getElementById("offerAmount").value;
+    if (!amount || amount <= 0) return showToast("Introduce una cantidad válida");
+    await startChatWithMessage(ad, currentUser, `Hola! Te ofrezco ${amount}€ por tu artículo 🤝`);
+    modal.remove();
+  };
+}
+
+
+  const buyBtn = document.getElementById("buyBtn");
+if(buyBtn) buyBtn.onclick = async () => {
+  if(!currentUser) return showToast("Inicia sesión para comprar");
+  if(ad.user_id === currentUser.id) return showToast("No puedes comprarte tu propio artículo");
+  await startChatWithMessage(ad, currentUser, "Hola! Me interesa tu artículo, ¿sigue disponible? 🛒");
+};
+
+const offerBtn = document.getElementById("offerBtn");
+if(offerBtn) offerBtn.onclick = () => {
+  if(!currentUser) return showToast("Inicia sesión para hacer una oferta");
+  if(ad.user_id === currentUser.id) return showToast("No puedes hacerte una oferta a ti mismo");
+  showOfferModal(ad, currentUser);
+};
+
 
   const sellerBtn = document.getElementById("sellerBtn");
   if(sellerBtn) sellerBtn.onclick = () => navigate("publicProfile", { userId: ad.user_id });
