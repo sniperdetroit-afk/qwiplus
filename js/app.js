@@ -55,6 +55,7 @@ import { EditAdView } from "./views/editAd.js";
 import { InboxView } from "./views/inbox.js";
 import { ChatView } from "./views/chat.js";
 import { PublicProfileView } from "./views/publicProfile.js";
+import { SuggestionsView } from "./views/suggestions.js";
 
 /* ================= ROUTES ================= */
 
@@ -78,7 +79,8 @@ const routes = {
   editProfile: EditProfileView,
   messages: InboxView,
   chat: ChatView,
-  publicProfile: PublicProfileView
+  publicProfile: PublicProfileView,
+  suggestions: SuggestionsView
 };
 
 /* ================= RENDER ================= */
@@ -128,7 +130,8 @@ async function renderApp(){
       settings: { header: false, nav: false },
       editProfile: { header: false, nav: false },
       editAd: { header: false, nav: false },
-      publicProfile: { header: false, nav: false }
+      publicProfile: { header: false, nav: false },
+      suggestions: { header: false, nav: false }
     };
 
     const layout = layoutConfig[viewName] || { header: false, nav: true };
