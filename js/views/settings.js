@@ -81,12 +81,6 @@ function settingsItem(icon, label, view) {
 
 function renderSettings() {
 
-  const langOptions = LANGUAGES.map(l => `
-    <option value="${l.code}" ${getLang() === l.code ? "selected" : ""} style="background:#0B0F14;color:#F5F7FA;">
-      ${l.label}
-    </option>
-  `).join("");
-
   return `
   <section style="
     min-height: 100vh;
@@ -167,29 +161,30 @@ function renderSettings() {
         margin: 24px 0 12px 4px;
       ">🌐 Idioma</p>
       <div id="langSelector" style="
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 16px 18px;
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-">
-  <span style="font-size:20px;width:28px;text-align:center;">🌐</span>
-  <span style="flex:1;font-size:15px;font-weight:500;color:#F5F7FA;" id="langLabel">
-    ${LANGUAGES.find(l => l.code === getLang())?.label || "🇪🇸 Español"}
-  </span>
-  <span style="color:#38BDF8;font-size:18px;font-weight:300;">›</span>
-</div>
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 16px 18px;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+      ">
+        <span style="font-size:20px;width:28px;text-align:center;">🌐</span>
+        <span style="flex:1;font-size:15px;font-weight:500;color:#F5F7FA;" id="langLabel">
+          ${LANGUAGES.find(l => l.code === getLang())?.label || "🇪🇸 Español"}
+        </span>
+        <span style="color:#38BDF8;font-size:18px;font-weight:300;">›</span>
+      </div>
 
     </div>
 
   </section>
   `;
 }
+
 /* ================= MOUNT ================= */
 
 function mountSettings() {
@@ -214,19 +209,13 @@ function mountSettings() {
     };
   });
 
-    const langSelector = document.getElementById("langSelector");
+  const langSelector = document.getElementById("langSelector");
   if (langSelector) {
     langSelector.onclick = () => openLanguageModal();
   }
+}
 
-/* ================= EXPORT ================= */
-
-export const SettingsView = () => {
-  return {
-    html: renderSettings(),
-    mount: mountSettings
-  };
-};
+/* ================= MODAL IDIOMA ================= */
 
 function openLanguageModal() {
   const currentLang = getLang();
@@ -306,3 +295,11 @@ function openLanguageModal() {
   });
 }
 
+/* ================= EXPORT ================= */
+
+export const SettingsView = () => {
+  return {
+    html: renderSettings(),
+    mount: mountSettings
+  };
+};
