@@ -166,28 +166,24 @@ function renderSettings() {
         text-transform: uppercase;
         margin: 24px 0 12px 4px;
       ">🌐 Idioma</p>
-      <div style="
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 14px;
-        padding: 4px 16px;
-        backdrop-filter: blur(10px);
-        transition: all 0.2s;
-      ">
-        <select id="langSelect" style="
-          width: 100%;
-          padding: 14px 0;
-          border: none;
-          background: transparent;
-          font-size: 15px;
-          font-weight: 500;
-          color: #F5F7FA;
-          outline: none;
-          cursor: pointer;
-        ">
-          ${langOptions}
-        </select>
-      </div>
+      <div id="langSelector" style="
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px 18px;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+">
+  <span style="font-size:20px;width:28px;text-align:center;">🌐</span>
+  <span style="flex:1;font-size:15px;font-weight:500;color:#F5F7FA;" id="langLabel">
+    ${LANGUAGES.find(l => l.code === getLang())?.label || "🇪🇸 Español"}
+  </span>
+  <span style="color:#38BDF8;font-size:18px;font-weight:300;">›</span>
+</div>
 
     </div>
 
@@ -218,14 +214,10 @@ function mountSettings() {
     };
   });
 
-  const langSelect = document.getElementById("langSelect");
-  if (langSelect) {
-    langSelect.addEventListener("change", (e) => {
-      setLang(e.target.value);
-      window.location.href = "/";
-    });
+    const langSelector = document.getElementById("langSelector");
+  if (langSelector) {
+    langSelector.onclick = () => openLanguageModal();
   }
-}
 
 /* ================= EXPORT ================= */
 
@@ -235,4 +227,82 @@ export const SettingsView = () => {
     mount: mountSettings
   };
 };
+
+function openLanguageModal() {
+  const currentLang = getLang();
+
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.6);
+    z-index:9999;display:flex;align-items:flex-end;justify-content:center;
+    animation:fadeIn 0.2s ease;
+  `;
+
+  const sheet = document.createElement("div");
+  sheet.style.cssText = `
+    width:100%;max-width:500px;
+    background:linear-gradient(180deg, #12161D 0%, #1a1f2e 100%);
+    border-radius:20px 20px 0 0;
+    padding:20px 16px 24px;
+    box-shadow:0 -8px 32px rgba(0,0,0,0.4);
+    border-top:1px solid rgba(255,255,255,0.08);
+  `;
+
+  const optionsHTML = LANGUAGES.map(l => `
+    <button class="lang-option" data-code="${l.code}" style="
+      width:100%;padding:16px 18px;
+      background:${l.code === currentLang ? 'rgba(56,189,248,0.12)' : 'transparent'};
+      border:1px solid ${l.code === currentLang ? 'rgba(56,189,248,0.3)' : 'transparent'};
+      border-radius:12px;margin-bottom:6px;
+      display:flex;align-items:center;gap:14px;
+      cursor:pointer;
+      color:#F5F7FA;font-size:15px;font-weight:500;
+      text-align:left;
+      transition:all 0.15s;
+    ">
+      <span style="flex:1;">${l.label}</span>
+      ${l.code === currentLang ? '<span style="color:#38BDF8;font-size:18px;font-weight:700;">✓</span>' : ''}
+    </button>
+  `).join("");
+
+  sheet.innerHTML = `
+    <div style="width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 20px;"></div>
+
+    <h3 style="
+      margin:0 0 16px 6px;
+      font-size:18px;font-weight:700;color:#F5F7FA;
+    ">🌐 Seleccionar idioma</h3>
+
+    <div>${optionsHTML}</div>
+
+    <button id="closeLangModal" style="
+      width:100%;margin-top:12px;padding:14px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:12px;
+      color:#F5F7FA;font-size:15px;font-weight:600;cursor:pointer;
+    ">Cancelar</button>
+  `;
+
+  overlay.appendChild(sheet);
+  document.body.appendChild(overlay);
+
+  overlay.onclick = (e) => {
+    if (e.target === overlay) overlay.remove();
+  };
+
+  sheet.querySelector("#closeLangModal").onclick = () => overlay.remove();
+
+  sheet.querySelectorAll(".lang-option").forEach(btn => {
+    btn.onclick = () => {
+      const newLang = btn.dataset.code;
+      if (newLang !== currentLang) {
+        setLang(newLang);
+        window.location.href = "/";
+      } else {
+        overlay.remove();
+      }
+    };
+  });
+}
 
