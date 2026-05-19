@@ -1,6 +1,6 @@
-
-// import { createView } from "../core/createView.js";
-
+ 
+ 
+ import { createView } from "../core/createView.js";
 import { supabase } from "../services/supabase.js";
 import { renderCard } from "../components/card.js";
 import { toggleFavorite } from "../services/favoritesService.js";
