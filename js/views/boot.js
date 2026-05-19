@@ -1,3 +1,5 @@
+//views/boot.js//
+
 import { createView } from "../core/createView.js";
 import { supabase } from "../services/supabase.js";
 import { navigate } from "../core/router.js";

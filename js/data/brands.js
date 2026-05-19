@@ -1,3 +1,5 @@
+//data/brands.js//
+
 export const brands = {
   "Moda y Niños": [
     "Nike",

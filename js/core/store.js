@@ -1,3 +1,5 @@
+//js/core7store.js//
+
 let listeners = [];
 let rendering = false;
 let queued = false;

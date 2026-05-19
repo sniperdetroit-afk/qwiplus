@@ -1,3 +1,5 @@
+//services/imageService.js//
+
 import { supabase } from "./supabase.js";
 
 export async function uploadImage(file) {

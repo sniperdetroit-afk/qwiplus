@@ -1,3 +1,6 @@
+
+
+//components/card.js//
 import { getState } from "../core/state.js";
 
 export function renderCard(ad) {

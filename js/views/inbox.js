@@ -1,3 +1,5 @@
+//views/inbox.js//
+
 import { supabase } from "../services/supabase.js";
 import { startInboxSync, stopInboxSync } from "../chat/syncEngine.js";
 import { getState, setState } from "../core/state.js";

@@ -1,3 +1,5 @@
+ //views//suggestions.js//
+ 
 import { navigate } from "../core/router.js";
 import { supabase } from "../services/supabase.js";
 

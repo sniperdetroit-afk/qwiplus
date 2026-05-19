@@ -1,3 +1,5 @@
+//services/favoritesService.js//
+
 import { supabase } from "./supabase.js";
 
 export async function toggleFavorite(user_id, ad_id){

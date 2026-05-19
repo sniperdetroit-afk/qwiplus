@@ -1,3 +1,5 @@
+//js/core/syncHub.js//
+
 const channels = new Map();
 
 export function registerChannel(key, channel){

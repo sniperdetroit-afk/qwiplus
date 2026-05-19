@@ -1,3 +1,5 @@
+//js/core/renderGuard.js//
+
 let rendering = false;
 let queued = false;
 

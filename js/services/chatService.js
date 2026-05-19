@@ -1,3 +1,5 @@
+//services/chatService.js//
+
 import { supabase } from "./supabase.js";
 import { navigate } from "../core/router.js";
 

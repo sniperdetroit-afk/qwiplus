@@ -1,3 +1,6 @@
+
+
+//models/adModel.js//
 export function createAdModel(data) {
   return {
     id: crypto.randomUUID(),

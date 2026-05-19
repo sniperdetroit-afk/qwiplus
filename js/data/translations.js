@@ -1,3 +1,5 @@
+//data/translations.js//
+
 export const translations = {
   es: {
     // Navegación

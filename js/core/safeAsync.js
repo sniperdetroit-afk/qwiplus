@@ -1,3 +1,6 @@
+
+//js/core/safeAsync.js//
+
 export async function safeAsync(fn, label = "async") {
   try {
     return await fn();

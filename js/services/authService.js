@@ -1,3 +1,5 @@
+//services/authService.js//
+
 import { supabase } from "./supabase.js";
 import { setState } from "../core/state.js";
 

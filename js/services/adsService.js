@@ -1,3 +1,5 @@
+//services/adsService.js//
+
 import { supabase } from "./supabase.js";
 import { apiFetch } from "../api/client.js";
 

@@ -1,3 +1,6 @@
+
+
+//components/avatar.js//
 export function renderAvatar({
   url = null,
   size = "md"

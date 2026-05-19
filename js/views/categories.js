@@ -1,3 +1,6 @@
+//views/categories.js//
+//categories no se toca//
+
 import { createView } from "../core/createView.js";
 
 /* ================= DATA ================= */
