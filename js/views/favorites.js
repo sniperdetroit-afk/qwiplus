@@ -1,6 +1,4 @@
 
-
-//views/favorites.js//
 // import { createView } from "../core/createView.js";
 
 import { supabase } from "../services/supabase.js";
