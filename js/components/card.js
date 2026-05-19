@@ -24,7 +24,7 @@ export function renderCard(ad) {
 
       <div class="card-image" style="position:relative;">
         ${imageHtml}
-        ${ad.reserved ? `
+        ${ad.status === "reservado" ? `
           <div style="
             position:absolute;top:8px;left:8px;
             background:#f59e0b;color:white;

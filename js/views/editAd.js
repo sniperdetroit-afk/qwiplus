@@ -47,7 +47,7 @@ async function renderEditAd(state) {
   selectedFiles = [];
 
   const isVendido = ad.status === "vendido";
-  const isReserved = ad.reserved === true;
+    const isReserved = ad.status === "reservado";
 
   return `
   <section class="edit-ad-page" style="max-width:480px;margin:0 auto;padding:20px;padding-bottom:60px;">
@@ -297,7 +297,7 @@ function mountEditAd() {
       if (!ok) return;
       reservarBtn.disabled = true;
       reservarBtn.textContent = "Guardando...";
-      const { error } = await supabase.from("ads").update({ reserved: true }).eq("id", id);
+            const { error } = await supabase.from("ads").update({ status: "reservado" }).eq("id", id);
       if (error) { alert("Error: " + error.message); reservarBtn.disabled = false; reservarBtn.textContent = "🔒 Marcar como reservado"; return; }
       navigate("profile");
     };
@@ -310,7 +310,7 @@ function mountEditAd() {
       const id = cancelReservaBtn.dataset.id;
       cancelReservaBtn.disabled = true;
       cancelReservaBtn.textContent = "Cancelando...";
-      const { error } = await supabase.from("ads").update({ reserved: false, reserved_by: null }).eq("id", id);
+      const { error } = await supabase.from("ads").update({ status: "activo" }).eq("id", id);
       if (error) { alert("Error: " + error.message); cancelReservaBtn.disabled = false; cancelReservaBtn.textContent = "🔓 Cancelar reserva"; return; }
       navigate("profile");
     };
@@ -325,7 +325,7 @@ function mountEditAd() {
       if (!ok) return;
       vendidoBtn.disabled = true;
       vendidoBtn.textContent = "Guardando...";
-      const { error } = await supabase.from("ads").update({ status: "vendido", reserved: false, reserved_by: null }).eq("id", id);
+            const { error } = await supabase.from("ads").update({ status: "vendido" }).eq("id", id);
       if (error) { alert("Error: " + error.message); vendidoBtn.disabled = false; return; }
       navigate("profile");
     };
@@ -338,7 +338,7 @@ function mountEditAd() {
       const id = reactivarBtn.dataset.id;
       reactivarBtn.disabled = true;
       reactivarBtn.textContent = "Reactivando...";
-      const { error } = await supabase.from("ads").update({ status: "activo", reserved: false, reserved_by: null }).eq("id", id);
+            const { error } = await supabase.from("ads").update({ status: "activo" }).eq("id", id);
       if (error) { alert("Error: " + error.message); reactivarBtn.disabled = false; return; }
       navigate("profile");
     };

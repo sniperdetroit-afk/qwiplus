@@ -437,9 +437,10 @@ function openReportModal(reportedUserId){
 async function renderSaleActions(conv, ad){
     const isSeller = (userId === conv.seller_id);
     const isBuyer = (userId === conv.buyer_id);
-    const adIsSold = ad.sold === true;
-    const saleConfirmed = ad.sale_confirmed_by_buyer === true;
-    const iAmTheSoldTo = (ad.sold_to === userId);
+    const adIsSold = ad.status === "vendido";
+const saleConfirmed = ad.sale_confirmed_by_buyer === true;
+const iAmTheSoldTo = (ad.sold_to === userId);
+
 
     if(isSeller && !adIsSold){
       document.getElementById("chatActions").innerHTML = `
@@ -667,10 +668,11 @@ async function markAsSold(){
 
   if(!conv) return;
 
-  const { error } = await supabase
-    .from("ads")
-    .update({ sold: true, sold_to: conv.buyer_id })
-    .eq("id", conv.ad_id);
+      const { error } = await supabase
+      .from("ads")
+      .update({ status: "vendido", sold_to: conv.buyer_id })
+      .eq("id", conv.ad_id);
+
 
   if(error){
     alert("Error al marcar como vendido: " + error.message);
@@ -693,10 +695,11 @@ async function confirmSale(){
 
   if(!conv) return;
 
-  const { error } = await supabase
-    .from("ads")
-    .update({ sale_confirmed_by_buyer: true })
-    .eq("id", conv.ad_id);
+      const { error } = await supabase
+      .from("ads")
+      .update({ status: "vendido", sold_to: conv.buyer_id })
+      .eq("id", conv.ad_id);
+
 
   if(error){
     alert("Error al confirmar la venta: " + error.message);
@@ -719,10 +722,11 @@ async function rejectSale(){
 
   if(!conv) return;
 
-  const { error } = await supabase
-    .from("ads")
-    .update({ sold: false, sold_to: null })
-    .eq("id", conv.ad_id);
+      const { error } = await supabase
+      .from("ads")
+      .update({ status: "activo", sold_to: null })
+      .eq("id", conv.ad_id);
+
 
   if(error){
     alert("Error al rechazar la venta: " + error.message);
