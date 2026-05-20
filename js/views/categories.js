@@ -363,12 +363,22 @@ async function renderSubcategories(state){
   const category = categories.find(c => c.id === categoryId);
   if(!category) return `<p>Error categoría</p>`;
 
-  return `
+    return `
   <section class="subcategories">
 
     <button class="back-btn" data-view="categories">← Volver</button>
 
     <h3>${category.name}</h3>
+
+    <div class="subcategory-grid">
+
+      <button 
+        class="subcategory-item"
+        data-view="searchResults"
+        data-category="${category.id}"
+      >
+        🔍 Ver todos
+      </button>
 
     <div class="subcategory-grid">
       ${category.sub.map(sub => {
