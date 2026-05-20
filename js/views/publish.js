@@ -77,7 +77,7 @@ async function renderPublish() {
         <div id="dynamicFields"></div>
 
         <!-- PRECIO -->
-        <input type="number" placeholder="Precio (€)" class="input-field" id="priceInput" />
+        <input type="number" placeholder="Precio (€)" class="input-field" id="priceInput" step="0.01" min="0" />
 
         <!-- UBICACIÓN -->
         <input

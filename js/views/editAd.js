@@ -1,5 +1,5 @@
 // js/views/editAd.js
-
+import { categories } from "./categories.js";
 import { createView } from "../core/createView.js";
 import { supabase } from "../services/supabase.js";
 import { navigate } from "../core/router.js";
@@ -96,6 +96,20 @@ async function renderEditAd(state) {
         <input type="file" id="imageInput" accept="image/*" multiple hidden />
       </div>
 
+          const category = document.getElementById("editCategory")?.value || "";
+
+    const { error } = await supabase
+      .from("ads")
+      .update({
+        title,
+        price: Number(price),
+        image_url: allImages[0] || null,
+        images: allImages,
+        category: category || null
+      })
+      .eq("id", id);
+
+
       <!-- TÍTULO -->
       <div>
         <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:6px;display:block;">Título</label>
@@ -116,10 +130,12 @@ async function renderEditAd(state) {
       <div>
         <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:6px;display:block;">Precio (€)</label>
         <input
-          type="number"
-          id="editPrice"
-          value="${ad.price || ""}"
-          placeholder="Precio"
+  type="number"
+  id="editPrice"
+  value="${ad.price || ""}"
+  placeholder="Precio"
+  step="0.01"
+  min="0"
           style="
             width:100%;padding:12px 14px;
             border:1.5px solid #e5e7eb;border-radius:12px;
