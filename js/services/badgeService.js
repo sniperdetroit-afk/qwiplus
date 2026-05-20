@@ -4,15 +4,13 @@ import { supabase } from "./supabase.js";
 
 let badgeChannel = null;
 
-/* ================= ACTUALIZAR BADGE ================= */
-
 async function updateBadge(userId) {
   const badge = document.getElementById("msgBadge");
   if (!badge || !userId) return;
 
   const { data: convs, error: convError } = await supabase
     .from("conversations")
-    .select("id")
+    .select("id, buyer_id, seller_id, hidden_for_buyer, hidden_for_seller")
     .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
 
   if (convError) {
@@ -20,23 +18,27 @@ async function updateBadge(userId) {
     return;
   }
 
-  if (!convs?.length) {
+  // Filtrar conversaciones ocultas para este usuario
+  const visibleConvs = (convs || []).filter(c => {
+    if(c.buyer_id === userId && c.hidden_for_buyer) return false;
+    if(c.seller_id === userId && c.hidden_for_seller) return false;
+    return true;
+  });
+
+  if (!visibleConvs.length) {
     badge.classList.add("hidden");
     badge.textContent = "0";
     return;
   }
 
-  const convIds = convs.map(c => c.id);
+  const convIds = visibleConvs.map(c => c.id);
 
-  // 🔍 DEBUG: ver qué mensajes están sin leer
   const { data: unread } = await supabase
     .from("messages")
-    .select("id, conversation_id, sender_id, text, read")
+    .select("id, conversation_id, sender_id, read")
     .in("conversation_id", convIds)
     .eq("read", false)
     .neq("sender_id", userId);
-
-  console.log("🔔 BADGE - Mensajes sin leer:", unread?.length || 0, unread);
 
   const count = unread?.length || 0;
 
@@ -50,41 +52,20 @@ async function updateBadge(userId) {
   badge.classList.remove("hidden");
 }
 
-/* ================= INICIAR ================= */
-
 export function initBadge(userId) {
   if (!userId) return;
 
   stopBadge();
-
   updateBadge(userId);
 
   badgeChannel = supabase
     .channel(`badge-channel-${userId}`)
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "messages"
-      },
-      () => updateBadge(userId)
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "messages"
-      },
-      () => updateBadge(userId)
-    )
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, () => updateBadge(userId))
+    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages" }, () => updateBadge(userId))
     .subscribe((status) => {
       console.log("BADGE CHANNEL:", status);
     });
 }
-
-/* ================= PARAR ================= */
 
 export function stopBadge() {
   if (badgeChannel) {
@@ -93,30 +74,24 @@ export function stopBadge() {
   }
 }
 
-/* ================= MARCAR LEÍDOS ================= */
-
 export async function markConversationRead(conversationId, userId) {
   if (!conversationId || !userId) return;
 
-  console.log("📨 MARK READ - conv:", conversationId, "user:", userId);
-
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("messages")
     .update({ read: true })
     .eq("conversation_id", conversationId)
     .eq("read", false)
-    .neq("sender_id", userId)
-    .select();
+    .neq("sender_id", userId);
 
   if (error) {
     console.error("MARK READ ERROR:", error);
     return;
   }
 
-  console.log("✅ Mensajes marcados como leídos:", data?.length || 0, data);
-
   await updateBadge(userId);
 }
+
 
 
 

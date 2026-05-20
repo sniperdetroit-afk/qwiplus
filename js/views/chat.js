@@ -562,18 +562,18 @@ async function sendMessage(){
     .select()
     .single();
 
-  if(data){
-    addMessage(data);
-    await supabase
+      const isSeller = conv?.seller_id === userId;
+
+        await supabase
       .from("conversations")
       .update({
         last_message: text,
-        last_message_at: new Date().toISOString()
+        last_message_at: new Date().toISOString(),
+        hidden_for_buyer: false,
+        hidden_for_seller: false
       })
-      .eq("id", conversationId);
-  }
-}
-
+      .eq ("id", conversationId);
+       }
 
 function addMessage(msg){
 
