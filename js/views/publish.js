@@ -1,7 +1,7 @@
 // js/views/publish.js
 
 import { createView } from "../core/createView.js";
-import { categories } from "../data/categories.js";
+import { categories } from "./categories.js";
 import { createAd } from "../services/adsService.js";
 import { navigate } from "../core/router.js";
 import { uploadImage } from "../services/imageService.js";
