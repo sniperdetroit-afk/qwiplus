@@ -12,7 +12,7 @@ const cache = new Map();
  * Lee de localStorage la preferencia o usa el del navegador
  */
 export function getUserLanguage(){
-  const saved = localStorage.getItem("qwiplus_lang");
+  const saved = localStorage.getItem("lang");
   if(saved) return saved.toLowerCase().slice(0, 2);
 
   const nav = navigator.language || "es";
