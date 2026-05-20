@@ -4,6 +4,7 @@ import { supabase } from "../services/supabase.js";
 import { navigate } from "../core/router.js";
 import { getState } from "../core/state.js";
 import { blockUser, unblockUser, isBlocked } from "../services/blockService.js";
+import { escapeHtml } from "../core/escapeHtml.js";
 
 function getInitials(name = "") {
   const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
@@ -83,8 +84,8 @@ async function mountPublicProfile() {
   ]);
 
   const p = profileRes.data || {};
-  const name = p.name || "Usuario";
-  const location = p.location ? `📍 ${p.location}` : "";
+  const name = escapeHtml(p.name || "Usuario");
+  const location = p.location ? `📍 ${escapeHtml(p.location)}` : "";
   const adsList = adsRes.data || [];
   const reviewsList = reviewsRes.data || [];
   const avg = avgRating(reviewsList);
@@ -464,7 +465,7 @@ function renderTabReviews(reviewsList) {
   }
 
   content.innerHTML = reviewsList.map(r => {
-    const reviewerName = r.profiles?.name || "Usuario";
+    const reviewerName = escapeHtml(r.profiles?.name || "Usuario");
     const reviewerAvatar = r.profiles?.avatar_url
       ? `<img src="${r.profiles.avatar_url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
       : `<div style="width:40px;height:40px;border-radius:50%;background:#6DA8FF;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">${reviewerName.charAt(0).toUpperCase()}</div>`;
@@ -480,7 +481,7 @@ function renderTabReviews(reviewsList) {
             </div>
           </div>
         </div>
-        ${r.comment ? `<p style="margin:0;font-size:14px;color:#374151;">${r.comment}</p>` : ""}
+        ${r.comment ? `<p style="margin:0;font-size:14px;color:#374151;">${escapeHtml(r.comment)}</p>` : ""}
       </div>
     `;
   }).join("");
