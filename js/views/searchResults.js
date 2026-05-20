@@ -6,34 +6,17 @@ import { getState } from "../core/state.js";
 import { renderCard } from "../components/card.js";
 
 async function renderSearchResults(){
-
-  const state = getState();
-  const params = state.app?.params || {};
-  const category = params.category || "";
-  const subcategory = params.subcategory || "";
-  const queryText = params.query || "";
-
-  const subtitle = subcategory
-    ? subcategory
-    : category
-    ? category
-    : "Todos los anuncios";
-
   return `
   <section class="search-results-page">
-
     <div class="search-top">
       <button class="back-btn" id="resultsBackBtn">
         ← Volver
       </button>
     </div>
-
-    <h2 class="search-title">${subtitle}</h2>
-
+    <h2 class="search-title" id="resultsTitle">Cargando...</h2>
     <div id="resultsBox" class="ads-grid">
       <p style="padding:20px;color:#9ca3af;">Cargando...</p>
     </div>
-
   </section>
   `;
 }
@@ -46,10 +29,15 @@ async function loadResults(){
   const subcategory = params.subcategory || "";
   const queryText = params.query || "";
 
+  const title = document.getElementById("resultsTitle");
   const box = document.getElementById("resultsBox");
   if(!box) return;
 
-    let query = supabase
+  if(title){
+    title.textContent = subcategory || category || "Todos los anuncios";
+  }
+
+  let query = supabase
     .from("ads")
     .select("*, profiles!ads_user_id_fkey(name, avatar_url)")
     .order("created_at", { ascending: false });
@@ -96,3 +84,4 @@ export const SearchResultsView = createView(
   renderSearchResults,
   mountSearchResults
 );
+
