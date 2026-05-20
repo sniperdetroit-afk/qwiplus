@@ -4,6 +4,7 @@
 import { supabase } from "../services/supabase.js";
 import { renderCard } from "../components/card.js";
 import { toggleFavorite } from "../services/favoritesService.js";
+import { navigate } from "../core/router.js";
 
 async function renderFavorites(state) {
 
@@ -49,6 +50,18 @@ async function mountFavorites(state) {
   const user = state?.session?.user;
   if (!user) return;
 
+    
+async function mountFavorites(state) {
+  const user = state?.session?.user;
+  if (!user) return;
+
+  document.querySelectorAll(".card[data-id]").forEach(card => {
+    card.addEventListener("click", (e) => {
+      if(e.target.closest(".fav-btn")) return;
+      navigate("adDetail", { id: card.dataset.id });
+    });
+  });
+
   document.querySelectorAll(".fav-btn").forEach(btn => {
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
@@ -58,6 +71,7 @@ async function mountFavorites(state) {
     });
   });
 }
+
 
 export const FavoritesView = createView(renderFavorites, mountFavorites);
 
