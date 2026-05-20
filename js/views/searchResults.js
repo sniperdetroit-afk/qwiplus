@@ -49,9 +49,9 @@ async function loadResults(){
   const box = document.getElementById("resultsBox");
   if(!box) return;
 
-  let query = supabase
+    let query = supabase
     .from("ads")
-    .select("*")
+    .select("*, profiles!ads_user_id_fkey(name, avatar_url)")
     .order("created_at", { ascending: false });
 
   if(category){

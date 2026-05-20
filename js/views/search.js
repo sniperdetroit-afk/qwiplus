@@ -103,9 +103,9 @@ async function runSearch(){
   const location = document.getElementById("locationInput")?.value.trim();
   const category = document.getElementById("categoryFilter")?.value;
 
-  let query = supabase
+    let query = supabase
     .from("ads")
-    .select("*")
+    .select("*, profiles!ads_user_id_fkey(name, avatar_url)")
     .order("created_at",{ ascending:false });
 
   if(text){
