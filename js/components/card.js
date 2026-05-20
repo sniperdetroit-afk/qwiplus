@@ -20,7 +20,7 @@ export function renderCard(ad) {
     : `<div class="card-img-empty"></div>`;
 
   return `
-    <div class="card" data-ad="${ad.id}">
+        <div class="card" data-id="${ad.id}" data-view="adDetail">
 
       <div class="card-image" style="position:relative;">
         ${imageHtml}
