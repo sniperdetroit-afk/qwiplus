@@ -67,9 +67,7 @@ async function renderEditAd(state) {
 
       <!-- FOTOS -->
       <div>
-        <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:8px;display:block;">
-          📷 Fotos (máx. 5)
-        </label>
+                        <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:8px;display:block;">📷 Fotos (máx. 9)</label>
         <div id="photosPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
         <label for="imageInput" style="
           display:inline-block;padding:10px 18px;
@@ -169,10 +167,6 @@ async function renderEditAd(state) {
 
   </section>
   `;
-    </div>
-
-  </section>
-  `;
 }
 
 /* ================= MOUNT ================= */
@@ -224,7 +218,7 @@ function mountEditAd() {
     if (total > 0) {
       const counter = document.createElement("div");
       counter.style.cssText = "width:100%;font-size:12px;color:#94A3B8;margin-top:4px;";
-      counter.textContent = `${total}/5 foto${total !== 1 ? "s" : ""}`;
+      counter.textContent = total + "/9 foto" + (total !== 1 ? "s" : "");
       photosPreview.appendChild(counter);
     }
   }
@@ -236,7 +230,7 @@ function mountEditAd() {
       const files = Array.from(imageInput.files);
       files.forEach(file => {
         const total = existingImages.length + selectedFiles.length;
-        if (total >= 5) return;
+                if (total >= 9) return;
         if (selectedFiles.find(f => f.name === file.name)) return;
         selectedFiles.push(file);
       });
