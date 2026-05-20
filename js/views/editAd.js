@@ -9,8 +9,6 @@ let formRef = null;
 let selectedFiles = [];
 let existingImages = [];
 
-/* ================= RENDER ================= */
-
 async function renderEditAd(state) {
 
   const id = state?.app?.params?.id || state?.id;
@@ -25,10 +23,7 @@ async function renderEditAd(state) {
   }
 
   const { data: ad, error } = await supabase
-    .from("ads")
-    .select("*")
-    .eq("id", id)
-    .single();
+    .from("ads").select("*").eq("id", id).single();
 
   if (error || !ad) {
     return `
@@ -39,7 +34,6 @@ async function renderEditAd(state) {
     `;
   }
 
-  // Inicializar imágenes existentes
   existingImages = ad.images && ad.images.length > 0
     ? [...ad.images]
     : ad.image_url ? [ad.image_url] : [];
@@ -47,20 +41,16 @@ async function renderEditAd(state) {
   selectedFiles = [];
 
   const isVendido = ad.status === "vendido";
-    const isReserved = ad.status === "reservado";
+  const isReserved = ad.status === "reservado";
 
   return `
   <section class="edit-ad-page" style="max-width:480px;margin:0 auto;padding:20px;padding-bottom:60px;">
 
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-      <button id="backBtn" style="
-        background:none;border:none;font-size:22px;
-        cursor:pointer;color:#6b7280;
-      ">←</button>
+      <button id="backBtn" style="background:none;border:none;font-size:22px;cursor:pointer;color:#6b7280;">←</button>
       <h2 style="margin:0;font-size:22px;font-weight:700;color:#111827;">Editar anuncio</h2>
     </div>
 
-    <!-- ESTADO ACTUAL -->
     <div style="
       display:flex;align-items:center;gap:10px;
       padding:12px 16px;border-radius:14px;margin-bottom:20px;
@@ -80,68 +70,53 @@ async function renderEditAd(state) {
         <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:8px;display:block;">
           📷 Fotos (máx. 5)
         </label>
-
         <div id="photosPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;"></div>
-
         <label for="imageInput" style="
           display:inline-block;padding:10px 18px;
           background:rgba(255,255,255,0.08);
           border:1px solid rgba(255,255,255,0.15);
           border-radius:10px;cursor:pointer;
-          font-weight:600;color:#94A3B8;
-          font-size:14px;
-        ">
-          + Añadir foto
-        </label>
+          font-weight:600;color:#94A3B8;font-size:14px;
+        ">+ Añadir foto</label>
         <input type="file" id="imageInput" accept="image/*" multiple hidden />
       </div>
 
-          const category = document.getElementById("editCategory")?.value || "";
-
-    const { error } = await supabase
-      .from("ads")
-      .update({
-        title,
-        price: Number(price),
-        image_url: allImages[0] || null,
-        images: allImages,
-        category: category || null
-      })
-      .eq("id", id);
-
+      <!-- CATEGORÍA -->
+      <div>
+        <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:6px;display:block;">Categoría</label>
+        <select id="editCategory" style="
+          width:100%;padding:12px 14px;
+          border:1.5px solid #e5e7eb;border-radius:12px;
+          font-size:15px;outline:none;box-sizing:border-box;
+          background:#fff;color:#111827;
+        ">
+          <option value="">Sin categoría</option>
+          ${categories.map(cat => `
+            <option value="${cat.id}" ${ad.category === cat.id ? "selected" : ""}>
+              ${cat.name}
+            </option>
+          `).join("")}
+        </select>
+      </div>
 
       <!-- TÍTULO -->
       <div>
         <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:6px;display:block;">Título</label>
-        <input
-          type="text"
-          id="editTitle"
-          value="${ad.title || ""}"
-          placeholder="Título del anuncio"
-          style="
-            width:100%;padding:12px 14px;
-            border:1.5px solid #e5e7eb;border-radius:12px;
-            font-size:15px;outline:none;box-sizing:border-box;
-          "
-        />
+        <input type="text" id="editTitle" value="${ad.title || ""}" placeholder="Título del anuncio" style="
+          width:100%;padding:12px 14px;
+          border:1.5px solid #e5e7eb;border-radius:12px;
+          font-size:15px;outline:none;box-sizing:border-box;
+        "/>
       </div>
 
       <!-- PRECIO -->
       <div>
         <label style="font-size:13px;font-weight:600;color:#6b7280;margin-bottom:6px;display:block;">Precio (€)</label>
-        <input
-  type="number"
-  id="editPrice"
-  value="${ad.price || ""}"
-  placeholder="Precio"
-  step="0.01"
-  min="0"
-          style="
-            width:100%;padding:12px 14px;
-            border:1.5px solid #e5e7eb;border-radius:12px;
-            font-size:15px;outline:none;box-sizing:border-box;
-          "
-        />
+        <input type="number" id="editPrice" value="${ad.price || ""}" placeholder="Precio" step="0.01" min="0" style="
+          width:100%;padding:12px 14px;
+          border:1.5px solid #e5e7eb;border-radius:12px;
+          font-size:15px;outline:none;box-sizing:border-box;
+        "/>
       </div>
 
       <button type="submit" id="saveAdBtn" data-id="${ad.id}" style="
@@ -149,11 +124,8 @@ async function renderEditAd(state) {
         background:linear-gradient(135deg,#3b82f6,#6366f1);
         color:white;border:none;border-radius:14px;
         font-size:16px;font-weight:700;cursor:pointer;
-        box-shadow:0 4px 14px rgba(99,102,241,.35);
-        margin-top:4px;
-      ">
-        Guardar cambios
-      </button>
+        box-shadow:0 4px 14px rgba(99,102,241,.35);margin-top:4px;
+      ">Guardar cambios</button>
 
     </form>
 
@@ -165,24 +137,18 @@ async function renderEditAd(state) {
           background:linear-gradient(135deg,#f59e0b,#d97706);
           color:white;border:none;border-radius:14px;
           font-size:16px;font-weight:700;cursor:pointer;
-          box-shadow:0 4px 14px rgba(245,158,11,.35);
-        ">
-          🔓 Cancelar reserva
-        </button>
+        ">🔓 Cancelar reserva</button>
       ` : !isVendido ? `
         <button id="reservarBtn" data-id="${ad.id}" style="
           width:100%;padding:14px;
           background:linear-gradient(135deg,#f59e0b,#d97706);
           color:white;border:none;border-radius:14px;
           font-size:16px;font-weight:700;cursor:pointer;
-          box-shadow:0 4px 14px rgba(245,158,11,.35);
-        ">
-          🔒 Marcar como reservado
-        </button>
+        ">🔒 Marcar como reservado</button>
       ` : ""}
     </div>
 
-    <!-- MARCAR COMO VENDIDO -->
+    <!-- VENDIDO -->
     <div style="margin-top:12px;">
       ${isVendido ? `
         <button id="reactivarBtn" data-id="${ad.id}" style="
@@ -190,21 +156,19 @@ async function renderEditAd(state) {
           background:linear-gradient(135deg,#10b981,#059669);
           color:white;border:none;border-radius:14px;
           font-size:16px;font-weight:700;cursor:pointer;
-          box-shadow:0 4px 14px rgba(16,185,129,.35);
-        ">
-          🔄 Reactivar anuncio
-        </button>
+        ">🔄 Reactivar anuncio</button>
       ` : `
         <button id="vendidoBtn" data-id="${ad.id}" style="
           width:100%;padding:14px;
           background:linear-gradient(135deg,#f59e0b,#ef4444);
           color:white;border:none;border-radius:14px;
           font-size:16px;font-weight:700;cursor:pointer;
-          box-shadow:0 4px 14px rgba(245,158,11,.35);
-        ">
-          🏷️ Marcar como vendido
-        </button>
+        ">🏷️ Marcar como vendido</button>
       `}
+    </div>
+
+  </section>
+  `;
     </div>
 
   </section>
@@ -223,25 +187,17 @@ function mountEditAd() {
   if (backBtn) backBtn.onclick = () => navigate("profile");
   if (formRef) formRef.addEventListener("submit", handleSaveAd);
 
-  /* ── RENDER PREVIEWS ── */
   function renderPreviews() {
     if (!photosPreview) return;
     photosPreview.innerHTML = "";
-
     const total = existingImages.length + selectedFiles.length;
 
-    // Fotos existentes (ya subidas)
     existingImages.forEach((url, index) => {
       const wrapper = document.createElement("div");
       wrapper.style.cssText = "position:relative;width:80px;height:80px;";
       wrapper.innerHTML = `
         <img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid rgba(56,189,248,0.4);" />
-        <button data-type="existing" data-index="${index}" style="
-          position:absolute;top:-6px;right:-6px;
-          background:#ef4444;color:white;border:none;
-          border-radius:50%;width:20px;height:20px;
-          cursor:pointer;font-size:13px;line-height:1;
-        ">×</button>
+        <button style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:13px;line-height:1;">×</button>
       `;
       wrapper.querySelector("button").addEventListener("click", () => {
         existingImages.splice(index, 1);
@@ -250,25 +206,13 @@ function mountEditAd() {
       photosPreview.appendChild(wrapper);
     });
 
-    // Fotos nuevas (pendientes de subir)
     selectedFiles.forEach((file, index) => {
       const url = URL.createObjectURL(file);
       const wrapper = document.createElement("div");
       wrapper.style.cssText = "position:relative;width:80px;height:80px;";
       wrapper.innerHTML = `
         <img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid rgba(245,185,66,0.5);" />
-        <div style="
-          position:absolute;bottom:0;left:0;right:0;
-          background:rgba(245,185,66,0.8);
-          font-size:9px;font-weight:700;color:#000;
-          text-align:center;border-radius:0 0 8px 8px;padding:2px;
-        ">NUEVA</div>
-        <button data-type="new" data-index="${index}" style="
-          position:absolute;top:-6px;right:-6px;
-          background:#ef4444;color:white;border:none;
-          border-radius:50%;width:20px;height:20px;
-          cursor:pointer;font-size:13px;line-height:1;
-        ">×</button>
+        <button style="position:absolute;top:-6px;right:-6px;background:#ef4444;color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:13px;line-height:1;">×</button>
       `;
       wrapper.querySelector("button").addEventListener("click", () => {
         selectedFiles.splice(index, 1);
@@ -277,7 +221,6 @@ function mountEditAd() {
       photosPreview.appendChild(wrapper);
     });
 
-    // Contador
     if (total > 0) {
       const counter = document.createElement("div");
       counter.style.cssText = "width:100%;font-size:12px;color:#94A3B8;margin-top:4px;";
@@ -286,10 +229,8 @@ function mountEditAd() {
     }
   }
 
-  // Render inicial con fotos existentes
   renderPreviews();
 
-  /* ── AGREGAR FOTOS NUEVAS ── */
   if (imageInput) {
     imageInput.addEventListener("change", () => {
       const files = Array.from(imageInput.files);
@@ -304,7 +245,6 @@ function mountEditAd() {
     });
   }
 
-  /* ── RESERVAR ── */
   const reservarBtn = document.getElementById("reservarBtn");
   if (reservarBtn) {
     reservarBtn.onclick = async () => {
@@ -313,13 +253,12 @@ function mountEditAd() {
       if (!ok) return;
       reservarBtn.disabled = true;
       reservarBtn.textContent = "Guardando...";
-            const { error } = await supabase.from("ads").update({ status: "reservado" }).eq("id", id);
+      const { error } = await supabase.from("ads").update({ status: "reservado" }).eq("id", id);
       if (error) { alert("Error: " + error.message); reservarBtn.disabled = false; reservarBtn.textContent = "🔒 Marcar como reservado"; return; }
       navigate("profile");
     };
   }
 
-  /* ── CANCELAR RESERVA ── */
   const cancelReservaBtn = document.getElementById("cancelReservaBtn");
   if (cancelReservaBtn) {
     cancelReservaBtn.onclick = async () => {
@@ -332,7 +271,6 @@ function mountEditAd() {
     };
   }
 
-  /* ── VENDIDO ── */
   const vendidoBtn = document.getElementById("vendidoBtn");
   if (vendidoBtn) {
     vendidoBtn.onclick = async () => {
@@ -341,20 +279,19 @@ function mountEditAd() {
       if (!ok) return;
       vendidoBtn.disabled = true;
       vendidoBtn.textContent = "Guardando...";
-            const { error } = await supabase.from("ads").update({ status: "vendido" }).eq("id", id);
+      const { error } = await supabase.from("ads").update({ status: "vendido" }).eq("id", id);
       if (error) { alert("Error: " + error.message); vendidoBtn.disabled = false; return; }
       navigate("profile");
     };
   }
 
-  /* ── REACTIVAR ── */
   const reactivarBtn = document.getElementById("reactivarBtn");
   if (reactivarBtn) {
     reactivarBtn.onclick = async () => {
       const id = reactivarBtn.dataset.id;
       reactivarBtn.disabled = true;
       reactivarBtn.textContent = "Reactivando...";
-            const { error } = await supabase.from("ads").update({ status: "activo" }).eq("id", id);
+      const { error } = await supabase.from("ads").update({ status: "activo" }).eq("id", id);
       if (error) { alert("Error: " + error.message); reactivarBtn.disabled = false; return; }
       navigate("profile");
     };
@@ -383,6 +320,7 @@ async function handleSaveAd(e) {
   const id = btn.dataset.id;
   const title = document.getElementById("editTitle").value.trim();
   const price = document.getElementById("editPrice").value;
+  const category = document.getElementById("editCategory")?.value || "";
 
   if (!title || !price) {
     alert("Completa los campos");
@@ -393,7 +331,6 @@ async function handleSaveAd(e) {
 
   try {
 
-    // Subir fotos nuevas
     const newUrls = [];
     for (const file of selectedFiles) {
       btn.textContent = `Subiendo fotos... (${newUrls.length + 1}/${selectedFiles.length})`;
@@ -401,7 +338,6 @@ async function handleSaveAd(e) {
       if (url) newUrls.push(url);
     }
 
-    // Combinar: existentes (sin borrar) + nuevas
     const allImages = [...existingImages, ...newUrls];
 
     const { error } = await supabase
@@ -410,7 +346,8 @@ async function handleSaveAd(e) {
         title,
         price: Number(price),
         image_url: allImages[0] || null,
-        images: allImages
+        images: allImages,
+        category: category || null
       })
       .eq("id", id);
 
@@ -437,5 +374,3 @@ export const EditAdView = createView({
   mount: mountEditAd,
   unmount: unmountEditAd
 });
-
-
