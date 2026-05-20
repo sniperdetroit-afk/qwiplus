@@ -7,6 +7,18 @@ import { renderCard } from "../components/card.js";
 
 async function renderSearchResults(){
 
+  const state = getState();
+  const params = state.app?.params || {};
+  const category = params.category || "";
+  const subcategory = params.subcategory || "";
+  const queryText = params.query || "";
+
+  const subtitle = subcategory
+    ? subcategory
+    : category
+    ? category
+    : "Todos los anuncios";
+
   return `
   <section class="search-results-page">
 
@@ -16,9 +28,11 @@ async function renderSearchResults(){
       </button>
     </div>
 
-    <h2 class="search-title">Resultados</h2>
+    <h2 class="search-title">${subtitle}</h2>
 
-    <div id="resultsBox" class="ads-grid"></div>
+    <div id="resultsBox" class="ads-grid">
+      <p style="padding:20px;color:#9ca3af;">Cargando...</p>
+    </div>
 
   </section>
   `;
@@ -27,16 +41,26 @@ async function renderSearchResults(){
 async function loadResults(){
 
   const state = getState();
-  const queryText = state.query || "";
+  const params = state.app?.params || {};
+  const category = params.category || "";
+  const subcategory = params.subcategory || "";
+  const queryText = params.query || "";
 
   const box = document.getElementById("resultsBox");
-
   if(!box) return;
 
   let query = supabase
     .from("ads")
     .select("*")
-    .order("created_at",{ ascending:false });
+    .order("created_at", { ascending: false });
+
+  if(category){
+    query = query.eq("category", category);
+  }
+
+  if(subcategory){
+    query = query.eq("subcategory", subcategory);
+  }
 
   if(queryText){
     query = query.or(`title.ilike.%${queryText}%,description.ilike.%${queryText}%`);
@@ -46,12 +70,12 @@ async function loadResults(){
 
   if(error){
     console.error("searchResults error", error);
-    box.innerHTML = "<p>Error cargando resultados</p>";
+    box.innerHTML = "<p style='padding:20px;color:#ef4444;'>Error cargando resultados</p>";
     return;
   }
 
-  if(!data.length){
-    box.innerHTML = "<p>No hay resultados</p>";
+  if(!data || !data.length){
+    box.innerHTML = "<p style='padding:20px;color:#9ca3af;'>No hay resultados en esta categoría</p>";
     return;
   }
 
@@ -61,9 +85,8 @@ async function loadResults(){
 function mountSearchResults(){
 
   const backBtn = document.getElementById("resultsBackBtn");
-
   if(backBtn){
-    backBtn.onclick = ()=> history.back();
+    backBtn.onclick = () => history.back();
   }
 
   loadResults();
