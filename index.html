@@ -142,7 +142,7 @@
     }
   </script>
 
-  <!-- ================= TRANSICIONES ================= -->
+    <!-- ================= TRANSICIONES ================= -->
   <script>
     function animateViewChange() {
       const mainView = document.getElementById("main");
@@ -161,14 +161,22 @@
     const mainView = document.getElementById("main");
 
     if (mainView) {
-      const observerView = new MutationObserver(animateViewChange);
+      const observerView = new MutationObserver((mutations) => {
+        for(const mutation of mutations){
+          if(mutation.target === mainView && mutation.type === "childList"){
+            animateViewChange();
+            break;
+          }
+        }
+      });
 
       observerView.observe(mainView, {
         childList: true,
-        subtree: true
+        subtree: false
       });
     }
   </script>
+
   <!-- ============ SERVICE WORKER ============ -->
 <script>
   if ("serviceWorker" in navigator) {
