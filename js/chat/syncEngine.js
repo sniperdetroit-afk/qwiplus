@@ -1,6 +1,5 @@
+// js/chat/syncEngine.js
 
-
-//chat/syncEngine.js//
 import { supabase } from "../services/supabase.js";
 
 let chatChannel = null;
@@ -14,7 +13,7 @@ export function startChatSync(conversationId, userId, onMessage){
 
   if(activeConversation === conversationId) return;
 
-  stopChatSync(); // ⭐ CRÍTICO
+  stopChatSync();
 
   rendered.clear();
   activeConversation = conversationId;
@@ -41,7 +40,7 @@ export function startChatSync(conversationId, userId, onMessage){
         if(msg.sender_id !== userId){
           await supabase
             .from("messages")
-            .update({ read_at: new Date() })
+            .update({ read: true })
             .eq("id", msg.id);
         }
 
