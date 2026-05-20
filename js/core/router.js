@@ -106,6 +106,14 @@ export function resolveRoute(){
     return { view: "chat", params: { conversationId: parts[1] } };
   }
 
+  if(parts[0] === "publish"){
+    return { view: "publish", params: {} };
+  }
+
+  if(parts[0] === "messages"){
+    return { view: "messages", params: {} };
+  }
+
   const category = parts[0];
   const subcategory = parts[1] ? decodeURIComponent(parts[1]) : null;
 
