@@ -193,7 +193,7 @@ async function mountRegister() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+            const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -202,6 +202,15 @@ async function mountRegister() {
       });
 
       if (error) throw error;
+
+      if(signUpData?.user){
+        const userId = signUpData.user.id;
+        const avatarUrl = `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${userId}`;
+        await supabase.from("profiles").upsert({
+          id: userId,
+          avatar_url: avatarUrl
+        });
+      }
 
       showSuccess("✅ Cuenta creada. Revisa tu email para confirmarla 📩");
 
