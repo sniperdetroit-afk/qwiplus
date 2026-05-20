@@ -1,6 +1,4 @@
- 
- 
- import { createView } from "../core/createView.js";
+import { createView } from "../core/createView.js";
 import { supabase } from "../services/supabase.js";
 import { renderCard } from "../components/card.js";
 import { toggleFavorite } from "../services/favoritesService.js";
@@ -50,11 +48,6 @@ async function mountFavorites(state) {
   const user = state?.session?.user;
   if (!user) return;
 
-    
-async function mountFavorites(state) {
-  const user = state?.session?.user;
-  if (!user) return;
-
   document.querySelectorAll(".card[data-id]").forEach(card => {
     card.addEventListener("click", (e) => {
       if(e.target.closest(".fav-btn")) return;
@@ -72,8 +65,5 @@ async function mountFavorites(state) {
   });
 }
 
-
 export const FavoritesView = createView(renderFavorites, mountFavorites);
-
-
 
