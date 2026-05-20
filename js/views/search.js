@@ -1,7 +1,7 @@
 // js/views/search.js
 
 import { createView } from "../core/createView.js";
-import { categories } from "../data/categories.js";
+import { categories } from "./categories.js";
 import { supabase } from "../services/supabase.js";
 import { getState } from "../core/state.js";
 import { renderCard } from "../components/card.js";
