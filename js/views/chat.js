@@ -603,9 +603,10 @@ async function sendMessage(){
     .select()
     .single();
 
-  if(data){
+    if(data){
     addMessage(data);
-    await supabase
+    console.log("📤 SEND MESSAGE - actualizando conversación:", conversationId);
+    const { error: updateError } = await supabase
       .from("conversations")
       .update({
         last_message: text,
@@ -614,6 +615,13 @@ async function sendMessage(){
         hidden_for_seller: false
       })
       .eq("id", conversationId);
+    if(updateError){
+      console.error("❌ Error actualizando conversación:", updateError);
+    } else {
+      console.log("✅ Conversación actualizada");
+    }
+  } else {
+    console.error("❌ INSERT mensaje falló - no hay data");
   }
 }
 

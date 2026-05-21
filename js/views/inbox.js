@@ -261,7 +261,11 @@ async function deleteConversation(c){
 
 function handleRealtimeUpdate(conv){
 
-  if(!alive) return;
+  console.log("📬 INBOX REALTIME - conv recibida:", conv);
+  if(!alive){
+    console.log("⚠️ Inbox no está alive, ignorando");
+    return;
+  }
 
   // Si la conversación está oculta para mí, no la muestres
   const iAmBuyer = (conv.buyer_id === userId);
