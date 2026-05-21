@@ -211,16 +211,6 @@ function renderConversation(c){
         text-overflow:ellipsis;
       ">${c.last_message || ""}</div>
     </div>
-
-    <button class="conv-delete" data-conv-id="${c.id}" style="
-      background:transparent;
-      border:none;
-      color:#6b7280;
-      font-size:20px;
-      padding:8px;
-      cursor:pointer;
-      flex-shrink:0;
-    " title="Eliminar conversación">✕</button>
   `;
 
   // Click en la conversación (no en el botón eliminar)
@@ -229,13 +219,6 @@ function renderConversation(c){
     markConversationRead(c.id, userId);
     setState({ chat:{ conversationId:c.id } });
     navigate("chat");
-  };
-
-  // Click en eliminar
-  const deleteBtn = div.querySelector(".conv-delete");
-  deleteBtn.onclick = (e) => {
-    e.stopPropagation();
-    deleteConversation(c);
   };
 
   box.appendChild(div);
