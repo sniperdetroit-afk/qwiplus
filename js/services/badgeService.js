@@ -8,18 +8,23 @@ async function updateBadge(userId) {
   const badge = document.getElementById("msgBadge");
   if (!badge || !userId) return;
 
-    const { data: convs, error: convError } = await supabase
+  const { data: convs, error: convError } = await supabase
     .from("conversations")
     .select("id")
     .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
-
 
   if (convError) {
     console.error("BADGE CONVERSATIONS ERROR:", convError);
     return;
   }
 
-  // Filtrar conversaciones ocultas para este usuario
+  if (!convs?.length) {
+    badge.classList.add("hidden");
+    badge.textContent = "0";
+    return;
+  }
+
+  const convIds = convs.map(c => c.id);
 
   const { data: unread } = await supabase
     .from("messages")
@@ -79,6 +84,7 @@ export async function markConversationRead(conversationId, userId) {
 
   await updateBadge(userId);
 }
+
 
 
 
