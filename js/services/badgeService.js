@@ -20,13 +20,6 @@ async function updateBadge(userId) {
   }
 
   // Filtrar conversaciones ocultas para este usuario
-  const visibleConvs = (convs || []).filter(c => {
-    if(c.buyer_id === userId && c.hidden_for_buyer) return false;
-    if(c.seller_id === userId && c.hidden_for_seller) return false;
-    return true;
-  });
-
-  const convIds = visibleConvs.map(c => c.id);
 
   const { data: unread } = await supabase
     .from("messages")
