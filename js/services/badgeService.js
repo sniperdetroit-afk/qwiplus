@@ -8,10 +8,11 @@ async function updateBadge(userId) {
   const badge = document.getElementById("msgBadge");
   if (!badge || !userId) return;
 
-  const { data: convs, error: convError } = await supabase
+    const { data: convs, error: convError } = await supabase
     .from("conversations")
-    .select("id, buyer_id, seller_id, hidden_for_buyer, hidden_for_seller")
+    .select("id")
     .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+
 
   if (convError) {
     console.error("BADGE CONVERSATIONS ERROR:", convError);
@@ -24,12 +25,6 @@ async function updateBadge(userId) {
     if(c.seller_id === userId && c.hidden_for_seller) return false;
     return true;
   });
-
-  if (!visibleConvs.length) {
-    badge.classList.add("hidden");
-    badge.textContent = "0";
-    return;
-  }
 
   const convIds = visibleConvs.map(c => c.id);
 
