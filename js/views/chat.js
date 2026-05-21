@@ -281,35 +281,6 @@ function openChatMenu(otherUserId){
       Eliminar chat
     </button>
 
-      const deleteChatBtn = sheet.querySelector("#deleteChatBtn");
-  if(deleteChatBtn){
-    deleteChatBtn.onclick = async () => {
-      const ok = confirm("¿Eliminar este chat? Si el otro usuario te escribe volverá a aparecer.");
-      if(!ok) return;
-
-      const { data: conv } = await supabase
-        .from("conversations")
-        .select("buyer_id, seller_id")
-        .eq("id", conversationId)
-        .single();
-
-      if(!conv) return;
-
-      const isBuyer = conv.buyer_id === userId;
-      const updateData = isBuyer 
-        ? { hidden_for_buyer: true }
-        : { hidden_for_seller: true };
-
-      await supabase
-        .from("conversations")
-        .update(updateData)
-        .eq("id", conversationId);
-
-      overlay.remove();
-      navigate("messages");
-    };
-  }
-
     ${!iBlockedOther ? `
       <button id="blockChatBtn" style="
         width:100%;padding:14px;text-align:left;
@@ -360,6 +331,35 @@ function openChatMenu(otherUserId){
     };
   }
 
+  const deleteChatBtn = sheet.querySelector("#deleteChatBtn");
+  if(deleteChatBtn){
+    deleteChatBtn.onclick = async () => {
+      const ok = confirm("¿Eliminar este chat? Si el otro usuario te escribe volverá a aparecer.");
+      if(!ok) return;
+
+      const { data: convData } = await supabase
+        .from("conversations")
+        .select("buyer_id, seller_id")
+        .eq("id", conversationId)
+        .single();
+
+      if(!convData) return;
+
+      const isBuyer = convData.buyer_id === userId;
+      const updateData = isBuyer
+        ? { hidden_for_buyer: true }
+        : { hidden_for_seller: true };
+
+      await supabase
+        .from("conversations")
+        .update(updateData)
+        .eq("id", conversationId);
+
+      overlay.remove();
+      navigate("messages");
+    };
+  }
+
   const blockChatBtn = sheet.querySelector("#blockChatBtn");
   if(blockChatBtn){
     blockChatBtn.onclick = async () => {
@@ -378,6 +378,7 @@ function openChatMenu(otherUserId){
     };
   }
 }
+
 
 /* ================= MODAL DENUNCIAR USUARIO ================= */
 
