@@ -61,7 +61,12 @@ export function stopChatSync(){
 
 export function startInboxSync(userId, onUpdate){
 
-  if(inboxChannel) return;
+  if(inboxChannel){
+    console.log("⚠️ INBOX SYNC ya existe, saltando");
+    return;
+  }
+
+  console.log("📡 INICIANDO INBOX SYNC para user:", userId);
 
   inboxChannel = supabase
     .channel("inbox-"+userId)
@@ -74,14 +79,22 @@ export function startInboxSync(userId, onUpdate){
       },
       payload => {
 
+        console.log("📨 INBOX UPDATE recibido:", payload.new);
+
         const conv = payload.new;
 
-        if(conv.buyer_id !== userId && conv.seller_id !== userId) return;
+        if(conv.buyer_id !== userId && conv.seller_id !== userId){
+          console.log("⚠️ UPDATE ignorado (no soy buyer ni seller)");
+          return;
+        }
 
+        console.log("✅ Llamando a onUpdate");
         onUpdate(conv);
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log("📡 INBOX CHANNEL STATUS:", status);
+    });
 }
 
 export function stopInboxSync(){
@@ -89,3 +102,4 @@ export function stopInboxSync(){
   supabase.removeChannel(inboxChannel);
   inboxChannel = null;
 }
+
