@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 160 REGISTER");
+console.log("APP VERSION 161 SESSION GUARD FIX");
 
 /* ================= IMPORTS ================= */
 
@@ -198,17 +198,24 @@ document.addEventListener("click", async (e) => {
   });
 
   const state = getState();
-  const user = state.session?.user;
+  let user = state.session?.user;
   const current = state.app?.view;
 
   if (current === view) return;
 
-  if (
-    ["publish","favorites","messages","chat","profile","profileMenu"].includes(view)
-    && !user
-  ){
-    navigate("login");
-    return;
+  const protegidas = ["publish","favorites","messages","chat","profile","profileMenu"];
+
+  if (protegidas.includes(view) && !user) {
+    // revalida contra Supabase antes de expulsar (evita falso negativo por timing)
+    const { data: { session } } = await supabase.auth.getSession();
+    user = session?.user || null;
+
+    if (user) {
+      setState({ session: { user } });
+    } else {
+      navigate("login");
+      return;
+    }
   }
 
   navigate(view, params);
@@ -308,6 +315,4 @@ supabase.auth.onAuthStateChange((event, session) => {
 });
 
 /* ================= SW ================= */
-
 // desactivado por ahora
-
