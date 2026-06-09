@@ -8,7 +8,6 @@ import { setState } from "../core/state.js";
 /* ================= RENDER ================= */
 
 async function renderBoot(){
-
   return `
     <section style="
       height:100vh;
@@ -20,7 +19,6 @@ async function renderBoot(){
       Cargando…
     </section>
   `;
-
 }
 
 /* ================= MOUNT ================= */
@@ -31,43 +29,16 @@ async function mountBoot(){
 
     const { data:{ session } } = await supabase.auth.getSession();
 
-    // 🔥 si ya hay sesión válida
     if(session?.user){
-
-      setState({
-        session:{ user: session.user }
-      });
-
+      setState({ session:{ user: session.user } });
       navigate("home");
-      return;
+    } else {
+      navigate("login");
     }
 
-    // 🔥 fallback: esperar evento real de auth
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-
-      listener.subscription.unsubscribe();
-
-      if(session?.user){
-
-        setState({
-          session:{ user: session.user }
-        });
-
-        navigate("home");
-
-      } else {
-
-        navigate("login");
-
-      }
-
-    });
-
   } catch (err) {
-
     console.error("Boot error:", err);
     navigate("login");
-
   }
 
 }
