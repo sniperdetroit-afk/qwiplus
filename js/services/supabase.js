@@ -1,8 +1,14 @@
 //services/supabase.js//
 
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const supabaseUrl = "https://nsxbrrocytxthqnltrjg.supabase.co";
 const supabaseKey = "sb_publishable_k2htxSm1QZ-qTRuj5evLvQ_fSMM_iji";
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+});
