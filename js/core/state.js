@@ -26,15 +26,17 @@ export function getState() {
 export function setState(newState) {
 
   const prevView = state.app?.view;
+  const prevUserId = state.session?.user?.id || null;
 
   const nextState = mergeDeep(state, newState);
 
   const nextView = nextState.app?.view;
+  const nextUserId = nextState.session?.user?.id || null;
 
   state = nextState;
 
-  // 🔥 SOLO render si cambia la vista
-  if(prevView !== nextView){
+  // 🔥 render si cambia la vista O cambia la sesión (login/logout/restore)
+  if (prevView !== nextView || prevUserId !== nextUserId) {
     notify();
   }
 
