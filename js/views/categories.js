@@ -276,6 +276,8 @@ export const categories = [
       "Plantillas",
       "Plugins",
       "Apps",
+      "anuncios",
+      "marketing",
       "Diseño",
       "Servicios",
       "Programación",
@@ -285,11 +287,12 @@ export const categories = [
   },
   {
     id: "servicios",
-    name: "Servicios y eventos",
+    name: "Serviciosen tu zona",
     sub: [
       "Fontanero",
       "Electricista",
       "Mudanzas",
+      "reparasiones",
       "Limpieza",
       "clases y formacion",
       "reparaciones",

@@ -1,4 +1,3 @@
-
 // js/core/state.js
 import { notify } from “./store.js”;
 let state = {
