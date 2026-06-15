@@ -11,7 +11,7 @@ async function renderLogin(){
   <section style="
     min-height:100vh;
     width:100%;
-    background: url('/img/escudo.jpg') center center / cover no-repeat;
+    background: url('/img/inicio.jpg') center center / cover no-repeat;
     display:flex;
     align-items:center;
     justify-content:center;
