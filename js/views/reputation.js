@@ -66,8 +66,10 @@ async function renderReputation(){
 async function mountReputation(){
  const state = getState();
  const currentUser = state.session?.user;
- const targetUserId = state.app?.params?.userId || currentUser?.id;
- const isOwn = !state.app?.params?.userId || state.app?.params?.userId === currentUser?.id;
+ const targetUserId = state.app?.params?.userId 
+  ? state.app.params.userId 
+  : currentUser?.id;
+const isOwn = targetUserId === currentUser?.id;
 
  if(!targetUserId) return;
 
