@@ -104,7 +104,7 @@ async function mountReputation(){
 
     const { data: reviews } = await supabase
       .from("reviews")
-      .select(`*, profiles!reviews_${otherField}_fkey(name, avatar_url)`)
+      .select(`*, profiles(name, avatar_url)`)
       .eq(field, userId)
       .order("created_at", { ascending: false });
 
