@@ -111,7 +111,17 @@ async function renderProfile(){
           ${location ? `<p style="color:#6b7280;font-size:14px;margin:2px 0 8px;">${location}</p>` : ""}
           <div class="profile-badge">
             <span>Verificado por Qwiplus</span>
-          </div> <button id="logoutBtn" class="btn-danger">Cerrar sesión</button>
+          <button id="logoutBtn" style="
+           background:rgba(239,68,68,0.1);
+            border:1px solid rgba(239,68,68,0.3);
+            color:#fca5a5;
+             padding:6px 14px;
+            border-radius:999px;
+           font-size:12px;
+          font-weight:600;
+         cursor:pointer;
+         margin-top:6px;
+        ">Cerrar sesión</button>
         </div>
 
       </div>
