@@ -99,14 +99,11 @@ async function mountReputation(){
        .rpc("get_reviews_with_reviewer", { p_reviewed_id: userId });
      list = data || [];
    } else {
-     // Para compras: reviews donde yo soy reviewer_id
-     const { data } = await supabase
-       .from("reviews")
-       .select("*")
-       .eq("reviewer_id", userId)
-       .order("created_at", { ascending: false });
-     list = data || [];
-   }
+  const { data } = await supabase
+    .rpc("get_reviews_as_buyer", { p_reviewer_id: userId });
+  list = data || [];
+}
+
 
    const avg = list.length
      ? (list.reduce((s,r) => s + r.rating, 0) / list.length).toFixed(1)
@@ -133,10 +130,14 @@ async function mountReputation(){
      return;
    }
 
-   listEl.innerHTML = list.map(r => {
-     const name = escapeHtml(r.reviewer_name || "Usuario");
+    listEl.innerHTML = list.map(r => {
+     const name = escapeHtml(
+    (tab === "ventas" ? r.reviewer_name : r.reviewed_name) || "Usuario"
+    );
      const initial = name.charAt(0).toUpperCase();
-     const avatar = r.reviewer_avatar
+     const avatarUrl = tab === "ventas" ? r.reviewer_avatar : r.reviewed_avatar;
+     const avatar = avatarUrl
+
        ? `<img src="${r.reviewer_avatar}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
        : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(34,211,238,0.2);border:1px solid rgba(34,211,238,0.3);display:flex;align-items:center;justify-content:center;color:#22d3ee;font-weight:700;font-size:16px;">${initial}</div>`;
 
