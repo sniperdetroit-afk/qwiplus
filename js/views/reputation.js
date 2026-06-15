@@ -27,7 +27,7 @@ async function renderReputation(){
          color:#22d3ee;font-size:18px;
          padding:6px 12px;border-radius:999px;cursor:pointer;
        ">←</button>
-       <h1 style="margin:0;font-size:22px;font-weight:800;color:#f1f5f9;">Mi Reputación</h1>
+       <h1 id="reputationTitle" style="margin:0;font-size:22px;font-weight:800;color:#f1f5f9;">Reputación</h1>
      </div>
 
      <div style="display:flex;gap:10px;margin-bottom:24px;">
@@ -65,11 +65,30 @@ async function renderReputation(){
 
 async function mountReputation(){
  const state = getState();
- const userId = state.session?.user?.id;
- if(!userId) return;
+ const currentUser = state.session?.user;
+ const targetUserId = state.app?.params?.userId || currentUser?.id;
+ const isOwn = !state.app?.params?.userId || state.app?.params?.userId === currentUser?.id;
+
+ if(!targetUserId) return;
+
+ // Título dinámico
+ const titleEl = document.getElementById("reputationTitle");
+ if(titleEl){
+   if(isOwn){
+     titleEl.textContent = "Mi Reputación";
+   } else {
+     // Cargar nombre del usuario
+     const { data: profile } = await supabase
+       .from("profiles")
+       .select("name")
+       .eq("id", targetUserId)
+       .maybeSingle();
+     titleEl.textContent = profile?.name ? `Reputación de ${profile.name}` : "Reputación";
+   }
+ }
 
  document.getElementById("backReputation")
-   ?.addEventListener("click", () => navigate("profileMenu"));
+   ?.addEventListener("click", () => history.back());
 
  async function loadTab(tab){
 
@@ -96,14 +115,13 @@ async function mountReputation(){
 
    if(tab === "ventas"){
      const { data } = await supabase
-       .rpc("get_reviews_with_reviewer", { p_reviewed_id: userId });
+       .rpc("get_reviews_with_reviewer", { p_reviewed_id: targetUserId });
      list = data || [];
    } else {
-  const { data } = await supabase
-    .rpc("get_reviews_as_buyer", { p_reviewer_id: userId });
-  list = data || [];
-}
-
+     const { data } = await supabase
+       .rpc("get_reviews_as_buyer", { p_reviewer_id: targetUserId });
+     list = data || [];
+   }
 
    const avg = list.length
      ? (list.reduce((s,r) => s + r.rating, 0) / list.length).toFixed(1)
@@ -124,22 +142,21 @@ async function mountReputation(){
    if(!list.length){
      listEl.innerHTML = `
        <div style="text-align:center;padding:40px;color:#94a3b8;">
-         No tienes valoraciones como ${tab === "ventas" ? "vendedor" : "comprador"} aún
+         Sin valoraciones como ${tab === "ventas" ? "vendedor" : "comprador"} aún
        </div>
      `;
      return;
    }
 
-    listEl.innerHTML = list.map(r => {
+   listEl.innerHTML = list.map(r => {
      const name = escapeHtml(
-    (tab === "ventas" ? r.reviewer_name : r.reviewed_name) || "Usuario"
-    );
+       (tab === "ventas" ? r.reviewer_name : r.reviewed_name) || "Usuario"
+     );
      const initial = name.charAt(0).toUpperCase();
      const avatarUrl = tab === "ventas" ? r.reviewer_avatar : r.reviewed_avatar;
      const avatar = avatarUrl
-
-       ? `<img src="${avatarUrl}" alt="${name} profile picture" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
-       : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(34,211,238,0.2);border:1px solid rgba(34,211,238,0.3);display:flex;align-items:center;justify-content:center;color:#22d3ee;font-weight:700;font-size:16px;" aria-label="${name} profile initial">${initial}</div>`;
+       ? `<img src="${avatarUrl}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
+       : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(34,211,238,0.2);border:1px solid rgba(34,211,238,0.3);display:flex;align-items:center;justify-content:center;color:#22d3ee;font-weight:700;font-size:16px;">${initial}</div>`;
 
      const stars = Array.from({length:5},(_,i) =>
        `<span style="color:${i<r.rating?"#f59e0b":"rgba(255,255,255,0.2)"};font-size:16px;">★</span>`
@@ -182,4 +199,3 @@ export const ReputationView = createView(
  mountReputation,
  unmountReputation
 );
-
