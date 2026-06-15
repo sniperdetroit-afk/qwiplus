@@ -11,6 +11,8 @@ import { navigate, resolveRoute } from "./core/router.js";
 import { supabase } from "./services/supabase.js";
 import { initLang } from "./services/langService.js";
 import { initBadge, stopBadge } from "./services/badgeService.js";
+import { ReputationView } from "./views/reputation.js";
+import { ProtectionView } from "./views/protection.js";
 
 /* ================= ANTI DOBLE INIT ================= */
 
@@ -81,6 +83,8 @@ const routes = {
   chat: ChatView,
   publicProfile: PublicProfileView,
   suggestions: SuggestionsView,
+  reputation: ReputationView,
+  protection: ProtectionView
 };
 
 /* ================= RENDER ================= */
@@ -132,6 +136,8 @@ async function renderApp(){
       editAd: { header: false, nav: false },
       publicProfile: { header: false, nav: false },
       suggestions: { header: false, nav: false },
+      reputation: { header: false, nav: false },
+       protection: { header: false, nav: false },
     };
 
     const layout = layoutConfig[viewName] || { header: false, nav: true };
