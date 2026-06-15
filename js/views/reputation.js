@@ -92,15 +92,22 @@ async function mountReputation(){
      tabV.style.color = "#94a3b8";
    }
 
-   const field = tab === "ventas" ? "reviewed_id" : "reviewer_id";
+   let list = [];
 
-   const { data: reviews } = await supabase
-     .from("reviews")
-     .select("*")
-     .eq(field, userId)
-     .order("created_at", { ascending: false });
+   if(tab === "ventas"){
+     const { data } = await supabase
+       .rpc("get_reviews_with_reviewer", { p_reviewed_id: userId });
+     list = data || [];
+   } else {
+     // Para compras: reviews donde yo soy reviewer_id
+     const { data } = await supabase
+       .from("reviews")
+       .select("*")
+       .eq("reviewer_id", userId)
+       .order("created_at", { ascending: false });
+     list = data || [];
+   }
 
-   const list = reviews || [];
    const avg = list.length
      ? (list.reduce((s,r) => s + r.rating, 0) / list.length).toFixed(1)
      : 0;
@@ -127,6 +134,12 @@ async function mountReputation(){
    }
 
    listEl.innerHTML = list.map(r => {
+     const name = escapeHtml(r.reviewer_name || "Usuario");
+     const initial = name.charAt(0).toUpperCase();
+     const avatar = r.reviewer_avatar
+       ? `<img src="${r.reviewer_avatar}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
+       : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(34,211,238,0.2);border:1px solid rgba(34,211,238,0.3);display:flex;align-items:center;justify-content:center;color:#22d3ee;font-weight:700;font-size:16px;">${initial}</div>`;
+
      const stars = Array.from({length:5},(_,i) =>
        `<span style="color:${i<r.rating?"#f59e0b":"rgba(255,255,255,0.2)"};font-size:16px;">★</span>`
      ).join("");
@@ -142,15 +155,9 @@ async function mountReputation(){
          margin-bottom:12px;
        ">
          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-           <div style="
-             width:44px;height:44px;border-radius:50%;
-             background:rgba(34,211,238,0.2);
-             border:1px solid rgba(34,211,238,0.3);
-             display:flex;align-items:center;justify-content:center;
-             color:#22d3ee;font-weight:700;font-size:16px;
-           ">U</div>
+           ${avatar}
            <div style="flex:1;">
-             <div style="font-weight:700;font-size:15px;color:#f1f5f9;">Usuario</div>
+             <div style="font-weight:700;font-size:15px;color:#f1f5f9;">${name}</div>
              <div style="display:flex;gap:2px;margin-top:2px;">${stars}</div>
            </div>
            <div style="font-size:12px;color:#64748b;">${date}</div>
@@ -174,3 +181,4 @@ export const ReputationView = createView(
  mountReputation,
  unmountReputation
 );
+
