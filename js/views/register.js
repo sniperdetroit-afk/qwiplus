@@ -4,54 +4,57 @@ import { supabase } from "../services/supabase.js";
 import { navigate } from "../core/router.js";
 import { createView } from "../core/createView.js";
 
-/* ================= RENDER ================= */
-
 async function renderRegister() {
   return `
   <section style="
     min-height:100vh;
     width:100%;
-    background:linear-gradient(160deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);
+    background: url('/img/inicioescudo.jpg') center center / cover no-repeat;
     display:flex;
     align-items:center;
     justify-content:center;
     padding:24px;
     box-sizing:border-box;
+    position:relative;
   ">
+    <div style="
+      position:absolute;inset:0;
+      background:rgba(2,6,23,0.55);
+      pointer-events:none;
+    "></div>
 
     <div style="
-      width:100%;
-      max-width:400px;
-      color:white;
-      box-sizing:border-box;
+      position:relative;z-index:1;
+      width:100%;max-width:400px;
+      color:white;box-sizing:border-box;
     ">
 
       <!-- LOGO -->
       <div style="text-align:center;margin-bottom:32px;">
         <img src="/img/logo-qwiplus.png" style="
           width:260px;height:auto;
-          margin-bottom:14px;
-          object-fit:contain;
-          mix-blend-mode:lighten;
+          margin-bottom:14px;object-fit:contain;
         ">
         <p style="margin:6px 0 0;color:#94a3b8;font-size:14px;">Crea tu cuenta gratis</p>
       </div>
 
       <!-- CARD -->
       <div style="
-        background:rgba(255,255,255,0.05);
-        border:1px solid rgba(255,255,255,0.08);
+        background:rgba(6,11,28,0.70);
+        border:1px solid rgba(34,211,238,0.20);
         border-radius:24px;
         padding:28px;
-        backdrop-filter:blur(12px);
+        backdrop-filter:blur(16px);
       ">
 
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
           <button id="backBtn" style="
-            background:none;border:none;
-            color:#94a3b8;font-size:20px;cursor:pointer;
+            background:rgba(34,211,238,0.1);
+            border:1px solid rgba(34,211,238,0.25);
+            color:#22d3ee;font-size:18px;
+            padding:4px 10px;border-radius:999px;cursor:pointer;
           ">←</button>
-          <h2 style="margin:0;font-size:20px;font-weight:700;">Crear cuenta</h2>
+          <h2 style="margin:0;font-size:20px;font-weight:700;color:#f1f5f9;">Crear cuenta</h2>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:12px;">
@@ -59,47 +62,59 @@ async function renderRegister() {
           <div style="position:relative;">
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;">📧</span>
             <input id="emailInput" type="email" placeholder="Email" style="
-              width:100%;height:50px;
-              border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
+              width:100%;height:50px;border-radius:14px;
+              border:1px solid rgba(34,211,238,0.25);
               padding:0 16px 0 42px;font-size:15px;
-              background:rgba(255,255,255,0.07);color:white;
-              outline:none;box-sizing:border-box;
-            ">
+              background:rgba(6,11,28,0.65);color:white;
+              outline:none;box-sizing:border-box;transition:border 0.2s;
+            "
+              onfocus="this.style.borderColor='#22d3ee';this.style.boxShadow='0 0 0 2px rgba(34,211,238,0.15)'"
+              onblur="this.style.borderColor='rgba(34,211,238,0.25)';this.style.boxShadow='none'"
+            >
           </div>
 
           <div style="position:relative;">
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;">🔒</span>
             <input id="passwordInput" type="password" placeholder="Contraseña (mín. 6)" style="
-              width:100%;height:50px;
-              border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
+              width:100%;height:50px;border-radius:14px;
+              border:1px solid rgba(34,211,238,0.25);
               padding:0 16px 0 42px;font-size:15px;
-              background:rgba(255,255,255,0.07);color:white;
-              outline:none;box-sizing:border-box;
-            ">
+              background:rgba(6,11,28,0.65);color:white;
+              outline:none;box-sizing:border-box;transition:border 0.2s;
+            "
+              onfocus="this.style.borderColor='#22d3ee';this.style.boxShadow='0 0 0 2px rgba(34,211,238,0.15)'"
+              onblur="this.style.borderColor='rgba(34,211,238,0.25)';this.style.boxShadow='none'"
+            >
           </div>
 
           <div style="position:relative;">
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;">🔒</span>
             <input id="confirmInput" type="password" placeholder="Confirmar contraseña" style="
-              width:100%;height:50px;
-              border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
+              width:100%;height:50px;border-radius:14px;
+              border:1px solid rgba(34,211,238,0.25);
               padding:0 16px 0 42px;font-size:15px;
-              background:rgba(255,255,255,0.07);color:white;
-              outline:none;box-sizing:border-box;
-            ">
+              background:rgba(6,11,28,0.65);color:white;
+              outline:none;box-sizing:border-box;transition:border 0.2s;
+            "
+              onfocus="this.style.borderColor='#22d3ee';this.style.boxShadow='0 0 0 2px rgba(34,211,238,0.15)'"
+              onblur="this.style.borderColor='rgba(34,211,238,0.25)';this.style.boxShadow='none'"
+            >
           </div>
 
           <button id="registerBtn" style="
-            height:52px;border:0;border-radius:16px;
-            font-weight:800;color:white;font-size:16px;
-            background:linear-gradient(90deg,#6DA8FF,#6EE7B7);
-            box-shadow:0 6px 20px rgba(109,168,255,0.35);
+            height:52px;border:none;border-radius:16px;
+            font-weight:800;color:#020617;font-size:16px;
+            background:#22d3ee;
+            box-shadow:0 0 20px rgba(34,211,238,0.35);
             cursor:pointer;margin-top:4px;width:100%;
-          ">Crear cuenta</button>
+            transition:0.2s;
+          "
+            onmouseover="this.style.boxShadow='0 0 30px rgba(34,211,238,0.6)'"
+            onmouseout="this.style.boxShadow='0 0 20px rgba(34,211,238,0.35)'"
+          >Crear cuenta</button>
 
         </div>
 
-        <!-- ERROR -->
         <div id="registerError" style="
           display:none;margin-top:14px;
           color:#fca5a5;background:rgba(239,68,68,0.12);
@@ -107,7 +122,6 @@ async function renderRegister() {
           font-size:14px;font-weight:600;text-align:center;
         "></div>
 
-        <!-- ÉXITO -->
         <div id="registerSuccess" style="
           display:none;margin-top:14px;
           color:#86efac;background:rgba(34,197,94,0.12);
@@ -117,21 +131,17 @@ async function renderRegister() {
 
       </div>
 
-      <!-- FOOTER -->
       <div style="text-align:center;margin-top:20px;">
         <button id="goLoginBtn" style="
           background:transparent;border:0;
-          color:#6DA8FF;font-weight:700;font-size:15px;cursor:pointer;
+          color:#22d3ee;font-weight:700;font-size:15px;cursor:pointer;
         ">¿Ya tienes cuenta? <span style="text-decoration:underline;">Iniciar sesión</span></button>
       </div>
 
     </div>
-
   </section>
   `;
 }
-
-/* ================= HELPERS ================= */
 
 function showError(msg) {
   const el = document.getElementById("registerError");
@@ -158,10 +168,7 @@ function setLoading(loading) {
   btn.textContent = loading ? "Creando cuenta..." : "Crear cuenta";
 }
 
-/* ================= MOUNT ================= */
-
 async function mountRegister() {
-
   const backBtn = document.getElementById("backBtn");
   const goLoginBtn = document.getElementById("goLoginBtn");
   const registerBtn = document.getElementById("registerBtn");
@@ -170,35 +177,21 @@ async function mountRegister() {
   goLoginBtn?.addEventListener("click", () => navigate("login"));
 
   registerBtn?.addEventListener("click", async () => {
-
     const email = document.getElementById("emailInput").value.trim();
     const password = document.getElementById("passwordInput").value;
     const confirm = document.getElementById("confirmInput").value;
 
-    if (!email || !password || !confirm) {
-      showError("Completa todos los campos");
-      return;
-    }
-
-    if (password.length < 6) {
-      showError("La contraseña debe tener al menos 6 caracteres");
-      return;
-    }
-
-    if (password !== confirm) {
-      showError("Las contraseñas no coinciden");
-      return;
-    }
+    if (!email || !password || !confirm) { showError("Completa todos los campos"); return; }
+    if (password.length < 6) { showError("La contraseña debe tener al menos 6 caracteres"); return; }
+    if (password !== confirm) { showError("Las contraseñas no coinciden"); return; }
 
     setLoading(true);
 
     try {
-            const { data: signUpData, error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: window.location.origin
-        }
+        options: { emailRedirectTo: window.location.origin }
       });
 
       if (error) throw error;
@@ -206,14 +199,10 @@ async function mountRegister() {
       if(signUpData?.user){
         const userId = signUpData.user.id;
         const avatarUrl = `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${userId}`;
-        await supabase.from("profiles").upsert({
-          id: userId,
-          avatar_url: avatarUrl
-        });
+        await supabase.from("profiles").upsert({ id: userId, avatar_url: avatarUrl });
       }
 
       showSuccess("✅ Cuenta creada. Revisa tu email para confirmarla 📩");
-
       setTimeout(() => navigate("login"), 3000);
 
     } catch (err) {
@@ -224,8 +213,6 @@ async function mountRegister() {
   });
 }
 
-/* ================= UNMOUNT ================= */
-
 function unmountRegister() {}
 
 export const RegisterView = createView(
@@ -233,4 +220,3 @@ export const RegisterView = createView(
   mountRegister,
   unmountRegister
 );
-
