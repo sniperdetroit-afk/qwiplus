@@ -29,7 +29,7 @@ async function renderSearch(){
   return `
   <section style="
     min-height:100vh;
-    background: url('/img/fondo_busquedor.jpg') center bottom / cover no-repeat;
+    background: url('/img/search.jpg') center bottom / cover no-repeat;
     position:relative;
   ">
     <div style="
