@@ -6,48 +6,50 @@ import { setState } from "../core/state.js";
 
 let form;
 
-/* ================= RENDER ================= */
-
 async function renderLogin(){
   return `
   <section style="
     min-height:100vh;
     width:100%;
-    background:linear-gradient(160deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);
+    background: url('/img/inicioescudo.jpg') center center / cover no-repeat;
     display:flex;
     align-items:center;
     justify-content:center;
     padding:24px;
     box-sizing:border-box;
+    position:relative;
   ">
+    <div style="
+      position:absolute;inset:0;
+      background:rgba(2,6,23,0.55);
+      pointer-events:none;
+    "></div>
 
     <div style="
-      width:100%;
-      max-width:400px;
-      color:white;
-      box-sizing:border-box;
+      position:relative;z-index:1;
+      width:100%;max-width:400px;
+      color:white;box-sizing:border-box;
     ">
 
       <!-- LOGO -->
       <div style="text-align:center;margin-bottom:32px;">
         <img src="/img/logo-qwiplus.png" style="
-          width:320px;height:auto;
-          margin-bottom:14px;
-          object-fit:contain;
+          width:280px;height:auto;
+          margin-bottom:14px;object-fit:contain;
         ">
         <p style="margin:6px 0 0;color:#94a3b8;font-size:14px;">Compra y vende lo que quieras</p>
       </div>
 
       <!-- CARD -->
       <div style="
-        background:rgba(255,255,255,0.05);
-        border:1px solid rgba(255,255,255,0.08);
+        background:rgba(6,11,28,0.70);
+        border:1px solid rgba(34,211,238,0.20);
         border-radius:24px;
         padding:28px;
-        backdrop-filter:blur(12px);
+        backdrop-filter:blur(16px);
       ">
 
-        <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;">Iniciar sesión</h2>
+        <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;color:#f1f5f9;">Iniciar sesión</h2>
 
         <form id="loginForm" style="display:flex;flex-direction:column;gap:12px;">
 
@@ -55,40 +57,47 @@ async function renderLogin(){
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;">📧</span>
             <input id="email" type="email" placeholder="Email" required style="
               width:100%;height:50px;
-              border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
+              border-radius:14px;
+              border:1px solid rgba(34,211,238,0.25);
               padding:0 16px 0 42px;
               font-size:15px;
-              background:rgba(255,255,255,0.07);
-              color:white;
-              outline:none;
-              box-sizing:border-box;
-              transition:border 0.2s;
-            ">
+              background:rgba(6,11,28,0.65);
+              color:white;outline:none;
+              box-sizing:border-box;transition:border 0.2s;
+            "
+              onfocus="this.style.borderColor='#22d3ee';this.style.boxShadow='0 0 0 2px rgba(34,211,238,0.15)'"
+              onblur="this.style.borderColor='rgba(34,211,238,0.25)';this.style.boxShadow='none'"
+            >
           </div>
 
           <div style="position:relative;">
             <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;">🔒</span>
             <input id="password" type="password" placeholder="Contraseña" required style="
               width:100%;height:50px;
-              border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
+              border-radius:14px;
+              border:1px solid rgba(34,211,238,0.25);
               padding:0 16px 0 42px;
               font-size:15px;
-              background:rgba(255,255,255,0.07);
-              color:white;
-              outline:none;
-              box-sizing:border-box;
-              transition:border 0.2s;
-            ">
+              background:rgba(6,11,28,0.65);
+              color:white;outline:none;
+              box-sizing:border-box;transition:border 0.2s;
+            "
+              onfocus="this.style.borderColor='#22d3ee';this.style.boxShadow='0 0 0 2px rgba(34,211,238,0.15)'"
+              onblur="this.style.borderColor='rgba(34,211,238,0.25)';this.style.boxShadow='none'"
+            >
           </div>
 
           <button type="submit" style="
-            height:52px;border:0;border-radius:16px;
-            font-weight:800;color:white;font-size:16px;
-            background:linear-gradient(90deg,#6DA8FF,#6EE7B7);
-            box-shadow:0 6px 20px rgba(109,168,255,0.35);
+            height:52px;border:none;border-radius:16px;
+            font-weight:800;color:#020617;font-size:16px;
+            background:#22d3ee;
+            box-shadow:0 0 20px rgba(34,211,238,0.35);
             cursor:pointer;margin-top:4px;
-            transition:opacity 0.2s;
-          ">Entrar</button>
+            transition:0.2s;
+          "
+            onmouseover="this.style.boxShadow='0 0 30px rgba(34,211,238,0.6)'"
+            onmouseout="this.style.boxShadow='0 0 20px rgba(34,211,238,0.35)'"
+          >Entrar</button>
 
         </form>
 
@@ -101,25 +110,19 @@ async function renderLogin(){
 
         <!-- OAUTH -->
         <div style="display:flex;gap:10px;">
-
           <button id="googleBtn" style="
-            flex:1;height:46px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.1);
-            background:rgba(255,255,255,0.07);color:white;
+            flex:1;height:46px;border-radius:14px;
+            border:1px solid rgba(34,211,238,0.25);
+            background:rgba(6,11,28,0.65);color:white;
             font-weight:700;font-size:14px;cursor:pointer;
             display:flex;align-items:center;justify-content:center;gap:8px;
-          ">
+            transition:0.2s;
+          "
+            onmouseover="this.style.borderColor='#22d3ee'"
+            onmouseout="this.style.borderColor='rgba(34,211,238,0.25)'"
+          >
             <span style="font-size:18px;">G</span> Google
           </button>
-
-         <!--<button id="facebookBtn" style="
-            flex:1;height:46px;border-radius:14px;border:0;
-            background:#1877f2;color:white;
-            font-weight:700;font-size:14px;cursor:pointer;
-            display:flex;align-items:center;justify-content:center;gap:8px;
-          ">
-            <span style="font-size:18px;">f</span> Facebook
-          </button>-->
-
         </div>
 
         <!-- ERROR -->
@@ -132,28 +135,23 @@ async function renderLogin(){
 
       </div>
 
-      <!-- FOOTER LINKS -->
+      <!-- FOOTER -->
       <div style="text-align:center;margin-top:20px;display:flex;flex-direction:column;gap:10px;">
-
         <button id="registerBtn" style="
           background:transparent;border:0;
-          color:#6DA8FF;font-weight:700;font-size:15px;cursor:pointer;
+          color:#22d3ee;font-weight:700;font-size:15px;cursor:pointer;
         ">¿No tienes cuenta? <span style="text-decoration:underline;">Crear cuenta</span></button>
 
         <button id="guestBtn" style="
           background:transparent;border:0;
           color:#64748b;font-size:13px;cursor:pointer;
         ">Continuar sin registrarse →</button>
-
       </div>
 
     </div>
-
   </section>
   `;
-} 
-
-/* ================= HELPERS ================= */
+}
 
 const getRedirectTo = () => window.location.origin;
 
@@ -162,7 +160,7 @@ const forceAuthLayout = () => {
   const nav = document.getElementById("bottomNav");
   if(header) header.style.display = "none";
   if(nav) nav.style.display = "none";
-  document.body.style.background = "#0f172a";
+  document.body.style.background = "#020617";
 };
 
 const setLoading = (loading) => {
@@ -186,10 +184,7 @@ const clearError = () => {
   errorBox.style.display = "none";
 };
 
-/* ================= MOUNT ================= */
-
 async function mountLogin(){
-
   forceAuthLayout();
 
   form = document.getElementById("loginForm");
@@ -219,10 +214,8 @@ async function mountLogin(){
     try{
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if(error) throw error;
-
       setState({ session:{ user:data.user }, guest:false });
       navigate("home");
-
     }catch(err){
       showError(err.message || "Email o contraseña incorrectos");
     }finally{
@@ -262,13 +255,9 @@ async function mountLogin(){
   }
 }
 
-/* ================= UNMOUNT ================= */
-
 async function unmountLogin(){
   form = null;
 }
-
-/* ================= EXPORT ================= */
 
 export const LoginView = async () => {
   const html = await renderLogin();
@@ -277,6 +266,4 @@ export const LoginView = async () => {
     mount: mountLogin,
     unmount: unmountLogin
   };
-};
-
-
+}
