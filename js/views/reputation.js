@@ -138,8 +138,8 @@ async function mountReputation(){
      const avatarUrl = tab === "ventas" ? r.reviewer_avatar : r.reviewed_avatar;
      const avatar = avatarUrl
 
-       ? `<img src="${r.reviewer_avatar}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
-       : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(34,211,238,0.2);border:1px solid rgba(34,211,238,0.3);display:flex;align-items:center;justify-content:center;color:#22d3ee;font-weight:700;font-size:16px;">${initial}</div>`;
+       ? `<img src="${avatarUrl}" alt="${name} profile picture" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
+       : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(34,211,238,0.2);border:1px solid rgba(34,211,238,0.3);display:flex;align-items:center;justify-content:center;color:#22d3ee;font-weight:700;font-size:16px;" aria-label="${name} profile initial">${initial}</div>`;
 
      const stars = Array.from({length:5},(_,i) =>
        `<span style="color:${i<r.rating?"#f59e0b":"rgba(255,255,255,0.2)"};font-size:16px;">★</span>`
