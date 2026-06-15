@@ -1,18 +1,36 @@
 :root {
 
-  --bg: #0B0F14;
-  --card: #161B24;
+  /* ── BRAND ── */
+  --accent:        #22d3ee;
+  --accent-dim:    rgba(34, 211, 238, 0.15);
+  --accent-border: rgba(34, 211, 238, 0.25);
+  --accent-glow:   rgba(34, 211, 238, 0.40);
 
-  --text: #F5F7FA;
-  --muted: #94A3B8;
+  /* ── FONDO ── */
+  --bg:            #020617;
+  --card:          #060b1c;
+  --glass:         rgba(6, 11, 28, 0.55);
 
-  --accent: #2563EB;
-  --accent2: #F5B942;
+  /* ── TEXTO ── */
+  --text:          #f1f5f9;
+  --muted:         #94a3b8;
 
-  --radius-soft: 16px;
-  --radius-pill: 999px;
+  /* ── BORDES ── */
+  --border:        rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(34, 211, 238, 0.30);
 
-  --shadow-soft: 0 8px 30px rgba(0,0,0,0.4);
-  --shadow-card: 0 4px 14px rgba(0,0,0,0.3);
+  /* ── PELIGRO ── */
+  --danger:        #ef4444;
+  --danger-dim:    rgba(239, 68, 68, 0.15);
+
+  /* ── DISEÑO ── */
+  --radius:        18px;
+  --radius-pill:   999px;
+  --radius-soft:   12px;
+
+  /* ── SOMBRAS ── */
+  --shadow-soft:   0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-card:   0 4px 14px rgba(0, 0, 0, 0.3);
+  --shadow-accent: 0 0 20px rgba(34, 211, 238, 0.35);
 
 }

@@ -1,9 +1,9 @@
-.home-section{
-  padding:30px 22px 40px;
+.home-section {
+  padding: 30px 22px 40px;
 }
 
-.publish-page{
-  padding:28px 22px 40px;
+.publish-page {
+  padding: 28px 22px 40px;
 }
 
 /* ================= LOGIN PAGE ================= */
@@ -13,27 +13,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: var(--bg-soft);
+  background: var(--bg);
 }
- 
 
 .login-box {
   width: 100%;
   max-width: 420px;
-  background: var(--card-bg);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
   padding: 24px;
-  border-radius: var(--radius-main);
+  border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
   text-align: center;
 }
 
 .login-title {
   margin-bottom: 6px;
-  color: var(--text-main);
+  color: var(--text);
 }
 
 .login-sub {
-  color: var(--text-soft);
+  color: var(--muted);
   margin-bottom: 20px;
 }
 
@@ -41,33 +42,60 @@
   width: 100%;
   padding: 12px;
   margin-bottom: 12px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
+  border-radius: var(--radius-soft);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
 }
 
 .btn-primary {
   width: 100%;
   padding: 12px;
-  border-radius: 10px;
-  background: var(--accent1);
-  color: white;
-  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
   margin-bottom: 10px;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: var(--shadow-accent);
 }
 
 .btn-secondary {
   width: 100%;
   padding: 12px;
-  border-radius: 10px;
-  border: 2px solid var(--accent1);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-accent);
   background: transparent;
-  color: var(--accent1);
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-secondary:hover {
+  background: var(--accent-dim);
 }
 
 .back-btn {
   margin-top: 15px;
   background: none;
   border: none;
-  color: var(--text-soft);
+  color: var(--muted);
+  cursor: pointer;
 }
+
 
