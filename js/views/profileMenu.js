@@ -5,55 +5,48 @@ import { t } from "../services/langService.js";
 
 function renderProfileMenu(){
   return `
-  <section style="max-width:480px;margin:0 auto;padding:24px 20px;">
+  <section style="
+    min-height: 100vh;
+    background: #020617;
+    background-image: radial-gradient(ellipse at top, #0d1f3c 0%, #020617 60%);
+    padding: 24px 20px;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  ">
 
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:40px;">
       <button id="backProfileMenu" style="
-        background:none;border:none;font-size:22px;
-        cursor:pointer;color:#6b7280;padding:4px 8px;border-radius:8px;
+        background: rgba(34,211,238,0.1);
+        border: 1px solid rgba(34,211,238,0.25);
+        font-size: 18px;
+        cursor: pointer;
+        color: #22d3ee;
+        padding: 6px 12px;
+        border-radius: 999px;
+        backdrop-filter: blur(8px);
       ">←</button>
-      <h2 style="margin:0;font-size:22px;font-weight:800;color:#111827;">${t("myAccount")}</h2>
+      <h2 style="margin:0;font-size:22px;font-weight:800;color:#f1f5f9;">${t("myAccount")}</h2>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:12px;">
+    <div style="display:flex;flex-direction:column;gap:14px;">
 
-      <button class="profile-menu-btn" data-view="profile" style="
-        display:flex;align-items:center;gap:12px;
-        width:100%;padding:16px 20px;
-        background:linear-gradient(90deg,#3b82f6,#22c55e);
-        border:none;border-radius:999px;
-        font-size:15px;font-weight:700;color:white;
-        cursor:pointer;
-      ">
+      <button class="profile-menu-btn" data-view="profile">
         <span style="font-size:18px;">👤</span>
         <span style="flex:1;text-align:center;">${t("viewProfile")}</span>
-        <span style="opacity:0.8;font-size:18px;">›</span>
+        <span style="opacity:0.6;font-size:18px;">›</span>
       </button>
 
-      <button class="profile-menu-btn" data-view="favorites" style="
-        display:flex;align-items:center;gap:12px;
-        width:100%;padding:16px 20px;
-        background:linear-gradient(90deg,#3b82f6,#22c55e);
-        border:none;border-radius:999px;
-        font-size:15px;font-weight:700;color:white;
-        cursor:pointer;
-      ">
-        <span style="font-size:18px;">❤️</span>
+      <button class="profile-menu-btn" data-view="favorites">
+        <span style="font-size:18px;">🤍</span>
         <span style="flex:1;text-align:center;">${t("favorites")}</span>
-        <span style="opacity:0.8;font-size:18px;">›</span>
+        <span style="opacity:0.6;font-size:18px;">›</span>
       </button>
 
-      <button class="profile-menu-btn" data-view="settings" style="
-        display:flex;align-items:center;gap:12px;
-        width:100%;padding:16px 20px;
-        background:linear-gradient(90deg,#3b82f6,#22c55e);
-        border:none;border-radius:999px;
-        font-size:15px;font-weight:700;color:white;
-        cursor:pointer;
-      ">
+      <button class="profile-menu-btn" data-view="settings">
         <span style="font-size:18px;">⚙️</span>
         <span style="flex:1;text-align:center;">${t("config")}</span>
-        <span style="opacity:0.8;font-size:18px;">›</span>
+        <span style="opacity:0.6;font-size:18px;">›</span>
       </button>
 
     </div>
@@ -80,6 +73,7 @@ export const ProfileMenuView = () => {
     mount: mountProfileMenu
   };
 };
+
 
 
 
