@@ -298,15 +298,20 @@ initApp();
 /* ================= AUTH ================= */
 
 supabase.auth.onAuthStateChange((event, session) => {
-
   const prev = getState();
+  const currentUser = prev.session?.user;
+  const newUser = session?.user || null;
+
+  // Solo actualizar si el usuario realmente cambió
+  if(currentUser?.id === newUser?.id) return;
 
   setState({
     ...prev,
     session: {
-      user: session?.user || null
+      user: newUser
     }
   });
+
 
   if(session?.user){
     initBadge(session.user.id);
