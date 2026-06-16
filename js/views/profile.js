@@ -63,7 +63,7 @@ async function renderProfile(){
    return `
      <section class="profile-page">
        <div class="profile-top">
-         <button id="backProfileBtn">← Volver</button>
+         <button id="backProfileBtn" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.25);color:#22d3ee;font-size:18px;padding:6px 12px;border-radius:999px;cursor:pointer;">←</button>
        </div>
        <div class="profile-empty">
          <h1>Perfil</h1>
@@ -92,7 +92,7 @@ async function renderProfile(){
    <section class="profile-page">
 
      <div class="profile-top">
-       <button id="backProfileBtn" class="profile-back">← Volver</button>
+       <button id="backProfileBtn" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.25);color:#22d3ee;font-size:18px;padding:6px 12px;border-radius:999px;cursor:pointer;">← Volver</button>
      </div>
 
      <div class="profile-pro-header">
