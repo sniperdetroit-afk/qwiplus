@@ -311,6 +311,33 @@ supabase.auth.onAuthStateChange((event, session) => {
       user: newUser
     }
   });
+supabase.auth.onAuthStateChange((event, session) => {
+
+  // Ignorar eventos que no cambian nada
+  if(event === "INITIAL_SESSION") return;
+  if(event === "TOKEN_REFRESHED") return;
+
+  const prev = getState();
+  const currentUser = prev.session?.user;
+  const newUser = session?.user || null;
+
+  if(currentUser?.id === newUser?.id) return;
+
+  setState({
+    ...prev,
+    session: { user: newUser }
+  });
+
+  if(session?.user){
+    initBadge(session.user.id);
+  } else {
+    stopBadge();
+  }
+
+  if(session?.user && getState().app?.view === "login"){
+    navigate("home");
+  }
+});
 
 
   if(session?.user){
