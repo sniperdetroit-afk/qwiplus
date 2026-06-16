@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 162 AUTH FIX");
+console.log("APP VERSION 160 REGISTER");
 
 /* ================= IMPORTS ================= */
 
@@ -11,15 +11,13 @@ import { navigate, resolveRoute } from "./core/router.js";
 import { supabase } from "./services/supabase.js";
 import { initLang } from "./services/langService.js";
 import { initBadge, stopBadge } from "./services/badgeService.js";
-import { ReputationView } from "./views/reputation.js";
-import { ProtectionView } from "./views/protection.js";
 
 /* ================= ANTI DOBLE INIT ================= */
 
 if (window.__APP_INIT__) {
- console.warn("App ya inicializada");
+  console.warn("App ya inicializada");
 } else {
- window.__APP_INIT__ = true;
+  window.__APP_INIT__ = true;
 }
 
 /* ================= LANG ================= */
@@ -44,9 +42,9 @@ import { LoginView } from "./views/login.js";
 import { RegisterView } from "./views/register.js";
 
 import {
- CategoriesView,
- SubcategoriesView,
- SubSubcategoriesView
+  CategoriesView,
+  SubcategoriesView,
+  SubSubcategoriesView
 } from "./views/categories.js";
 
 import { FavoritesView } from "./views/favorites.js";
@@ -62,160 +60,158 @@ import { SuggestionsView } from "./views/suggestions.js";
 /* ================= ROUTES ================= */
 
 const routes = {
- boot: BootView,
- home: HomeView,
- publish: PublishView,
- profile: ProfileView,
- profileMenu: ProfileMenuView,
- settings: SettingsView,
- login: LoginView,
- register: RegisterView,
- categories: CategoriesView,
- subcategories: SubcategoriesView,
- subsubcategories: SubSubcategoriesView,
- favorites: FavoritesView,
- adDetail: AdDetailView,
- search: SearchView,
- searchResults: SearchResultsView,
- editAd: EditAdView,
- editProfile: EditProfileView,
- messages: InboxView,
- chat: ChatView,
- publicProfile: PublicProfileView,
- suggestions: SuggestionsView,
- reputation: ReputationView,
- protection: ProtectionView,
+  boot: BootView,
+  home: HomeView,
+  publish: PublishView,
+  profile: ProfileView,
+  profileMenu: ProfileMenuView,
+  settings: SettingsView,
+  login: LoginView,
+  register: RegisterView,
+  categories: CategoriesView,
+  subcategories: SubcategoriesView,
+  subsubcategories: SubSubcategoriesView,
+  favorites: FavoritesView,
+  adDetail: AdDetailView,
+  search: SearchView,
+  searchResults: SearchResultsView,
+  editAd: EditAdView,
+  editProfile: EditProfileView,
+  messages: InboxView,
+  chat: ChatView,
+  publicProfile: PublicProfileView,
+  suggestions: SuggestionsView,
 };
 
 /* ================= RENDER ================= */
 
 async function renderApp(){
 
- if (isRendering) return;
+  if (isRendering) return;
 
- const state = getState();
- let viewName = state.app?.view;
+  const state = getState();
+  let viewName = state.app?.view;
 
- if (!routes[viewName]) {
-   viewName = "login";
- }
+  if (!routes[viewName]) {
+    viewName = "login";
+  }
 
- const main = document.getElementById("main");
+  const main = document.getElementById("main");
 
- if (
-   viewName === currentViewName &&
-   main &&
-   main.innerHTML.trim() !== ""
- ){
-   return;
- }
+  if (
+    viewName === currentViewName &&
+    main &&
+    main.innerHTML.trim() !== ""
+  ){
+    return;
+  }
 
- isRendering = true;
+  isRendering = true;
 
- try {
+  try {
 
-   currentViewName = viewName;
+    currentViewName = viewName;
 
-   const View = routes[viewName];
+    const View = routes[viewName];
 
-   const header = document.getElementById("appHeader");
-   const nav = document.getElementById("bottomNav");
+    const header = document.getElementById("appHeader");
+    const nav = document.getElementById("bottomNav");
 
-   const layoutConfig = {
-     boot:        { header: false, nav: false },
-     login:       { header: false, nav: false },
-     register:    { header: false, nav: false },
-     home:        { header: true,  nav: true  },
-     search:      { header: false, nav: true  },
-     favorites:   { header: false, nav: true  },
-     chat:        { header: false, nav: false },
-     profileMenu: { header: false, nav: true  },
-     profile:     { header: false, nav: true  },
-     settings:    { header: false, nav: false },
-     editProfile: { header: false, nav: false },
-     editAd:      { header: false, nav: false },
-     publicProfile: { header: false, nav: false },
-     suggestions: { header: false, nav: false },
-     reputation:  { header: false, nav: false },
-     protection:  { header: false, nav: false },
-   };
+    const layoutConfig = {
+      boot: { header: false, nav: false },
+      login: { header: false, nav: false },
+      register: { header: false, nav: false },
+      home: { header: true, nav: true },
+      search: { header: false, nav: true },
+      favorites: { header: false, nav: true },
+      chat: { header: false, nav: false },
+      profileMenu: { header: false, nav: true },
+      profile: { header: false, nav: true },
+      settings: { header: false, nav: false },
+      editProfile: { header: false, nav: false },
+      editAd: { header: false, nav: false },
+      publicProfile: { header: false, nav: false },
+      suggestions: { header: false, nav: false },
+    };
 
-   const layout = layoutConfig[viewName] || { header: false, nav: true };
+    const layout = layoutConfig[viewName] || { header: false, nav: true };
 
-   if (header) header.style.display = layout.header ? "" : "none";
-   if (nav)    nav.style.display    = layout.nav    ? "" : "none";
+    if (header) header.style.display = layout.header ? "" : "none";
+    if (nav) nav.style.display = layout.nav ? "" : "none";
 
-   if (main) main.innerHTML = "";
+    if (main) {
+      main.innerHTML = "";
+    }
 
-   await loadView(View, state);
+    await loadView(View, state);
 
-   if (layout.nav) updateActiveNav(viewName);
+    if (layout.nav) updateActiveNav(viewName);
 
-   console.log("VIEW OK:", viewName);
+    console.log("VIEW OK:", viewName);
 
- } catch (err) {
-   console.error("Render error:", err);
-   const main = document.getElementById("main");
-   if (main) {
-     main.innerHTML = `<div style="padding:20px;color:white">⚠️ Error cargando vista</div>`;
-   }
- } finally {
-   isRendering = false;
- }
+  } catch (err) {
+    console.error("Render error:", err);
+
+    const main = document.getElementById("main");
+    if (main) {
+      main.innerHTML = `
+        <div style="padding:20px;color:white">
+          ⚠️ Error cargando vista
+        </div>
+      `;
+    }
+
+  } finally {
+    isRendering = false;
+  }
 }
 
 /* ================= NAV ================= */
 
 function updateActiveNav(view) {
- document.querySelectorAll(".nav-item")
-   .forEach(btn => {
-     btn.classList.toggle("active", btn.dataset.view === view);
-   });
+  document.querySelectorAll(".nav-item")
+    .forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.view === view);
+    });
 }
 
 /* ================= CLICK ================= */
 
 document.addEventListener("click", async (e) => {
 
- const el = e.target.closest("[data-view]");
- if (!el) return;
+  const el = e.target.closest("[data-view]");
+  if (!el) return;
 
- e.preventDefault();
+  e.preventDefault();
 
- const view = el.dataset.view;
+  const view = el.dataset.view;
 
- const params = {
-   id:          el.dataset.id,
-   userId:      el.dataset.userId,
-   category:    el.dataset.category,
-   subcategory: el.dataset.subcategory
- };
+  const params = {
+    id: el.dataset.id,
+    userId: el.dataset.userId,
+    category: el.dataset.category,
+    subcategory: el.dataset.subcategory
+  };
 
- Object.keys(params).forEach(k => {
-   if (!params[k]) delete params[k];
- });
+  Object.keys(params).forEach(k => {
+    if (!params[k]) delete params[k];
+  });
 
- const state = getState();
- let user = state.session?.user;
- const current = state.app?.view;
+  const state = getState();
+  const user = state.session?.user;
+  const current = state.app?.view;
 
- if (current === view) return;
+  if (current === view) return;
 
- const protegidas = ["publish","favorites","messages","chat","profile","profileMenu"];
+  if (
+    ["publish","favorites","messages","chat","profile","profileMenu"].includes(view)
+    && !user
+  ){
+    navigate("login");
+    return;
+  }
 
- if (protegidas.includes(view) && !user) {
-   const { data: { session } } = await supabase.auth.getSession();
-   user = session?.user || null;
-
-   if (user) {
-     setState({ session: { user } });
-   } else {
-     navigate("login");
-     return;
-   }
- }
-
- navigate(view, params);
+  navigate(view, params);
 });
 
 /* ================= BUSCADOR HEADER ================= */
@@ -223,21 +219,22 @@ document.addEventListener("click", async (e) => {
 const globalSearch = document.getElementById("globalSearch");
 
 if(globalSearch){
- globalSearch.addEventListener("input", () => {
-   const query = globalSearch.value.trim();
-   if(query.length < 2) return;
-   clearTimeout(window.__searchDebounce);
-   window.__searchDebounce = setTimeout(() => {
-     navigate("search", { query });
-   }, 400);
- });
+  globalSearch.addEventListener("input", () => {
+    const query = globalSearch.value.trim();
+    if(query.length < 2) return;
 
- globalSearch.addEventListener("keydown", (e) => {
-   if(e.key === "Enter"){
-     const query = globalSearch.value.trim();
-     if(query) navigate("search", { query });
-   }
- });
+    clearTimeout(window.__searchDebounce);
+    window.__searchDebounce = setTimeout(() => {
+      navigate("search", { query });
+    }, 400);
+  });
+
+  globalSearch.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      const query = globalSearch.value.trim();
+      if(query) navigate("search", { query });
+    }
+  });
 }
 
 /* ================= STORE ================= */
@@ -247,36 +244,40 @@ subscribe(renderApp);
 /* ================= INIT ================= */
 
 async function initApp() {
- try {
 
-   if (window.location.hash.includes("access_token")) {
-     await supabase.auth.getSession();
-     window.history.replaceState({}, "", "/");
-   }
+  try {
 
-   const route = resolveRoute();
-   console.log("ROUTE:", route);
+    if (window.location.hash.includes("access_token")) {
+      await supabase.auth.getSession();
+      window.history.replaceState({}, "", "/");
+    }
 
-   setState({
-     app: { view: "boot", params: {} }
-   });
+    const route = resolveRoute();
+    console.log("ROUTE:", route);
 
-   const { data: { session } } = await supabase.auth.getSession();
-   const user = session?.user || null;
+    setState({
+      app: {
+        view: "boot",
+        params: {}
+      }
+    });
 
-   if(user) initBadge(user.id);
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user || null;
 
-   setState({
-     session: { user },
-     app: {
-       view: user ? "home" : "login",
-       params: route.params || {}
-     }
-   });
+    if(user) initBadge(user.id);
 
- } catch (err){
-   console.error("Init error:", err);
- }
+    setState({
+      session: { user },
+      app: {
+        view: user ? "home" : "login",
+        params: route.params || {}
+      }
+    });
+
+  } catch (err){
+    console.error("Init error:", err);
+  }
 }
 
 initApp();
@@ -285,27 +286,28 @@ initApp();
 
 supabase.auth.onAuthStateChange((event, session) => {
 
- if(event === "INITIAL_SESSION") return;
- if(event === "TOKEN_REFRESHED") return;
+  const prev = getState();
 
- const prev = getState();
- const currentUser = prev.session?.user;
- const newUser = session?.user || null;
+  setState({
+    ...prev,
+    session: {
+      user: session?.user || null
+    }
+  });
 
- if(currentUser?.id === newUser?.id) return;
+  if(session?.user){
+    initBadge(session.user.id);
+  } else {
+    stopBadge();
+  }
 
- setState({
-   ...prev,
-   session: { user: newUser }
- });
+  if (session?.user && getState().app?.view === "login") {
+    navigate("home");
+  }
 
- if(session?.user){
-   initBadge(session.user.id);
- } else {
-   stopBadge();
- }
-
- if(session?.user && getState().app?.view === "login"){
-   navigate("home");
- }
 });
+
+/* ================= SW ================= */
+
+// desactivado por ahora
+
