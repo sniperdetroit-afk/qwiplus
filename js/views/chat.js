@@ -270,17 +270,6 @@ function openChatMenu(otherUserId){
       Denunciar usuario
     </button>
 
-    <button id="deleteChatBtn" style="
-      width:100%;padding:14px;text-align:left;
-      background:none;border:none;
-      font-size:15px;color:#374151;font-weight:600;
-      cursor:pointer;border-radius:10px;
-      display:flex;align-items:center;gap:12px;
-    ">
-      <span style="font-size:20px;">🗑️</span>
-      Eliminar chat
-    </button>
-
     ${!iBlockedOther ? `
       <button id="blockChatBtn" style="
         width:100%;padding:14px;text-align:left;
@@ -328,35 +317,6 @@ function openChatMenu(otherUserId){
     reportUserBtn.onclick = () => {
       overlay.remove();
       openReportModal(otherUserId);
-    };
-  }
-
-  const deleteChatBtn = sheet.querySelector("#deleteChatBtn");
-  if(deleteChatBtn){
-    deleteChatBtn.onclick = async () => {
-      const ok = confirm("¿Eliminar este chat? Si el otro usuario te escribe volverá a aparecer.");
-      if(!ok) return;
-
-      const { data: convData } = await supabase
-        .from("conversations")
-        .select("buyer_id, seller_id")
-        .eq("id", conversationId)
-        .single();
-
-      if(!convData) return;
-
-      const isBuyer = convData.buyer_id === userId;
-      const updateData = isBuyer
-        ? { hidden_for_buyer: true }
-        : { hidden_for_seller: true };
-
-      await supabase
-        .from("conversations")
-        .update(updateData)
-        .eq("id", conversationId);
-
-      overlay.remove();
-      navigate("messages");
     };
   }
 
