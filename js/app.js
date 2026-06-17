@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 162 SESSION GUARD + REPUTATION");
+console.log("APP VERSION 163 SESSION GUARD + REPUTATION + PROTECTION");
 
 /* ================= IMPORTS ================= */
 
@@ -57,6 +57,7 @@ import { ChatView } from "./views/chat.js";
 import { PublicProfileView } from "./views/publicProfile.js";
 import { SuggestionsView } from "./views/suggestions.js";
 import { ReputationView } from "./views/reputation.js";
+import { ProtectionView } from "./views/protection.js";
 
 /* ================= ROUTES ================= */
 
@@ -83,6 +84,7 @@ const routes = {
   publicProfile: PublicProfileView,
   suggestions: SuggestionsView,
   reputation: ReputationView,
+  protection: ProtectionView,
 };
 
 /* ================= RENDER ================= */
@@ -135,6 +137,7 @@ async function renderApp(){
       publicProfile: { header: false, nav: false },
       suggestions: { header: false, nav: false },
       reputation: { header: false, nav: true },
+      protection: { header: false, nav: true },
     };
 
     const layout = layoutConfig[viewName] || { header: false, nav: true };
@@ -206,7 +209,7 @@ document.addEventListener("click", async (e) => {
 
   if (current === view) return;
 
-  const protegidas = ["publish","favorites","messages","chat","profile","profileMenu","reputation","settings"];
+  const protegidas = ["publish","favorites","messages","chat","profile","profileMenu","reputation","settings","protection"];
 
   if (protegidas.includes(view) && !user) {
     // revalida contra Supabase antes de expulsar (evita falso negativo por timing)
