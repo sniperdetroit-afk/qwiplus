@@ -12,6 +12,9 @@ let userId;
 let alive = false;
 let unreadMap = new Map();
 let currentTab = "recibidos"; // recibidos | enviados | archivados | papelera
+let selectedIds = new Set();
+
+const PAPELERA_PURGE_DAYS = 30;
 
 /* ================= RENDER ================= */
 
@@ -187,11 +190,31 @@ async function renderInbox(){
           font-size:18px;font-weight:700;color:#22d3ee;
           margin-bottom:16px;
         "></div>
+
+        <!-- barra de selección múltiple (solo archivados/papelera) -->
+        <div id="inboxSelectBar" class="hidden" style="
+          display:flex;align-items:center;gap:10px;
+          margin-bottom:14px;
+        ">
+          <label style="display:flex;align-items:center;gap:8px;color:#cbd5e1;font-size:14px;cursor:pointer;">
+            <input type="checkbox" id="selectAllCheckbox" style="width:18px;height:18px;cursor:pointer;">
+            Seleccionar todo
+          </label>
+        </div>
+
         <div id="inboxLoading" style="color:#94a3b8;font-size:14px;">Cargando…</div>
         <div id="inboxEmpty" class="hidden" style="color:#94a3b8;font-size:14px;text-align:center;padding:30px 0;">
           No hay conversaciones aquí
         </div>
         <div id="inboxList"></div>
+
+        <!-- botón de acción para selección múltiple -->
+        <button id="bulkActionBtn" class="hidden" style="
+          width:100%;margin-top:16px;padding:14px;
+          border:none;border-radius:14px;
+          font-weight:700;font-size:14px;cursor:pointer;
+        "></button>
+
         <button id="backToBuzones" style="
           margin-top:20px;
           background: rgba(34,211,238,0.1);
@@ -233,6 +256,7 @@ async function mountInbox(){
   document.querySelectorAll(".inbox-buzon").forEach(btn => {
     btn.addEventListener("click", () => {
       currentTab = btn.dataset.tab;
+      selectedIds = new Set();
       showConvPanel(currentTab);
     });
   });
@@ -253,8 +277,9 @@ async function loadCounts(){
 
   const { data } = await supabase
     .from("conversations")
-    .select("id, buyer_id, seller_id, hidden_for_buyer, hidden_for_seller")
-    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+    .select("id, buyer_id, seller_id, hidden_for_buyer, hidden_for_seller, archived, deleted_at")
+    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+    .is("deleted_at", null);
 
   if(!data) return;
 
@@ -267,6 +292,8 @@ async function loadCounts(){
 
     if(hiddenForMe){
       papelera++;
+    } else if(c.archived){
+      archivados++;
     } else if(iAmSeller){
       recibidos++;
     } else if(iAmBuyer){
@@ -294,6 +321,19 @@ function showConvPanel(tab){
   };
   document.getElementById("inboxPanelTitle").textContent = titles[tab];
 
+  const selectBar = document.getElementById("inboxSelectBar");
+  const bulkBtn = document.getElementById("bulkActionBtn");
+  const showSelection = (tab === "archivados" || tab === "papelera");
+
+  selectBar.classList.toggle("hidden", !showSelection);
+  bulkBtn.classList.add("hidden");
+
+  if(showSelection){
+    const selectAllCb = document.getElementById("selectAllCheckbox");
+    selectAllCb.checked = false;
+    selectAllCb.onchange = () => toggleSelectAll(selectAllCb.checked);
+  }
+
   loadInbox(tab);
 }
 
@@ -301,7 +341,20 @@ function showBuzones(){
   document.querySelectorAll(".inbox-buzon").forEach(b => b.style.display = "flex");
   document.getElementById("inboxConvPanel").classList.add("hidden");
   document.getElementById("inboxList").innerHTML = "";
+  selectedIds = new Set();
   loadCounts();
+}
+
+/* ================= PURGA LAZY (papelera > 30 días) ================= */
+
+async function purgeOldTrash(){
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - PAPELERA_PURGE_DAYS);
+
+  await supabase
+    .from("conversations")
+    .delete()
+    .lt("deleted_at", cutoff.toISOString());
 }
 
 /* ================= LOAD ================= */
@@ -316,6 +369,10 @@ async function loadInbox(tab){
   empty.classList.add("hidden");
   box.innerHTML = "";
 
+  if(tab === "papelera"){
+    await purgeOldTrash();
+  }
+
   const { data, error } = await supabase
     .from("conversations")
     .select(`
@@ -326,9 +383,12 @@ async function loadInbox(tab){
       last_message_at,
       hidden_for_buyer,
       hidden_for_seller,
+      archived,
+      deleted_at,
       ads (title, image_url, user_id)
     `)
     .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+    .is("deleted_at", null)
     .order("last_message_at", { ascending: false });
 
   if(!alive) return;
@@ -346,19 +406,21 @@ async function loadInbox(tab){
     const hiddenForMe = (iAmBuyer && c.hidden_for_buyer) || (iAmSeller && c.hidden_for_seller);
 
     if(tab === "papelera")   return hiddenForMe;
-    if(tab === "recibidos")  return !hiddenForMe && iAmSeller;
-    if(tab === "enviados")   return !hiddenForMe && iAmBuyer;
-    if(tab === "archivados") return false; // futuro
+    if(tab === "archivados") return !hiddenForMe && c.archived;
+    if(tab === "recibidos")  return !hiddenForMe && !c.archived && iAmSeller;
+    if(tab === "enviados")   return !hiddenForMe && !c.archived && iAmBuyer;
     return false;
   });
 
   if(!filtered.length){
     empty.classList.remove("hidden");
+    updateBulkBar(tab);
     return;
   }
 
   await loadUnreadCounts(filtered.map(c => c.id));
-  renderList(filtered);
+  renderList(filtered, tab);
+  updateBulkBar(tab);
 }
 
 /* ================= UNREAD COUNTS ================= */
@@ -382,17 +444,19 @@ async function loadUnreadCounts(convIds){
 
 /* ================= RENDER LIST ================= */
 
-function renderList(list){
+function renderList(list, tab){
   box.innerHTML = "";
-  list.forEach(renderConversation);
+  list.forEach(c => renderConversation(c, tab));
 }
 
 /* ================= CARD ================= */
 
-function renderConversation(c){
+function renderConversation(c, tab){
 
   const unreadCount = unreadMap.get(c.id) || 0;
   const hasUnread = unreadCount > 0;
+  const showSelection = (tab === "archivados" || tab === "papelera");
+  const showGhostButtons = (tab === "recibidos" || tab === "enviados");
 
   const div = document.createElement("div");
   div.className = "conversation" + (hasUnread ? " has-unread" : "");
@@ -413,6 +477,11 @@ function renderConversation(c){
   const lastColor   = hasUnread ? "#e5e7eb" : "#6b7280";
 
   div.innerHTML = `
+    ${showSelection ? `
+      <input type="checkbox" class="conv-checkbox" data-id="${c.id}" style="
+        width:20px;height:20px;flex-shrink:0;cursor:pointer;
+      " ${selectedIds.has(c.id) ? "checked" : ""}>
+    ` : ""}
     <div class="conv-img" style="position:relative;flex-shrink:0;">
       <img src="${c.ads?.image_url || ""}" style="
         width:64px;height:64px;border-radius:14px;object-fit:cover;
@@ -440,16 +509,167 @@ function renderConversation(c){
         white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
       ">${c.last_message || ""}</div>
     </div>
+    ${showGhostButtons ? `
+      <div class="conv-ghost-actions" style="
+        display:flex;flex-direction:column;gap:6px;flex-shrink:0;
+      ">
+        <button class="ghost-archive-btn" title="Archivar" style="
+          width:30px;height:30px;border-radius:50%;
+          background:rgba(34,211,238,0.12);
+          border:1px solid rgba(34,211,238,0.4);
+          color:#22d3ee;font-size:14px;cursor:pointer;
+          display:flex;align-items:center;justify-content:center;
+        ">🗄️</button>
+        <button class="ghost-delete-btn" title="Eliminar" style="
+          width:30px;height:30px;border-radius:50%;
+          background:rgba(239,68,68,0.12);
+          border:1px solid rgba(239,68,68,0.4);
+          color:#ef4444;font-size:14px;cursor:pointer;
+          display:flex;align-items:center;justify-content:center;
+        ">🗑️</button>
+      </div>
+    ` : ""}
   `;
 
+  // click en la card abre el chat (excepto si se pulsa checkbox o botones fantasma)
   div.onclick = (e) => {
-    if(e.target.closest(".conv-delete")) return;
+    if(e.target.closest(".conv-checkbox")) return;
+    if(e.target.closest(".conv-ghost-actions")) return;
     markConversationRead(c.id, userId);
     setState({ chat: { conversationId: c.id } });
     navigate("chat");
   };
 
+  // checkbox individual
+  const checkbox = div.querySelector(".conv-checkbox");
+  if(checkbox){
+    checkbox.onchange = (e) => {
+      e.stopPropagation();
+      if(checkbox.checked){
+        selectedIds.add(c.id);
+      } else {
+        selectedIds.delete(c.id);
+      }
+      updateBulkBar(tab);
+    };
+  }
+
+  // botón archivar (fantasma)
+  const archiveBtn = div.querySelector(".ghost-archive-btn");
+  if(archiveBtn){
+    archiveBtn.onclick = async (e) => {
+      e.stopPropagation();
+      await supabase
+        .from("conversations")
+        .update({ archived: true })
+        .eq("id", c.id);
+      loadInbox(tab);
+      loadCounts();
+    };
+  }
+
+  // botón eliminar / mover a papelera (fantasma)
+  const deleteBtn = div.querySelector(".ghost-delete-btn");
+  if(deleteBtn){
+    deleteBtn.onclick = async (e) => {
+      e.stopPropagation();
+      const isBuyer = c.buyer_id === userId;
+      const updateData = isBuyer
+        ? { hidden_for_buyer: true }
+        : { hidden_for_seller: true };
+      await supabase
+        .from("conversations")
+        .update(updateData)
+        .eq("id", c.id);
+      loadInbox(tab);
+      loadCounts();
+    };
+  }
+
   box.appendChild(div);
+}
+
+/* ================= SELECCIÓN MÚLTIPLE ================= */
+
+function toggleSelectAll(checked){
+  const checkboxes = document.querySelectorAll(".conv-checkbox");
+  selectedIds = new Set();
+  checkboxes.forEach(cb => {
+    cb.checked = checked;
+    if(checked) selectedIds.add(cb.dataset.id);
+  });
+  updateBulkBar(currentTab);
+}
+
+function updateBulkBar(tab){
+  const bulkBtn = document.getElementById("bulkActionBtn");
+  if(!bulkBtn) return;
+
+  if(selectedIds.size === 0 || (tab !== "archivados" && tab !== "papelera")){
+    bulkBtn.classList.add("hidden");
+    return;
+  }
+
+  bulkBtn.classList.remove("hidden");
+
+  if(tab === "archivados"){
+    bulkBtn.textContent = `Mover a papelera (${selectedIds.size})`;
+    bulkBtn.style.background = "linear-gradient(90deg,#22d3ee,#0ea5e9)";
+    bulkBtn.style.color = "#020617";
+    bulkBtn.onclick = moveSelectedToTrash;
+  }
+
+  if(tab === "papelera"){
+    bulkBtn.textContent = `Eliminar definitivamente (${selectedIds.size})`;
+    bulkBtn.style.background = "linear-gradient(90deg,#ef4444,#b91c1c)";
+    bulkBtn.style.color = "white";
+    bulkBtn.onclick = deleteSelectedForever;
+  }
+}
+
+async function moveSelectedToTrash(){
+  if(!selectedIds.size) return;
+  const ok = confirm(`¿Mover ${selectedIds.size} conversación(es) a la papelera?`);
+  if(!ok) return;
+
+  for(const id of selectedIds){
+    const { data: conv } = await supabase
+      .from("conversations")
+      .select("buyer_id, seller_id")
+      .eq("id", id)
+      .single();
+
+    if(!conv) continue;
+
+    const isBuyer = conv.buyer_id === userId;
+    const updateData = isBuyer
+      ? { hidden_for_buyer: true, archived: false }
+      : { hidden_for_seller: true, archived: false };
+
+    await supabase
+      .from("conversations")
+      .update(updateData)
+      .eq("id", id);
+  }
+
+  selectedIds = new Set();
+  loadInbox(currentTab);
+  loadCounts();
+}
+
+async function deleteSelectedForever(){
+  if(!selectedIds.size) return;
+  const ok = confirm(`¿Eliminar definitivamente ${selectedIds.size} conversación(es)? Esta acción no se puede deshacer.`);
+  if(!ok) return;
+
+  await supabase
+    .from("conversations")
+    .update({ deleted_at: new Date().toISOString() })
+    .in("id", Array.from(selectedIds));
+
+  selectedIds = new Set();
+  loadInbox(currentTab);
+  loadCounts();
 }
 
 /* ================= REALTIME ================= */
