@@ -1,6 +1,6 @@
 // js/app.js
 
-console.log("APP VERSION 160 REGISTER");
+console.log("APP VERSION 162 SESSION GUARD + REPUTATION");
 
 /* ================= IMPORTS ================= */
 
@@ -56,6 +56,7 @@ import { InboxView } from "./views/inbox.js";
 import { ChatView } from "./views/chat.js";
 import { PublicProfileView } from "./views/publicProfile.js";
 import { SuggestionsView } from "./views/suggestions.js";
+import { ReputationView } from "./views/reputation.js";
 
 /* ================= ROUTES ================= */
 
@@ -81,6 +82,7 @@ const routes = {
   chat: ChatView,
   publicProfile: PublicProfileView,
   suggestions: SuggestionsView,
+  reputation: ReputationView,
 };
 
 /* ================= RENDER ================= */
@@ -132,6 +134,7 @@ async function renderApp(){
       editAd: { header: false, nav: false },
       publicProfile: { header: false, nav: false },
       suggestions: { header: false, nav: false },
+      reputation: { header: false, nav: true },
     };
 
     const layout = layoutConfig[viewName] || { header: false, nav: true };
@@ -198,17 +201,24 @@ document.addEventListener("click", async (e) => {
   });
 
   const state = getState();
-  const user = state.session?.user;
+  let user = state.session?.user;
   const current = state.app?.view;
 
   if (current === view) return;
 
-  if (
-    ["publish","favorites","messages","chat","profile","profileMenu"].includes(view)
-    && !user
-  ){
-    navigate("login");
-    return;
+  const protegidas = ["publish","favorites","messages","chat","profile","profileMenu","reputation","settings"];
+
+  if (protegidas.includes(view) && !user) {
+    // revalida contra Supabase antes de expulsar (evita falso negativo por timing)
+    const { data: { session } } = await supabase.auth.getSession();
+    user = session?.user || null;
+
+    if (user) {
+      setState({ session: { user } });
+    } else {
+      navigate("login");
+      return;
+    }
   }
 
   navigate(view, params);
@@ -310,4 +320,3 @@ supabase.auth.onAuthStateChange((event, session) => {
 /* ================= SW ================= */
 
 // desactivado por ahora
-
