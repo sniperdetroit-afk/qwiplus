@@ -191,15 +191,28 @@ async function renderInbox(){
           margin-bottom:16px;
         "></div>
 
-        <!-- barra de selección múltiple (solo archivados/papelera) -->
+        <!-- barra de selección múltiple (solo archivados/papelera) - fija arriba -->
         <div id="inboxSelectBar" class="hidden" style="
-          display:flex;align-items:center;gap:10px;
+          display:flex;flex-direction:column;gap:10px;
           margin-bottom:14px;
+          position:sticky;top:0;z-index:5;
+          background:rgba(2,6,23,0.92);
+          backdrop-filter:blur(10px);
+          padding:12px;
+          border-radius:14px;
+          border:1px solid rgba(34,211,238,0.15);
         ">
           <label style="display:flex;align-items:center;gap:8px;color:#cbd5e1;font-size:14px;cursor:pointer;">
             <input type="checkbox" id="selectAllCheckbox" style="width:18px;height:18px;cursor:pointer;">
             Seleccionar todo
           </label>
+
+          <!-- botón de acción para selección múltiple -->
+          <button id="bulkActionBtn" class="hidden" style="
+            width:100%;padding:14px;
+            border:none;border-radius:14px;
+            font-weight:700;font-size:14px;cursor:pointer;
+          "></button>
         </div>
 
         <div id="inboxLoading" style="color:#94a3b8;font-size:14px;">Cargando…</div>
@@ -207,13 +220,6 @@ async function renderInbox(){
           No hay conversaciones aquí
         </div>
         <div id="inboxList"></div>
-
-        <!-- botón de acción para selección múltiple -->
-        <button id="bulkActionBtn" class="hidden" style="
-          width:100%;margin-top:16px;padding:14px;
-          border:none;border-radius:14px;
-          font-weight:700;font-size:14px;cursor:pointer;
-        "></button>
 
         <button id="backToBuzones" style="
           margin-top:20px;
