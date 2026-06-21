@@ -5,7 +5,6 @@ import { navigate } from "../core/router.js";
 import { getState, setState } from "../core/state.js";
 
 let box;
-let offset = 0;
 let loading = false;
 let alive = false;
 let adsChannel = null;
@@ -14,6 +13,14 @@ let renderedIds = new Set();
 let requestId = 0;
 let myFavorites = new Set();
 
+// feed híbrido: bloque "recientes" (últimas 48h, por fecha) + bloque "populares" (resto, por favoritos)
+const RECENT_WINDOW_HOURS = 48;
+let offsetRecent = 0;
+let offsetPopular = 0;
+let recentExhausted = false;
+let recentCutoffISO = null;
+
+const PAGE_SIZE = 20;
 
 /* =========================
    RENDER
@@ -84,7 +91,11 @@ async function mountHome(){
 
   box = document.getElementById("adsList");
 
-  offset = 0;
+  offsetRecent = 0;
+  offsetPopular = 0;
+  recentExhausted = false;
+  recentCutoffISO = new Date(Date.now() - RECENT_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+
   loading = false;
   renderedIds.clear();
 
@@ -210,7 +221,7 @@ async function onScroll(){
 }
 
 /* =========================
-   LOAD ADS
+   LOAD ADS (híbrido: recientes 48h por fecha, luego el resto por popularidad)
 ========================= */
 
 async function loadMore(){
@@ -222,27 +233,65 @@ async function loadMore(){
 
   try {
 
-    const { data, error } = await supabase
-      .from("ads")
-      .select("*")
-      .order("favorites_count", { ascending: false })
-      .order("created_at", { ascending: false })
-      .range(offset, offset + 19);
+    let data = [];
 
-    if(error){
-      console.error(error);
-      return;
+    // 1) mientras queden anuncios recientes (últimas 48h) sin traer, priorizarlos por fecha
+    if(!recentExhausted){
+
+      const { data: recentData, error: recentError } = await supabase
+        .from("ads")
+        .select("*")
+        .gte("created_at", recentCutoffISO)
+        .order("created_at", { ascending: false })
+        .range(offsetRecent, offsetRecent + PAGE_SIZE - 1);
+
+      if(recentError){
+        console.error(recentError);
+        return;
+      }
+
+      if(myRequest !== requestId) return;
+
+      offsetRecent += recentData.length;
+
+      if(recentData.length < PAGE_SIZE){
+        // ya no hay más anuncios recientes, el resto de esta página se completa con populares
+        recentExhausted = true;
+      }
+
+      data = recentData;
     }
 
-    if(myRequest !== requestId) return;
+    // 2) completar la página (o toda la página si ya no hay recientes) con el resto, ordenado por popularidad
+    if(data.length < PAGE_SIZE){
 
-    if(offset === 0){
+      const remaining = PAGE_SIZE - data.length;
+
+      const { data: popularData, error: popularError } = await supabase
+        .from("ads")
+        .select("*")
+        .lt("created_at", recentCutoffISO)
+        .order("favorites_count", { ascending: false })
+        .order("created_at", { ascending: false })
+        .range(offsetPopular, offsetPopular + remaining - 1);
+
+      if(popularError){
+        console.error(popularError);
+        return;
+      }
+
+      if(myRequest !== requestId) return;
+
+      offsetPopular += popularData.length;
+      data = data.concat(popularData);
+    }
+
+    const isFirstLoad = renderedIds.size === 0;
+    if(isFirstLoad){
       box.innerHTML = "";
     }
 
     data.forEach(renderAd);
-
-    offset += data.length;
 
   } catch(err){
     console.error(err);
