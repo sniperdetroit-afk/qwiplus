@@ -274,7 +274,7 @@ export const categories = [
     sub: [
       "Software",
       "Plantillas",
-      "Plugins",
+      "inversiones",
       "Apps",
       "anuncios",
       "marketing",
