@@ -31,7 +31,7 @@ export const categories = [
       "Garajes",
       "Trasteros",
       "Terrenos",
-      "Naves industriales",
+      "inversiones",
       "Otros"
     ]
   },
