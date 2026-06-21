@@ -86,7 +86,7 @@ export const jobTypes = [
   "Por horas",
   "Freelance",
   "Prácticas",
-  "Voluntariado"
+  "busco socio"
 ];
 
 export const contractTypes = [

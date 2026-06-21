@@ -43,7 +43,7 @@ export const categories = [
       "Busco trabajo",
       "Prácticas",
       "Freelance",
-      "Voluntariado",
+      "busco socio",
       "Otros"
     ]
   },
