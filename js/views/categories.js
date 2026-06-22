@@ -279,6 +279,7 @@ export const categories = [
       "anuncios",
       "marketing",
       "Diseño",
+      "modelos 3d",
       "Servicios",
       "Programación",
       "Dominios",
